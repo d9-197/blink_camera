@@ -9,15 +9,15 @@ Version 0.1\
 Installation
 ------------
 
-TestÃ© uniquement sur **Jeedom Rasberry Pi**
+Testé uniquement sur **Jeedom Rasberry Pi**
 
 * Copier dans le dossier "plugins/blink_camera/"
 
-* Si nÃ©cessaire changer le groupe, l'owner et les droits sur les dossiers/fichiers.
+* Si nécessaire changer le groupe, l'owner et les droits sur les dossiers/fichiers.
 
   * Se placer dans le dossier ***blink_camera***
 
-  * ExÃ©cuter :
+  * Exécuter :
 
 ```bash
 sudo chgrp -R www-data \*\
@@ -28,7 +28,7 @@ sudo chmod -R 775 \*
 Configuration
 -------------
 
-A complÃ©ter...
+A compléter...
 
 Vue historique
 --------------
