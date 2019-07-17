@@ -81,33 +81,45 @@ class blink_camera extends eqLogic {
 
 
       public static function getToken() {
+		$email=config::byKey('param1', 'blink_camera');
+		$pwd=config::byKey('param2', 'blink_camera');
+		$email_prev=config::byKey('param1_prev', 'blink_camera');
+		$pwd_prev=config::byKey('param2_prev', 'blink_camera');
+		$forceReinit=($email!==$email_prev || $pwd!==$pwd_prev);
 
 		/* Test de validité du token deja existant */
 		$need_new_token=false;
 		$_tokenBlink=config::byKey('token', 'blink_camera');
 		$_accountBlink=config::byKey('account', 'blink_camera');
 		$_regionBlink=config::byKey('region', 'blink_camera');
-		if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
-			$client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);
-			$url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page=0';
-			
-			try {
-				$r = $client->request('GET',$url , [
-					'headers' => [
-						'Host'=> 'prod.immedia-semi.com',
-						'TOKEN_AUTH'=> $_tokenBlink
-					]
-				]);
-			} catch (ClientException $e) {
+		if (!$forceReinit) {
+			if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
+				$client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);
+				$url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page=0';		
+				try {
+					$r = $client->request('GET',$url , [
+						'headers' => [
+							'Host'=> 'prod.immedia-semi.com',
+							'TOKEN_AUTH'=> $_tokenBlink
+						]
+					]);
+				} catch (ClientException $e) {
+					$need_new_token=true;
+				}
+			} else {
 				$need_new_token=true;
 			}
+			if (!$need_new_token) {
+				log::add('blink_camera', 'debug', 'blink_camera->getToken() Reuse existing token');
+				return true;
+			}
+		} else {
+			config::save('token', '', blink_camera);
+			config::save('account', '', blink_camera);
+			config::save('region', '', blink_camera);
 		}
-		if (!$need_new_token) {
-			log::add('blink_camera', 'debug', 'blink_camera->getToken() Reuse existing token');
-			return true;
-		}
-		$email=config::byKey('param1', 'blink_camera');
-		$pwd=config::byKey('param2', 'blink_camera');
+		config::save('param1_prev', $email, blink_camera);
+		config::save('param2_prev', $pwd, blink_camera);
 		$data = "{\"email\" : \"".$email."\",\"password\": \"".$pwd."\", \"client_specifier\" : \"iPhone 9.2 | 2.2 | 222\"}";
 		$client = new GuzzleHttp\Client(['base_uri' => 'https://rest.prod.immedia-semi.com/']);
 		try {
@@ -549,7 +561,6 @@ class blink_camera extends eqLogic {
 //		}
 		//self::cronHourly($this->getId());
     }
-
 
     public function preRemove() {
 		shell_exec('rm -rf ' . $this->getMediaDir() );

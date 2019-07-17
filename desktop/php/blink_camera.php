@@ -1,3 +1,23 @@
+<script>
+const handleIntersect = function (entries, observer) {
+  entries.forEach(function (entry) {
+    if (entry.intersectionRatio > threshold) {
+      entry.target.classList.remove('reveal')
+      observer.unobserve(entry.target)
+    }
+  })
+}
+
+document.documentElement.classList.add('reveal-loaded')
+
+window.addEventListener("DOMContentLoaded", function () {
+  const observer = new IntersectionObserver(handleIntersect, options)
+  const targets = document.querySelectorAll('.reveal')
+  targets.forEach(function (target) {
+    observer.observe(target)
+  })
+})
+</script>
 <?php
 if (!isConnect('admin')) {
 	throw new Exception('{{401 - Accès non autorisé}}');
@@ -7,7 +27,6 @@ sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 ?>
 
-
 <div class="row row-overflow">
     <div class="col-lg-2 col-md-3 col-sm-4">
         <div class="bs-sidebar">
@@ -15,6 +34,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <a class="btn btn-default eqLogicAction" style="width : 100%;margin-top : 5px;margin-bottom: 5px;" data-action="add"><i class="fa fa-plus-circle"></i> {{Ajouter un équipement}}</a>
                 <li class="filter" style="margin-bottom: 5px;"><input class="filter form-control input-sm" placeholder="{{Rechercher}}" style="width: 100%"/></li>
                 <?php
+                blink_camera::getToken();
 foreach ($eqLogics as $eqLogic) {
 	$opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive');
 	echo '<li class="cursor li_eqLogic" data-eqLogic_id="' . $eqLogic->getId() . '" style="' . $opacity .'"><a>' . $eqLogic->getHumanName(true) . '</a></li>';
@@ -110,10 +130,16 @@ foreach (object::all() as $object) {
 
 
 <?php
+
+    
     $datas=blink_camera::getConfigDatas();
     $erreur=false;
     log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas,true));
     if ($datas['message']) {
+        echo '<script>';
+        echo 'var tbl_reseau = [{""}];';
+        echo 'var tbl_camera = [{""}];';
+        echo '</script>';
         echo '<div class="alert alert-danger div_alert"><span id="span_errorMessage">'.$datas['message'].'</span></div>';
         $erreur=true;
     }
@@ -183,3 +209,4 @@ foreach (object::all() as $object) {
 <?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
 <?php include_file('core', 'plugin.template', 'js');?>
 <?php include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');?>
+<?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>

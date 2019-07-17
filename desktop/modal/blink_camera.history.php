@@ -49,7 +49,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
 	if ($nbMax>0 && $cptVideo>=($nbMax)) {
 		break;
 	};
-	echo '<div class="div_dayContainer">';
+	echo '<div class="div_dayContainer reveal">';
 	echo '<legend>';
 	echo '<span class="blink_cameraHistoryDate">'.$date.'</span>';
 	echo ' <a class="btn btn-xs btn-default toggleList"><i class="fa fa-chevron-down"></i></a> ';
@@ -70,7 +70,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
 		$nom = $video['created_at'];
 		$blink_cameraName = str_replace(' ', '-', $blink_camera->getName());
 		//echo '<div class="panel panel-primary blink_cardVideo" style="width:402px" >';
-		echo '<div class="panel panel-primary blink_cardVideo">';
+		echo '<div class="panel panel-primary blink_cardVideo reveal">';
 		echo '<div class="panel-heading blink_cameraHistoryDate">'.$time.'</div>';
 		/*echo '<legend>';
 		echo '<a class="btn btn-xs btn-danger bt_removefile" data-day="1" data-dirname="'.$dir.'" data-filename="/*"><i class="fas fa-trash"></i> {{Supprimer}}</a> ';
