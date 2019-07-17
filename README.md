@@ -1,1 +1,1 @@
-# blink_camera
+# blink_camera : JEEDOM Plugin for Blink Camera
