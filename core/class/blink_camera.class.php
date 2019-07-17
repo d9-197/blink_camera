@@ -230,10 +230,11 @@ class blink_camera extends eqLogic {
 		return $jsonstr;
 	}
 	
-	public static function getDateJeedomTimezone(string $date) {
+	public static function getDateJeedomTimezone(string $date="") {
 		$dtim = date_create_from_format( blink_camera::FORMAT_DATETIME , $date);
 		$dtim=date_add($dtim,new DateInterval("PT".getTZoffsetMin()."M"));
 		return date_format($dtim,blink_camera::FORMAT_DATETIME_OUT);
+
 	}
 	public static function getMedia($urlMedia,$equipement_id,$filename="default") {
 		log::add('blink_camera', 'debug', 'blink_camera->getMedia() url : '.$urlMedia);
@@ -303,13 +304,20 @@ class blink_camera extends eqLogic {
 	}
 	
 	/*     * *********************Méthodes d'instance************************* */
-		
+	public function isConfigured(){
+		$network_id = $this->getConfiguration("network_id");
+		$camera_id = $this->getConfiguration("camera_id");
+		if ($network_id!=="" && $camera_id!=="") {
+			return true;
+		}
+		return false;
+	}	
 
 	public function getHomescreenData() {
 		$network_id = $this->getConfiguration("network_id");
 		$camera_id = $this->getConfiguration("camera_id");
 		$jsonstr="erreur";
-		if (self::getToken()) {
+		if (self::getToken() && $this->isConfigured()) {
 			$_tokenBlink=config::byKey('token', 'blink_camera');
 			$_accountBlink=config::byKey('account', 'blink_camera');
 			$_regionBlink=config::byKey('region', 'blink_camera');
@@ -333,7 +341,7 @@ class blink_camera extends eqLogic {
 		$network_id = $this->getConfiguration("network_id");
 		$camera_id = $this->getConfiguration("camera_id");
 		$jsonstr="erreur";
-		if (self::getToken()) {
+		if (self::getToken() && $this->isConfigured()) {
 			$_tokenBlink=config::byKey('token', 'blink_camera');
 			$_accountBlink=config::byKey('account', 'blink_camera');
 			$_regionBlink=config::byKey('region', 'blink_camera');
@@ -382,14 +390,16 @@ class blink_camera extends eqLogic {
 	}
 
 	public function getLastEventDate() {
-		$event = $this->getLastEvent(false);
-		$previous=$this->getConfiguration("last_event_datetime");
-		$dtim = date_create_from_format( blink_camera::FORMAT_DATETIME , $event['created_at']);
-		$dtim=date_add($dtim,new DateInterval("PT".getTZoffsetMin()."M"));
-		$new=date_format($dtim,blink_camera::FORMAT_DATETIME_OUT);
-		if ($new!==$previous) {
-			$this->setConfiguration("last_event_datetime",$new);
-			$this->checkAndUpdateCmd('last_event', $new);				
+		if($this->isConfigured()) {
+			$event = $this->getLastEvent(false);
+			$previous=$this->getConfiguration("last_event_datetime");
+			$dtim = date_create_from_format( blink_camera::FORMAT_DATETIME , $event['created_at']);
+			$dtim=date_add($dtim,new DateInterval("PT".getTZoffsetMin()."M"));
+			$new=date_format($dtim,blink_camera::FORMAT_DATETIME_OUT);
+			if ($new!==$previous) {
+				$this->setConfiguration("last_event_datetime",$new);
+				$this->checkAndUpdateCmd('last_event', $new);				
+			}
 		}
 	}
 	public function getMediaDir() {
@@ -398,7 +408,7 @@ class blink_camera extends eqLogic {
 
 	public function networkArm() {
 		$network_id = $this->getConfiguration("network_id");
-		if (self::getToken()) {
+		if (self::getToken() && $this->isConfigured()) {
 			$_tokenBlink=config::byKey('token', 'blink_camera');
 			$_accountBlink=config::byKey('account', 'blink_camera');
 			$_regionBlink=config::byKey('region', 'blink_camera');
@@ -421,7 +431,7 @@ class blink_camera extends eqLogic {
 	}
 	public function networkDisarm() {
 		$network_id = $this->getConfiguration("network_id");
-		if (self::getToken()) {
+		if (self::getToken() && $this->isConfigured()) {
 			$_tokenBlink=config::byKey('token', 'blink_camera');
 			$_accountBlink=config::byKey('account', 'blink_camera');
 			$_regionBlink=config::byKey('region', 'blink_camera');
@@ -444,7 +454,7 @@ class blink_camera extends eqLogic {
 	}
 	public function getNetworkArmStatus() {
 		$network_id = $this->getConfiguration("network_id");
-		if (self::getToken()) {
+		if (self::getToken() && $this->isConfigured()) {
 			$_tokenBlink=config::byKey('token', 'blink_camera');
 			$_accountBlink=config::byKey('account', 'blink_camera');
 			$_regionBlink=config::byKey('region', 'blink_camera');
@@ -611,19 +621,26 @@ class blink_camera extends eqLogic {
  
 		$replace['#action#'] = $action;
 		$replace['#info#'] = $info;
-		$temp=$this->getLastEvent(false);
-		log::add('blink_camera', 'debug', 'blink_camera->toHtml() after last event '.$temp['thumbnail']);
-		
-		$replace['#urlThumb#']=self::getMedia($temp['thumbnail'], $replace['#id#'],blink_camera::getDateJeedomTimezone($temp['created_at']));
+		if ( $this->isConfigured()) {
+			$temp=$this->getLastEvent(false);
+			log::add('blink_camera', 'debug', 'blink_camera->toHtml() after last event '.$temp['thumbnail']);
+			if (isset($temp) && isset($temp['created_at'])) {
+				$replace['#urlThumb#']=self::getMedia($temp['thumbnail'], $replace['#id#'],blink_camera::getDateJeedomTimezone($temp['created_at']));
+			}
+		}
 		$replace['#limite_nb_video#']="";
 		$nbMax= (int) config::byKey('nb_max_video', 'blink_camera');
 		if ($nbMax > 0) {
 			$replace['#limite_nb_video#']="- ".$nbMax." dernières vidéos";
 		} 
-		if (!$_fluxOnly) {
-			return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera', 'blink_camera')));
+		if ( $this->isConfigured()) {
+			if (!$_fluxOnly) {
+				return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera', 'blink_camera')));
+			} else {
+				return template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_flux_only', 'blink_camera'));
+			}	     
 		} else {
-			return template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_flux_only', 'blink_camera'));
+			return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_not_config', 'blink_camera')));
 		}
 	}
 
