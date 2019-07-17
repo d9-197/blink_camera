@@ -1,0 +1,18 @@
+{
+	"id" : "blink_camera",
+	"name" : "Blink Camera",
+	"version" : "1.0",
+	"description" : "Plugin for Blink Camera",
+	"licence" : "AGPL",
+	"author" : "Alain Farina",
+	"require" : "3.3",
+	"category" : "security",
+	"display" : "panel",
+	"mobile":"panel",
+	"hasOwnDeamon" : false,
+	"hasDependency" : false,
+	"changelog" : "",
+	"documentation" : "",
+	"language" : ["fr_FR","en_US"],
+	"compatibility" : ["miniplus","smart","rpi","docker","diy"]	
+}

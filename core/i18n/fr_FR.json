@@ -1,0 +1,35 @@
+{
+    "plugins\/blink_camera\/desktop\/php\/blink_camera.php": {
+        "Ajouter un équipement": "Ajouter un équipement",
+        "Rechercher": "Rechercher",
+        "Mes équipements": "Mes équipements",
+        "Gestion": "Gestion",
+        "Ajouter": "Ajouter",
+        "Configuration": "Configuration",
+        "Sauvegarder": "Sauvegarder",
+        "Supprimer": "Supprimer",
+        "Configuration avancée": "Configuration avancée",
+        "Equipement": "Equipement",
+        "Commandes": "Commandes",
+        "Nom de l'équipement": "Nom de l'équipement",
+        "Objet parent": "Objet parent",
+        "Aucun": "Aucun",
+        "Catégorie": "Catégorie",
+        "Activer": "Activer",
+        "Visible": "Visible",
+        " Type de vdm ": " Type de vdm ",
+        "Aleatoire": "Aleatoire",
+        "Coquin": "Coquin",
+        "Best": "Best",
+        "Nom": "Nom",
+        "Type": "Type",
+        "Action": "Action"
+    },
+    "plugins\/blink_camera\/plugin_info\/configuration.php": {
+        "Global param 1": "Compte Blink (email)",
+        "Global param 2": "Mot de passe",
+        "Global param 3": "Global param 3",
+        "value1": "valeur 1",
+        "value2": "valeur 2"
+    }
+}
