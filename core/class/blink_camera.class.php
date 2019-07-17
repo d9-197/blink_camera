@@ -33,7 +33,7 @@ class blink_camera extends eqLogic {
     /*
      * Fonction exécutée automatiquement toutes les minutes par Jeedom
 	 * */
-      public static function cron($_eqLogic_id = null) {
+      public static function cron5($_eqLogic_id = null) {
 		if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
 			$eqLogics = self::byType('blink_camera', true);
 		} else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
@@ -41,22 +41,21 @@ class blink_camera extends eqLogic {
 		}		  
 		foreach ($eqLogics as $blink_camera) {//parcours tous les équipements du plugin blink_camera
 			if ($blink_camera->getIsEnable() == 1) {//vérifie que l'équipement est acitf
-				// Toutes les 5 minutes on vérifie la date du dernier event
-				$blink_camera->getLastEventDate();
+				//$blink_camera->getLastEventDate();
 				$blink_camera->getNetworkArmStatus();
 			}
 		}
       }
      
-	public static function cron5($_eqLogic_id = null) {
-		if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
+	public static function cron($_eqLogic_id = null) {
+		/*if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
 			$eqLogics = self::byType('blink_camera', true);
 		} else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
 			$eqLogics = array(self::byId($_eqLogic_id));
 		}		  
 		foreach ($eqLogics as $blink_camera) {
-			blink_camera::cron($blink_camera);
-		}
+			blink_camera::cron5($blink_camera);
+		}*/
 	}
 
 
