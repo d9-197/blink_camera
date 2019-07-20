@@ -17,8 +17,8 @@ $dir= dirname(__FILE__) ."/../../medias/" . $blink_camera->getId();
 ?>
 <div id='div_blink_cameraRecordAlert' style="display: none;"></div>
 <?php
-echo '<a class="btn btn-danger bt_removefile pull-right" data-all="1" data-dirname="'.$dir.'" data-filename="/'.$date.'*.mp4"><i class="fas fa-trash"></i> {{Tout supprimer}}</a>';
-echo '<a class="btn btn-success  pull-right" target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($dir .'/*.mp4') . '" ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';
+echo '<a class="btn btn-danger bt_removefile pull-right" data-all="1" data-dirname="'.$dir.'" data-filename="/'.$date.'*"><i class="fas fa-trash"></i> {{Tout supprimer}}</a>';
+echo '<a class="btn btn-success  pull-right" target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($dir .'/*') . '" ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';
 ?>
 <?php
 $i = 0;

@@ -1,5 +1,5 @@
 <script>
-const handleIntersect = function (entries, observer) {
+/*const handleIntersect = function (entries, observer) {
   entries.forEach(function (entry) {
     if (entry.intersectionRatio > threshold) {
       entry.target.classList.remove('reveal')
@@ -11,12 +11,12 @@ const handleIntersect = function (entries, observer) {
 document.documentElement.classList.add('reveal-loaded')
 
 window.addEventListener("DOMContentLoaded", function () {
-  const observer = new IntersectionObserver(handleIntersect, options)
+  const observer = new IntersectionObserver(handleIntersect)
   const targets = document.querySelectorAll('.reveal')
   targets.forEach(function (target) {
     observer.observe(target)
   })
-})
+})*/
 </script>
 <?php
 if (!isConnect('admin')) {
@@ -194,7 +194,7 @@ foreach (object::all() as $object) {
 <table id="table_cmd" class="table table-bordered table-condensed">
     <thead>
         <tr>
-            <th>{{Nom}}</th><th>{{Type}}</th><th>{{Configuration}}</th><th>{{Action}}</th>
+            <th colspan="2">{{Nom}}</th><th>{{Type}}</th><th>{{Configuration}}</th><th>{{Action}}</th>
         </tr>
     </thead>
     <tbody>
@@ -209,4 +209,4 @@ foreach (object::all() as $object) {
 <?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
 <?php include_file('core', 'plugin.template', 'js');?>
 <?php include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');?>
-<?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
+<?php //include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
