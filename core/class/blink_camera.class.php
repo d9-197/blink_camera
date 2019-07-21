@@ -44,22 +44,25 @@ class blink_camera extends eqLogic
         }
         foreach ($eqLogics as $blink_camera) {//parcours tous les équipements du plugin blink_camera
             if ($blink_camera->getIsEnable() == 1) {//vérifie que l'équipement est acitf
-                $blink_camera->getLastEventDate();
-                $blink_camera->getNetworkArmStatus();
+                //$blink_camera->getLastEventDate();
+				$blink_camera->getNetworkArmStatus();
+				$blink_camera->getTemperature();
             }
         }
     }
      
     public static function cron($_eqLogic_id = null)
     {
-        /*if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
+        if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
             $eqLogics = self::byType('blink_camera', true);
         } else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
             $eqLogics = array(self::byId($_eqLogic_id));
         }
-        foreach ($eqLogics as $blink_camera) {
-            blink_camera::cron5($blink_camera);
-        }*/
+        foreach ($eqLogics as $blink_camera) {//parcours tous les équipements du plugin blink_camera
+            if ($blink_camera->getIsEnable() == 1) {//vérifie que l'équipement est acitf
+                $blink_camera->getLastEventDate();
+            }
+        }
     }
 
 
@@ -115,7 +118,7 @@ class blink_camera extends eqLogic
                 $need_new_token=true;
             }
             if (!$need_new_token) {
-                log::add('blink_camera', 'debug', 'blink_camera->getToken() Reuse existing token');
+                //log::add('blink_camera', 'debug', 'blink_camera->getToken() Reuse existing token');
                 return true;
             }
         } else {
@@ -209,7 +212,7 @@ class blink_camera extends eqLogic
                 $jsonrep= json_decode($r->getBody(), true);
                 $jsonstr =self::reformatConfigDatas($jsonrep, $_regionBlink, $_accountBlink);
                 $jsonout=json_decode($jsonstr, true);
-                log::add('blink_camera', 'debug', 'blink_camera->getConfigDatas()'.$jsonstr);
+                //log::add('blink_camera', 'debug', 'blink_camera->getConfigDatas()'.$jsonstr);
                 return $jsonout;
             }
         }
@@ -250,7 +253,7 @@ class blink_camera extends eqLogic
     }
     public static function getMedia($urlMedia, $equipement_id, $filename="default",$format="mp4")
     {
-        log::add('blink_camera', 'debug', 'blink_camera->getMedia() url : '.$urlMedia);
+        //log::add('blink_camera', 'debug', 'blink_camera->getMedia() url : '.$urlMedia);
         if (!empty($urlMedia)) {
             if (self::getToken()) {
                 $_tokenBlink=config::byKey('token', 'blink_camera');
@@ -276,7 +279,7 @@ class blink_camera extends eqLogic
                     $filename='thumb.png';
                 }
 
-                log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : $filename");
+                //log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : $filename");
                 if (!empty($_tokenBlink) && !empty($_accountBlink) && !empty($_regionBlink)) {
                     $folderBase=__DIR__.'/../../medias/'.$equipement_id.'/';
                     if (!file_exists($folderBase)) {
@@ -351,7 +354,6 @@ class blink_camera extends eqLogic
                     ]
                 ]);
                 $jsonrep= json_decode($r->getBody(), true);
-                //$jsonstr =self::reformatVideoDatas($jsonrep, $network_id, $camera_id);
             }
             return $jsonrep;
         }
@@ -375,7 +377,6 @@ class blink_camera extends eqLogic
                     ]
                 ]);
                 $jsonrep= json_decode($r->getBody(), true);
-                //$jsonstr =self::reformatVideoDatas($jsonrep, $network_id, $camera_id);
             }
             return $jsonrep;
         }
@@ -388,7 +389,7 @@ class blink_camera extends eqLogic
 			log::add('blink_camera','debug','devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
                 
             if ("".$device['device_id']==="".$camera_id) {
-				log::add('blink_camera','debug','devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
+				//log::add('blink_camera','debug','devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
                 $path=$this->getMedia($device['thumbnail'], $this->getId(),"thumbnail","jpg");
             }
         }
@@ -417,7 +418,6 @@ class blink_camera extends eqLogic
                 $jsonrep= json_decode($r->getBody(), true);
                 $jsonstr =self::reformatVideoDatas($jsonrep, $network_id, $camera_id);
             }
-            log::add('blink_camera', 'debug', 'blink_camera->getVideoList() '.$jsonstr);
             return $jsonstr;
         }
 	}
@@ -519,13 +519,14 @@ class blink_camera extends eqLogic
     public function getLastEventDate()
     {
         if ($this->isConfigured()) {
-            $event = $this->getLastEvent(false);
-            $previous=$this->getConfiguration("last_event_datetime");
+			$event = $this->getLastEvent(false);
+			$infoCmd=$this->getCmd(null, 'last_event');
+            $previous=$infoCmd->execCmd();
             $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $event['created_at']);
             $dtim=date_add($dtim, new DateInterval("PT".getTZoffsetMin()."M"));
-            $new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
-            if ($new!==$previous) {
-                $this->setConfiguration("last_event_datetime", $new);
+			$new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
+			if (isset($new) && $new!="" && $new>$previous) {
+				log::add('blink_camera','debug','New event detected:'.$new. ' (previous:'.$previous.')');
                 $this->checkAndUpdateCmd('last_event', $new);
             }
         }
@@ -614,16 +615,13 @@ class blink_camera extends eqLogic
                 ]);
                 $jsonrep= json_decode($r->getBody(), true);
                 if ($jsonrep['network']['armed']===true) {
-                    log::add('blink_camera', 'debug', 'ARM STATUS '.$network_id.'='.print_r($jsonrep['network']['armed'], true));
                     $this->checkAndUpdateCmd('arm_status', 1);
                 } else {
-                    log::add('blink_camera', 'debug', 'ARM STATUS '.$network_id.'='.print_r($jsonrep['network']['armed'], true));
                     $this->checkAndUpdateCmd('arm_status', 0);
                 }
                 return true;
             }
         }
-        log::add('blink_camera', 'debug', 'ARM STATUS '.$network_id.'=0');
         $this->checkAndUpdateCmd('arm_status', 0);
         return false;
     }
@@ -668,8 +666,10 @@ class blink_camera extends eqLogic
 			$info->setDisplay("showNameOndashboard", 1);
 			$info->setConfiguration('generic_type',"TEMPERATURE");
 			$info->setConfiguration('historizeRound',"1");
-	
 		}
+		$info->setConfiguration('generic_type',"TEMPERATURE");
+		$info->setConfiguration('historizeRound',"1");
+		$info->setUnite('°'.config::byKey('blink_tempUnit', 'blink_camera'));
 		$info->setIsVisible(true);
         $info->setLogicalId('temperature');
         $info->setEqLogic_id($this->getId());
@@ -745,6 +745,7 @@ class blink_camera extends eqLogic
 		$force_download->setSubType('other');
 		$force_download->setDisplay('icon','<i class="nature nature-planet5"></i>'); 
 		$force_download->useIconAndName();
+		$force_download->setOrder(13);
 		$force_download->save();
 
 
@@ -759,8 +760,10 @@ class blink_camera extends eqLogic
 		$newClip->setSubType('other');
 		$newClip->setOrder(12);
 		$newClip->setDisplay('icon','<i class="fa fa-video-camera"></i>'); 
+		$newClip->useIconAndName();
+		$newClip->setOrder(12);
 		$newClip->save();
-		log::add('blink_camera','debug','ICON:'.$newClip->getDisplay('icon'));	
+	//	log::add('blink_camera','debug','ICON:'.$newClip->getDisplay('icon'));	
 
 
 		$this::getTemperature();
@@ -814,7 +817,13 @@ class blink_camera extends eqLogic
                         $replaceCmd = array(
                             '#id#' => $cmd->getId(),
                             '#name#' => ($cmd->getDisplay('icon') != '') ? $cmd->getDisplay('icon') : $cmd->getName(),
-                        );
+						);
+						if ($cmd->getDisplay('showNameOn' . $version2, 1) == 0) {
+							$replaceCmd['#hideCmdName#'] = 'display:none;';
+						}
+						if ($cmd->getDisplay('showIconAndName' . $version2, 0) == 1) {
+							$replaceCmd['#name#'] = $cmd->getDisplay('icon') . ' ' . $cmd->getName();
+						}
                         $action .= template_replace($replaceCmd, getTemplate('core', $version, 'blink_camera_action', 'blink_camera')) . ' ';
                     } else {
                         if ($cmd->getType() == 'info') {
@@ -832,8 +841,9 @@ class blink_camera extends eqLogic
         }
  
         $replace['#action#'] = $action;
-        $replace['#info#'] = $info;
-        $replace['#urlLine#']=blink_camera::ERROR_IMG;
+		$replace['#info#'] = $info;
+		$urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
+        $replace['#urlFile#']=blink_camera::ERROR_IMG;
         if ($this->isConfigured()) {
             if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="1") {
 				// On affiche la vignette de la caméra
@@ -857,9 +867,9 @@ class blink_camera extends eqLogic
                         $urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
                         $replace['#urlFile#']=self::getMedia($temp[$media_type], $replace['#id#'], blink_camera::getDateJeedomTimezone($temp['created_at']));
                     }
-                    $replace['#urlLine#']=template_replace($replace, $urlLine);
                 }
-            }
+			}
+			$replace['#urlLine#']=template_replace($replace, $urlLine);
         }
         $replace['#limite_nb_video#']="";
         $nbMax= (int) config::byKey('nb_max_video', 'blink_camera');
@@ -957,7 +967,7 @@ class blink_cameraCmd extends cmd
             case 'refresh':
                 // Nettoyage des fichiers du dossier medias
 				//$eqlogic->forceCleanup();
-				$eqlogic->getLastEvent();
+				//$eqlogic->getLastEvent();
                 //rafraichissement de la datetime du dernier event
                 $eqlogic->getLastEventDate();
 
@@ -982,7 +992,7 @@ class blink_cameraCmd extends cmd
 				// Nettoyage des fichiers du dossier medias
 				$eqlogic->requestNewMedia("clip");
 				//rafraichissement de la datetime du dernier event
-				$eqlogic->getLastEventDate();
+				//$eqlogic->getLastEventDate();
 				break;
 	
             case 'arm_network':

@@ -24,7 +24,7 @@ if (!isConnect()) {
 ?>
 <form class="form-horizontal">
     <fieldset>
-        <h4 class="icon_blue">{{Compte Blink}}</h4>
+        <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
         <div class="form-group">
              <label class="col-lg-3 control-label">{{Email}}</label>
             <div class="col-lg-3">
@@ -46,7 +46,7 @@ if (!isConnect()) {
                 </select>
             </div>
         </div>
-        <h4 class="icon_blue">{{Widget}}</h4>
+        <h4 class="icon_blue"><i class="jeedomapp jeedomapp-visible"></i> {{Widget}}</h4>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Contenu de la vignette}}</label>
             <div class="col-lg-3">
@@ -57,7 +57,7 @@ if (!isConnect()) {
                 </select>
             </div>
         </div>
-        <h4 class="icon_blue">{{Vue historique}}</h4>
+        <h4 class="icon_blue"><i class="fa fa-folder-open"></i> {{Vue historique}}</h4>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Nombre maximum de vidéos téléchargées}}</label>
             <div class="col-lg-3">
