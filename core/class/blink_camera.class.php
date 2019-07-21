@@ -27,7 +27,7 @@ class blink_camera extends eqLogic {
     /*     * *************************Attributs****************************** */
 	CONST FORMAT_DATETIME="Y-m-d\TH:i:sT" ;//2019-07-15T18:40:44+00:00
 	CONST FORMAT_DATETIME_OUT="Y-m-d H:i:s" ;//2019-07-15T18:40:44+00:00
-
+	CONST ERROR_IMG="/plugins/blink_camera/img/error.png";
     /*     * ***********************Methode static*************************** */
 
     /*
@@ -288,18 +288,20 @@ class blink_camera extends eqLogic {
 							}
 						} catch (RequestException $e) {
 							shell_exec('rm -rf ' . $folderBase.$filename);
-							$filename = 'thumb.png';
+							log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : error.png");
+							return blink_camera::ERROR_IMG;
 						}
 
 					}
 				} else {
-					$filename = 'thumb.png';
+					log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : error.png");
+					return blink_camera::ERROR_IMG;
 				}
 				log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : $filename");
 				return '/plugins/blink_camera/medias/'.$equipement_id.'/'.$filename;
 			}
 		}
-		return "/plugins/blink_camera/medias/thumb.png";
+		return blink_camera::ERROR_IMG;
 	}
 	
 	/*     * *********************Méthodes d'instance************************* */
@@ -368,13 +370,13 @@ class blink_camera extends eqLogic {
 			$jsonvideo=$this->getVideoList($page);
 			foreach (json_decode($jsonvideo,true) as $event) {
 				if($include_deleted || $event['deleted']===false) {
-					log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() '.$event['created_at']);
+					//log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() '.$event['created_at']);
 					if (!isset($last_event)) {
 						$last_event=$event;
-						log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() init with first event'.$event['created_at']);
+						//log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() init with first event'.$event['created_at']);
 					}
 					if ($last_event['created_at']<$event['created_at']) {
-						log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() more early :'.$event['created_at']);
+						//log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() more early :'.$event['created_at']);
 						$last_event=$event;
 					}
 				} 
@@ -592,7 +594,7 @@ class blink_camera extends eqLogic {
 		$version = jeedom::versionAlias($_version);
 		$action = '';
 		$info = '';
-		log::add('blink_camera', 'debug', 'blink_camera->toHtml() before actions');
+		//log::add('blink_camera', 'debug', 'blink_camera->toHtml() before actions');
 
 		foreach ($this->getCmd() as $cmd) {
 			if ($cmd->getIsVisible() == 1) {
@@ -622,9 +624,11 @@ class blink_camera extends eqLogic {
 		$replace['#info#'] = $info;
 		if ( $this->isConfigured()) {
 			$temp=$this->getLastEvent(false);
-			log::add('blink_camera', 'debug', 'blink_camera->toHtml() after last event '.$temp['thumbnail']);
+			//log::add('blink_camera', 'debug', 'blink_camera->toHtml() after last event '.$temp['thumbnail']);
 			if (isset($temp) && isset($temp['created_at'])) {
 				$replace['#urlThumb#']=self::getMedia($temp['thumbnail'], $replace['#id#'],blink_camera::getDateJeedomTimezone($temp['created_at']));
+			} else {
+				$replace['#urlThumb#']=blink_camera::ERROR_IMG;
 			}
 		}
 		$replace['#limite_nb_video#']="";
@@ -632,6 +636,7 @@ class blink_camera extends eqLogic {
 		if ($nbMax > 0) {
 			$replace['#limite_nb_video#']="- ".$nbMax." dernières vidéos";
 		} 
+		//log::add('blink_camera','debug','toHtml() REPLACE VALUES: '.print_r($replace,true));
 		if ( $this->isConfigured()) {
 			if (!$_fluxOnly) {
 				return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera', 'blink_camera')));
