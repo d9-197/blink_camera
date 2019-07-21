@@ -20,7 +20,7 @@ window.addEventListener("DOMContentLoaded", function () {
 </script>
 <?php
 if (!isConnect('admin')) {
-	throw new Exception('{{401 - Accès non autorisé}}');
+    throw new Exception('{{401 - Accès non autorisé}}');
 }
 $plugin = plugin::byId('blink_camera');
 sendVarToJS('eqType', $plugin->getId());
@@ -36,10 +36,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <?php
                 blink_camera::getToken();
 foreach ($eqLogics as $eqLogic) {
-	$opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive');
-	echo '<li class="cursor li_eqLogic" data-eqLogic_id="' . $eqLogic->getId() . '" style="' . $opacity .'"><a>' . $eqLogic->getHumanName(true) . '</a></li>';
+    $opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive');
+    echo '<li class="cursor li_eqLogic" data-eqLogic_id="' . $eqLogic->getId() . '" style="' . $opacity .'"><a>' . $eqLogic->getHumanName(true) . '</a></li>';
 }
-		    ?>
+            ?>
            </ul>
        </div>
    </div>
@@ -63,13 +63,13 @@ foreach ($eqLogics as $eqLogic) {
 <div class="eqLogicThumbnailContainer">
     <?php
 foreach ($eqLogics as $eqLogic) {
-	$opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive');
-	echo '<div class="eqLogicDisplayCard cursor" data-eqLogic_id="' . $eqLogic->getId() . '" style="text-align: center; background-color : #ffffff; height : 200px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;' . $opacity . '" >';
-	echo '<img src="' . $plugin->getPathImgIcon() . '" height="105" width="95" />';
-	echo "<br>";
-	echo '<span style="font-size : 1.1em;position:relative; top : 15px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">' . $eqLogic->getHumanName(true, true) . '</span>';
-	echo '</div>';
-}
+                $opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive');
+                echo '<div class="eqLogicDisplayCard cursor" data-eqLogic_id="' . $eqLogic->getId() . '" style="text-align: center; background-color : #ffffff; height : 200px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;' . $opacity . '" >';
+                echo '<img src="' . $plugin->getPathImgIcon() . '" height="105" width="95" />';
+                echo "<br>";
+                echo '<span style="font-size : 1.1em;position:relative; top : 15px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">' . $eqLogic->getHumanName(true, true) . '</span>';
+                echo '</div>';
+            }
 ?>
 </div>
 </div>
@@ -102,7 +102,7 @@ foreach ($eqLogics as $eqLogic) {
                         <option value="">{{Aucun}}</option>
                         <?php
 foreach (object::all() as $object) {
-	echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
+    echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
 }
 ?>
                    </select>
@@ -113,9 +113,9 @@ foreach (object::all() as $object) {
                 <div class="col-sm-9">
                  <?php
                     foreach (jeedom::getConfiguration('eqLogic:category') as $key => $value) {
-                    echo '<label class="checkbox-inline">';
-                    echo '<input type="checkbox" class="eqLogicAttr" data-l1key="category" data-l2key="' . $key . '" />' . $value['name'];
-                    echo '</label>';
+                        echo '<label class="checkbox-inline">';
+                        echo '<input type="checkbox" class="eqLogicAttr" data-l1key="category" data-l2key="' . $key . '" />' . $value['name'];
+                        echo '</label>';
                     }
                   ?>
                </div>
@@ -134,7 +134,7 @@ foreach (object::all() as $object) {
     
     $datas=blink_camera::getConfigDatas();
     $erreur=false;
-    log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas,true));
+    log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas, true));
     if ($datas['message']) {
         echo '<script>';
         echo 'var tbl_reseau = [{""}];';
@@ -145,7 +145,7 @@ foreach (object::all() as $object) {
     }
     echo '<script>';
     foreach ($datas as $key => $value) {
-        if($key.trim()=="networks") {
+        if ($key.trim()=="networks") {
             echo 'var tbl_reseau = [';
             foreach ($value as $network) {
                 echo '{"network_id":"' .  $network['network_id']. '","network_name":"' . $network['network_name'] . '"},';
@@ -154,11 +154,11 @@ foreach (object::all() as $object) {
         }
     }
     foreach ($datas as $key => $value) {
-        if($key.trim()=="networks") {
+        if ($key.trim()=="networks") {
             echo 'var tbl_camera = [';
             foreach ($value as $network) {
                 foreach ($network as $key2 => $value2) {
-                    foreach($value2 as $camera) {
+                    foreach ($value2 as $camera) {
                         echo '{"network_id":"' .  $network['network_id']. '","device_id":"' .  $camera['device_id']. '","device_name":"' . $camera['device_name'] . '"},';
                     }
                 }
@@ -169,7 +169,7 @@ foreach (object::all() as $object) {
 
     echo '</script>';
     if (!$erreur) {
-?>
+        ?>
 
 
     
@@ -185,7 +185,8 @@ foreach (object::all() as $object) {
             <select id="select_camera" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="camera_id"></select>
         </div>
     </div>
-    <?php } ?>
+    <?php
+    } ?>
 </fieldset>
 </form>
 </div>

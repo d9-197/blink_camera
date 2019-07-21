@@ -4,7 +4,8 @@
   </center>
   <center> 
     <span class="directDisplay zoom cursor">
-      <img src="#urlThumb#" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>
+      <!--img src="#urlThumb#" style="display:block;padding:5px;" data-eqLogic_id="#id#"/-->
+      #urlLine#
     </span>
     <span class="blocCmds" style="position:absolute;bottom:15px;width:100%;left:0px;">
       <center>
@@ -22,12 +23,12 @@
   <span class="statusCmd" style="position : absolute;left : 5px;bottom : 0px; width : 30px;z-index: 1030;"></span>
   <script>
     reservedHeigth=$('.eqLogic[data-eqLogic_id=#id#] .blocCmds').height() + 20;
-    $('.eqLogic[data-eqLogic_id=#id#] .directDisplay img').css('max-height',$('.eqLogic[data-eqLogic_id=#id#]').height() - reservedHeigth);
-    $('.eqLogic[data-eqLogic_id=#id#] .directDisplay img').css('max-width',$('.eqLogic[data-eqLogic_id=#id#]').width());
+    $('.eqLogic[data-eqLogic_id=#id#] .directDisplay .vignette').css('max-height',$('.eqLogic[data-eqLogic_id=#id#]').height() - reservedHeigth);
+    $('.eqLogic[data-eqLogic_id=#id#] .directDisplay .vignette').css('max-width',$('.eqLogic[data-eqLogic_id=#id#]').width());
     $('.eqLogic[data-eqLogic_id=#id#]').off('resize').on('resize',function(){
       reservedHeigth=$('.eqLogic[data-eqLogic_id=#id#] .blocCmds').height() + 20;
-      $('.eqLogic[data-eqLogic_id=#id#] .directDisplay img').css('max-height',$('.eqLogic[data-eqLogic_id=#id#]').height() - reservedHeigth);
-      $('.eqLogic[data-eqLogic_id=#id#] .directDisplay img').css('max-width',$('.eqLogic[data-eqLogic_id=#id#]').width());
+      $('.eqLogic[data-eqLogic_id=#id#] .directDisplay .vignette').css('max-height',$('.eqLogic[data-eqLogic_id=#id#]').height() - reservedHeigth);
+      $('.eqLogic[data-eqLogic_id=#id#] .directDisplay .vignette').css('max-width',$('.eqLogic[data-eqLogic_id=#id#]').width());
     });
     $('.camera_history[data-eqLogic_id=#id#]').off().on('click', function () {
       $('#md_modal').dialog({title: "Historique #name#"}); 

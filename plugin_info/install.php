@@ -18,17 +18,15 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
-function blink_camera_install() {
-    
+function blink_camera_install()
+{
 }
 
-function blink_camera_update() {
-    
+function blink_camera_update()
+{
 }
 
 
-function blink_camera_remove() {
-    
+function blink_camera_remove()
+{
 }
-
-?>

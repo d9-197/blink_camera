@@ -26,27 +26,48 @@ if (!isConnect()) {
     <fieldset>
         <h4 class="icon_blue">{{Compte Blink}}</h4>
         <div class="form-group">
-             <label class="col-lg-6 control-label">{{Email}}</label>
+             <label class="col-lg-3 control-label">{{Email}}</label>
             <div class="col-lg-3">
                 <input class="configKey form-control" data-l1key="param1" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-6 control-label">{{Mot de passe}}</label>
+            <label class="col-lg-3 control-label">{{Mot de passe}}</label>
             <div class="col-lg-3">
                 <input type="password" class="configKey form-control" data-l1key="param2"/>
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">{{Unité de température}}</label>
+            <div class="col-lg-3">
+                <select  class="configKey form-control" data-l1key="blink_tempUnit">
+                    <option value="C">{{° C}}</option>
+                    <option value="F">{{° F}}</option>
+                </select>
+            </div>
+        </div>
+        <h4 class="icon_blue">{{Widget}}</h4>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">{{Contenu de la vignette}}</label>
+            <div class="col-lg-3">
+                <select  class="configKey form-control" data-l1key="blink_dashboard_content_type">
+                    <!--option value="1">{{Vignette de la caméra}}</option-->
+                    <option value="2">{{Vignette de la dernière vidéo}}</option>
+                    <option value="3">{{Dernière vidéo}}</option>
+                </select>
+            </div>
+        </div>
         <h4 class="icon_blue">{{Vue historique}}</h4>
         <div class="form-group">
-            <label class="col-lg-6 control-label">{{Nombre maximum de vidéos téléchargées}}</label>
-            <div class="col-lg-2">
+            <label class="col-lg-3 control-label">{{Nombre maximum de vidéos téléchargées}}</label>
+            <div class="col-lg-3">
                 <input type="number" class="configKey form-control" data-l1key="nb_max_video" min="0" />
             </div>
         </div>
+
         <div class="form-group">
-            <label class="col-lg-6 control-label">{{Taille des aperçus des vidéos}}</label>
-            <div class="col-lg-2">
+            <label class="col-lg-3 control-label">{{Taille des aperçus des vidéos}}</label>
+            <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_size_videos">
                     <option value="0.1">10%</option>
                     <option value="0.2">20%</option>

@@ -26,17 +26,16 @@ try {
     
     ajax::init();
 
-	if (init('action') == 'removeRecord') {
-		$file = init('file');
-		$dir = init('dir');
-		$file = str_replace('..', '', $file);
-		shell_exec('rm -rf ' . $dir . '/' . $file);
-		ajax::success();
-	}
+    if (init('action') == 'removeRecord') {
+        $file = init('file');
+        $dir = init('dir');
+        $file = str_replace('..', '', $file);
+        shell_exec('rm -rf ' . $dir . '/' . $file);
+        ajax::success();
+    }
 
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {
     ajax::error(displayExeption($e), $e->getCode());
 }
-
