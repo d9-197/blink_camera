@@ -2,7 +2,7 @@
 if (!isConnect()) {
 	throw new Exception('{{401 - Accès non autorisé}}');
 }
-sendVarToJs('jeedomBackgroundImg', 'plugins/camera/core/img/panel.jpg');
+sendVarToJs('jeedomBackgroundImg', '/plugins/blink_camera/img/panel.png');
 if (init('object_id') == '') {
 	$object = jeeObject::byId($_SESSION['user']->getOptions('defaultDashboardObject'));
 } else {
