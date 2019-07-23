@@ -49,6 +49,7 @@ function addCmdToTable(_cmd) {
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fa fa-rss"></i> {{Tester}}</a>';
     }
+    
     //tr += '<i class="fa fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i>';
     tr += '</td>';
     tr += '</tr>';
@@ -85,6 +86,9 @@ if (init(_cmd.type) == 'action') {
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fa fa-rss"></i> {{Tester}}</a>';
     }
+    tr += '<select class="cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="updateCmdId" style="display : none;margin-top : 5px;" title="Commande d\'information à mettre à jour">';
+    tr += '<option value="">Aucune</option>';
+    tr += '</select>';
     //tr += '<i class="fa fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i>';
     tr += '</td>';
     tr += '</tr>';
@@ -100,7 +104,8 @@ if (init(_cmd.type) == 'action') {
         success: function (result) {
             tr.find('.cmdAttr[data-l1key=value]').append(result);
             $(".cmdAttr[data-l1key=value]").show();
-            //tr.find('.cmdAttr[data-l1key=configuration][data-l2key=updateCmdId]').append(result);
+            tr.find('.cmdAttr[data-l1key=configuration][data-l2key=updateCmdId]').append(result);
+            $(".cmdAttr[data-l1key=configuration][data-l2key=updateCmdId]").show();
             tr.setValues(_cmd, '.cmdAttr');
             //jeedom.cmd.changeType(tr, init(_cmd.subType));
         }

@@ -184,6 +184,14 @@ foreach ($eqLogics as $eqLogic) {
             <select id="select_camera" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="camera_id"></select>
         </div>
     </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" >{{ Widget standard }}</label>
+        <div id="liste" class="col-sm-3">         
+        <label class="checkbox-inline">
+        <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="blink_dashboard_custom_widget" />{{ Utiliser le widget standard (sans vignette) }}
+        </label>
+        </div>
+    </div>
     <?php
     } ?>
 </fieldset>

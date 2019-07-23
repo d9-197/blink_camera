@@ -30,7 +30,7 @@ class blink_camera extends eqLogic
     const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;//2019-07-15T18:40:44+00:00
     const FORMAT_DATETIME_OUT="Y-m-d H:i:s" ;//2019-07-15T18:40:44+00:00
     const ERROR_IMG="/plugins/blink_camera/img/error.png";
-    public static $_widgetPossibility = array('custom' => true, 'custom::layout' => false);
+    public static $_widgetPossibility = array('custom' => true, 'custom::layout' => true);
 
     /*     * ***********************Methode static*************************** */
 
@@ -574,8 +574,8 @@ class blink_camera extends eqLogic
                     ]
                 ]);
                 $jsonrep= json_decode($r->getBody(), true);
-                sleep(2);
-                $this->getNetworkArmStatus();
+               /* sleep(2);
+                $this->getNetworkArmStatus();*/
                 return true;
             }
         }
@@ -598,8 +598,8 @@ class blink_camera extends eqLogic
                     ]
                 ]);
                 $jsonrep= json_decode($r->getBody(), true);
-                sleep(2);
-                $this->getNetworkArmStatus();
+               /* sleep(2);
+                $this->getNetworkArmStatus();*/
                 return true;
             }
         }
@@ -844,96 +844,100 @@ class blink_camera extends eqLogic
     
     public function toHtml($_version = 'dashboard', $_fluxOnly = false)
     {
-        log::add('blink_camera', 'debug', 'blink_camera->toHtml() start');
-        if ($_fluxOnly) {
-            $replace = $this->preToHtml($_version, array(), true);
-        } else {
-            $replace = $this->preToHtml($_version);
-        }
-        if (!is_array($replace)) {
-            return $replace;
-        }
-        $version = jeedom::versionAlias($_version);
-        $version2 = jeedom::versionAlias($_version, false);
-        $action = '';
-        $info = '';
-        //log::add('blink_camera', 'debug', 'blink_camera->toHtml() before actions');
+        if ($_version=="dashboard" && $this->getConfiguration("blink_dashboard_custom_widget")==="0") {
+            log::add('blink_camera', 'debug', 'blink_camera->toHtml() use custom widget');
+            if ($_fluxOnly) {
+                $replace = $this->preToHtml($_version, array(), true);
+            } else {
+                $replace = $this->preToHtml($_version);
+            }
+            if (!is_array($replace)) {
+                return $replace;
+            }
+            $version = jeedom::versionAlias($_version);
+            $version2 = jeedom::versionAlias($_version, false);
+            $action = '';
+            $info = '';
+            //log::add('blink_camera', 'debug', 'blink_camera->toHtml() before actions');
 
-        foreach ($this->getCmd() as $cmd) {
-            if ($cmd->getIsVisible() == 1) {
-                if ($cmd->getLogicalId() != 'refresh') {
-                    if ($cmd->getType() == 'action' && $cmd->getSubType() == 'other') {
-                        $replaceCmd = array(
-                            '#id#' => $cmd->getId(),
-                            '#name#' => ($cmd->getDisplay('icon') != '') ? $cmd->getDisplay('icon') : $cmd->getName(),
-						);
-						if ($cmd->getDisplay('showNameOn' . $version2, 1) == 0) {
-							$replaceCmd['#hideCmdName#'] = 'display:none;';
-						}
-						if ($cmd->getDisplay('showIconAndName' . $version2, 0) == 1) {
-							$replaceCmd['#name#'] = $cmd->getDisplay('icon') . ' ' . $cmd->getName();
-						}
-                        $action .= template_replace($replaceCmd, getTemplate('core', $version, 'blink_camera_action', 'blink_camera')) . ' ';
-                    } else {
-                        if ($cmd->getType() == 'info') {
-                            $info .= $cmd->toHtml($_version);
+            foreach ($this->getCmd() as $cmd) {
+                if ($cmd->getIsVisible() == 1) {
+                    if ($cmd->getLogicalId() != 'refresh') {
+                        if ($cmd->getType() == 'action' && $cmd->getSubType() == 'other') {
+                            $replaceCmd = array(
+                                '#id#' => $cmd->getId(),
+                                '#name#' => ($cmd->getDisplay('icon') != '') ? $cmd->getDisplay('icon') : $cmd->getName(),
+                            );
+                            if ($cmd->getDisplay('showNameOn' . $version2, 1) == 0) {
+                                $replaceCmd['#hideCmdName#'] = 'display:none;';
+                            }
+                            if ($cmd->getDisplay('showIconAndName' . $version2, 0) == 1) {
+                                $replaceCmd['#name#'] = $cmd->getDisplay('icon') . ' ' . $cmd->getName();
+                            }
+                            $action .= template_replace($replaceCmd, getTemplate('core', $version, 'blink_camera_action', 'blink_camera')) . ' ';
                         } else {
-                            $action .= $cmd->toHtml($_version);
+                            if ($cmd->getType() == 'info') {
+                                $info .= $cmd->toHtml($_version);
+                            } else {
+                                $action .= $cmd->toHtml($_version);
+                            }
+                        }
+                        
+                        if ($cmd->getDisplay('forceReturnLineAfter', 0) == 1) {
+                            $action .= '<br/>';
                         }
                     }
-                    
-                    if ($cmd->getDisplay('forceReturnLineAfter', 0) == 1) {
-                        $action .= '<br/>';
-                    }
                 }
             }
-        }
- 
-        $replace['#action#'] = $action;
-		$replace['#info#'] = $info;
-		$urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
-        $replace['#urlFile#']=blink_camera::ERROR_IMG;
-        if ($this->isConfigured()) {
-            if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="1") {
-				// On affiche la vignette de la caméra
-                    $urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
-                    $replace['#urlFile#']=$this->getCameraThumbnail();
-             } else {
-                $temp=$this->getLastEvent(false);
-                //log::add('blink_camera', 'debug', 'blink_camera->toHtml() after last event '.$temp[$media_type]);
-                if (isset($temp) && isset($temp['created_at'])) {
-                    if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="3") {
-                        //On affiche la video
-                        $facteur= (float) config::byKey('blink_size_videos', 'blink_camera');
-                        $tailleVideo=720*$facteur;
-                        $dir= dirname(__FILE__).'/../../../../';
-                        $media_type='media';
-                        $urlLine ='<video class="displayVideo vignette" height="'.$tailleVideo.'" controls loop data-src="core/php/downloadFile.php?pathfile=#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="core/php/downloadFile.php?pathfile=#urlFile#">Your browser does not support the video tag.</video>';
-                        $replace['#urlFile#']=urlencode($dir.self::getMedia($temp[$media_type], $replace['#id#'], blink_camera::getDateJeedomTimezone($temp['created_at'])));
-                    } else {
-						//On affiche la vignette de la derniere video
-                        $media_type='thumbnail';
+    
+            $replace['#action#'] = $action;
+            $replace['#info#'] = $info;
+            $urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
+            $replace['#urlFile#']=blink_camera::ERROR_IMG;
+            if ($this->isConfigured()) {
+                if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="1") {
+                    // On affiche la vignette de la caméra
                         $urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
-                        $replace['#urlFile#']=self::getMedia($temp[$media_type], $replace['#id#'], blink_camera::getDateJeedomTimezone($temp['created_at']));
+                        $replace['#urlFile#']=$this->getCameraThumbnail();
+                } else {
+                    $temp=$this->getLastEvent(false);
+                    //log::add('blink_camera', 'debug', 'blink_camera->toHtml() after last event '.$temp[$media_type]);
+                    if (isset($temp) && isset($temp['created_at'])) {
+                        if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="3") {
+                            //On affiche la video
+                            $facteur= (float) config::byKey('blink_size_videos', 'blink_camera');
+                            $tailleVideo=720*$facteur;
+                            $dir= dirname(__FILE__).'/../../../../';
+                            $media_type='media';
+                            $urlLine ='<video class="displayVideo vignette" height="'.$tailleVideo.'" controls loop data-src="core/php/downloadFile.php?pathfile=#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="core/php/downloadFile.php?pathfile=#urlFile#">Your browser does not support the video tag.</video>';
+                            $replace['#urlFile#']=urlencode($dir.self::getMedia($temp[$media_type], $replace['#id#'], blink_camera::getDateJeedomTimezone($temp['created_at'])));
+                        } else {
+                            //On affiche la vignette de la derniere video
+                            $media_type='thumbnail';
+                            $urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
+                            $replace['#urlFile#']=self::getMedia($temp[$media_type], $replace['#id#'], blink_camera::getDateJeedomTimezone($temp['created_at']));
+                        }
                     }
                 }
-			}
-			$replace['#urlLine#']=template_replace($replace, $urlLine);
-        }
-        $replace['#limite_nb_video#']="";
-        $nbMax= (int) config::byKey('nb_max_video', 'blink_camera');
-        if ($nbMax > 0) {
-            $replace['#limite_nb_video#']="- ".$nbMax." dernières vidéos";
-        }
-        //log::add('blink_camera','debug','toHtml() REPLACE VALUES: '.print_r($replace,true));
-        if ($this->isConfigured()) {
-            if (!$_fluxOnly) {
-                return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera', 'blink_camera')));
+                $replace['#urlLine#']=template_replace($replace, $urlLine);
+            }
+            $replace['#limite_nb_video#']="";
+            $nbMax= (int) config::byKey('nb_max_video', 'blink_camera');
+            if ($nbMax > 0) {
+                $replace['#limite_nb_video#']="- ".$nbMax." dernières vidéos";
+            }
+            //log::add('blink_camera','debug','toHtml() REPLACE VALUES: '.print_r($replace,true));
+            if ($this->isConfigured()) {
+                if (!$_fluxOnly) {
+                    return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera', 'blink_camera')));
+                } else {
+                    return template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_flux_only', 'blink_camera'));
+                }
             } else {
-                return template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_flux_only', 'blink_camera'));
+                return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_not_config', 'blink_camera')));
             }
         } else {
-            return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_not_config', 'blink_camera')));
+            return parent::toHtml($_version);
         }
     }
 
