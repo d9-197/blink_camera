@@ -30,6 +30,8 @@ class blink_camera extends eqLogic
     const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;//2019-07-15T18:40:44+00:00
     const FORMAT_DATETIME_OUT="Y-m-d H:i:s" ;//2019-07-15T18:40:44+00:00
     const ERROR_IMG="/plugins/blink_camera/img/error.png";
+    public static $_widgetPossibility = array('custom' => true, 'custom::layout' => false);
+
     /*     * ***********************Methode static*************************** */
 
     /*
@@ -46,7 +48,7 @@ class blink_camera extends eqLogic
             if ($blink_camera->getIsEnable() == 1) {//vérifie que l'équipement est acitf
                 //$blink_camera->getLastEventDate();
 				$blink_camera->getNetworkArmStatus();
-				$blink_camera->getTemperature();
+                $blink_camera->refreshCameraInfos();
             }
         }
     }
@@ -267,11 +269,11 @@ class blink_camera extends eqLogic
                         $filename = $filenameTab[count($filenameTab)-1];
                     }
                     if ($filenameTab[count($filenameTab)-2]==="thumb" || $format!=="mp4") {
-                        if (!strpos($file, '.jpg')) {
+                        if (!strpos($filename, '.jpg')) {
                             $filename =$filename .".jpg";
                         }
                     } else if ($format==="mp4"){
-                        if (!strpos($file, '.mp4')) {
+                        if (!strpos($filename, '.mp4')) {
                             $filename =$filename .".mp4";
                         }
                     }
@@ -513,7 +515,7 @@ class blink_camera extends eqLogic
             }
         }
         $jsonstr='[{"deleted":false,"device_id":"xxxxx","device_name":"xxxx","media":"xxxxxxx","thumbnail":"/plugins/blink_camera/medias/x0.png","created_at":"2019-01-01T00:00:01+0000"}]';
-        return json_decode($json_str, true);
+        return json_decode($jsonstr, true);
     }
 
     public function getLastEventDate()
@@ -531,19 +533,25 @@ class blink_camera extends eqLogic
             }
         }
 	}
-	
-	public function getTemperature(){
+	public function refreshCameraInfos() {
 		if ($this->isConfigured()) {
-			$datas=$this->getCameraInfo();
+            $datas=$this->getCameraInfo();
+            /* MAJ Température */
 			$tempe=(float) $datas['camera_status']['temperature'];
 			$blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
 			if ($blink_tempUnit==="C") {
 				$tempe =($tempe - 32) / 1.8;
 			}
-			$this->checkAndUpdateCmd('temperature', $tempe);
+            $this->checkAndUpdateCmd('temperature', $tempe);
+            /* MAJ Power */
+            $power=(float) $datas['camera_status']['battery_voltage'];
+            $this->checkAndUpdateCmd('power', ($power/100));
+            /* MAJ WIFI */
+            $wifi=(float) $datas['camera_status']['wifi_strength'];
+			$this->checkAndUpdateCmd('wifi_strength', $wifi);
 		}
-	}
-
+    }
+    
     public function getMediaDir()
     {
         return __DIR__.'/../../medias/'.$this->getId();
@@ -676,8 +684,48 @@ class blink_camera extends eqLogic
         $info->setType('info');
 		$info->setSubType('numeric');
 		$info->setOrder(2);
+        $info->save();
+        
+        $info = $this->getCmd(null, 'power');
+        if (!is_object($info)) {
+            $info = new blink_cameraCmd();
+			$info->setName(__('Pile', __FILE__));
+			$info->setTemplate('dashboard', 'badge');
+			$info->setDisplay("showNameOndashboard", 1);
+			//$info->setConfiguration('generic_type',"TEMPERATURE");
+			$info->setConfiguration('historizeRound',"2");
+		}
+		//$info->setConfiguration('generic_type',"TEMPERATURE");
+		$info->setConfiguration('historizeRound',"2");
+		$info->setUnite('V');
+		$info->setIsVisible(true);
+        $info->setLogicalId('power');
+        $info->setEqLogic_id($this->getId());
+        $info->setType('info');
+		$info->setSubType('numeric');
+		$info->setOrder(3);
 		$info->save();
-
+ 
+        $info = $this->getCmd(null, 'wifi_strength');
+        if (!is_object($info)) {
+            $info = new blink_cameraCmd();
+			$info->setName(__('Puissance Wifi', __FILE__));
+			$info->setTemplate('dashboard', 'badge');
+			$info->setDisplay("showNameOndashboard", 1);
+			//$info->setConfiguration('generic_type',"TEMPERATURE");
+			$info->setConfiguration('historizeRound',"0");
+		}
+		//$info->setConfiguration('generic_type',"TEMPERATURE");
+		$info->setConfiguration('historizeRound',"0");
+		$info->setUnite('dB');
+		$info->setIsVisible(true);
+        $info->setLogicalId('wifi_strength');
+        $info->setEqLogic_id($this->getId());
+        $info->setType('info');
+		$info->setSubType('numeric');
+		$info->setOrder(4);
+        $info->save();
+        
         $info = $this->getCmd(null, 'last_event');
         if (!is_object($info)) {
             $info = new blink_cameraCmd();
@@ -690,7 +738,7 @@ class blink_camera extends eqLogic
         $info->setTemplate('dashboard', 'default');
         $info->setDisplay("showNameOndashboard", 1);
 		$info->setSubType('string');
-		$info->setOrder(3);
+		$info->setOrder(9);
         $info->save();
         
         $refresh = $this->getCmd(null, 'refresh');
@@ -766,8 +814,8 @@ class blink_camera extends eqLogic
 	//	log::add('blink_camera','debug','ICON:'.$newClip->getDisplay('icon'));	
 
 
-		$this::getTemperature();
-		$this::getLastEventDate();
+        $this::refreshCameraInfos();
+        $this::getLastEventDate();
 		$this::getNetworkArmStatus();
         $this::emptyCacheWidget();
     }
@@ -806,6 +854,7 @@ class blink_camera extends eqLogic
             return $replace;
         }
         $version = jeedom::versionAlias($_version);
+        $version2 = jeedom::versionAlias($_version, false);
         $action = '';
         $info = '';
         //log::add('blink_camera', 'debug', 'blink_camera->toHtml() before actions');
@@ -901,19 +950,19 @@ class blink_camera extends eqLogic
      */
     public static function postConfig_param1($value)
     {
-        self::postConfigOverall();
+        self::postConfigOverall($value);
     }
     public static function postConfig_param2($value)
     {
-        self::postConfigOverall();
+        self::postConfigOverall($value);
     }
     public static function postConfig_blink_dashboard_content_type($value)
     {
-        self::postConfigOverall();
+        self::postConfigOverall($value);
 	}
     public static function postConfig_blink_size_videos($value)
     {
-        self::postConfigOverall();
+        self::postConfigOverall($value);
 	}	
 	
 
@@ -954,7 +1003,7 @@ class blink_cameraCmd extends cmd
       return true;
       }
      */
-	public function useIconAndName() {
+	public function useIconAndName($_version="dashboard") {
 		$version2 = jeedom::versionAlias($_version, false);
 		$this->setDisplay('showIconAndName' . $version2, "1");
 	}
@@ -974,8 +1023,7 @@ class blink_cameraCmd extends cmd
                 // Refresh du statut du reseau
 				$eqlogic->getNetworkArmStatus();
 				
-				$eqlogic->getTemperature();
-				
+                $eqlogic->refreshCameraInfos();
 				break;
 			case 'force_download':
                 // Nettoyage des fichiers du dossier medias
@@ -1001,12 +1049,6 @@ class blink_cameraCmd extends cmd
 
             case 'disarm_network':
                 $eqlogic->networkDisarm();
-                break;
-
-            case 'arm_status': // LogicalId de la commande rafraîchir que l’on a créé dans la méthode Postsave de la classe blink_camera .
-                /*$info = $eqlogic->getNetworkArmStatus(); 	//On lance la fonction getVideoList() pour récupérer une blink_camera et on la stocke dans la variable $info
-                $eqlogic->checkAndUpdateCmd('arm_status', $info); // on met à jour la commande avec le LogicalId "story"  de l'eqlogic
-                */
                 break;
         }
     }

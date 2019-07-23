@@ -64,6 +64,9 @@ if (init(_cmd.type) == 'action') {
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="id" style="display:none;"></span>';
     tr += '<input class="cmdAttr form-control input-sm" data-l1key="name" style="width : 140px;" placeholder="{{Nom}}">';
+    tr += '<select class="cmdAttr form-control input-sm" data-l1key="value" style="display : none;margin-top : 5px;" title="La valeur de la commande vaut par défaut la commande">';
+    tr += '<option value="">Aucune</option>';
+    tr += '</select>';
     tr += '</td>';
     tr += '<td>';
     tr += '<a class="cmdAction btn btn-default btn-sm" data-l1key="chooseIcon"><i class="fas fa-flag"></i> Icone</a>';
@@ -87,6 +90,21 @@ if (init(_cmd.type) == 'action') {
     tr += '</tr>';
     $('#table_cmd tbody').append(tr);
     $('#table_cmd tbody tr:last').setValues(_cmd, '.cmdAttr');
+    var tr = $('#table_cmd tbody tr:last');
+    jeedom.eqLogic.builSelectCmd({
+        id: $(".li_eqLogic.active").attr('data-eqLogic_id'),
+        filter: {type: 'info'},
+        error: function (error) {
+            $('#div_alert').showAlert({message: error.message, level: 'danger'});
+        },
+        success: function (result) {
+            tr.find('.cmdAttr[data-l1key=value]').append(result);
+            $(".cmdAttr[data-l1key=value]").show();
+            //tr.find('.cmdAttr[data-l1key=configuration][data-l2key=updateCmdId]').append(result);
+            tr.setValues(_cmd, '.cmdAttr');
+            //jeedom.cmd.changeType(tr, init(_cmd.subType));
+        }
+    });
     /*if (isset(_cmd.type)) {
         $('#table_cmd tbody tr:last .cmdAttr[data-l1key=type]').value(init(_cmd.type));
     }
