@@ -1,0 +1,1 @@
+2019-07-21 : Première version Beta du plugin
