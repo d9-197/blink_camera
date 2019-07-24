@@ -664,7 +664,21 @@ class blink_camera extends eqLogic
 		$info->setSubType('binary');
 		$info->setOrder(1);
 		$info->save();
-		
+        
+        $info = $this->getCmd(null, 'thumbnail');
+        if (!is_object($info)) {
+            $info = new blink_cameraCmd();
+            $info->setName(__('Vignette', __FILE__));
+        }
+        $info->setLogicalId('thumbnail');
+        $info->setEqLogic_id($this->getId());
+        $info->setType('info');
+        $info->setIsVisible(true);
+        $info->setTemplate('dashboard', 'default');
+        $info->setDisplay("showNameOndashboard", 0);
+		$info->setSubType('string');
+		$info->setOrder(9);
+		$info->save();
 
         $info = $this->getCmd(null, 'temperature');
         if (!is_object($info)) {
@@ -738,7 +752,7 @@ class blink_camera extends eqLogic
         $info->setTemplate('dashboard', 'default');
         $info->setDisplay("showNameOndashboard", 1);
 		$info->setSubType('string');
-		$info->setOrder(9);
+		$info->setOrder(4);
         $info->save();
         
         $refresh = $this->getCmd(null, 'refresh');
@@ -806,13 +820,24 @@ class blink_camera extends eqLogic
         $newClip->setLogicalId('new_clip');
         $newClip->setType('action');
 		$newClip->setSubType('other');
-		$newClip->setOrder(12);
 		$newClip->setDisplay('icon','<i class="fa fa-video-camera"></i>'); 
 		$newClip->useIconAndName();
 		$newClip->setOrder(12);
 		$newClip->save();
-	//	log::add('blink_camera','debug','ICON:'.$newClip->getDisplay('icon'));	
 
+        $history = $this->getCmd(null, 'history');
+        if (!is_object($history)) {
+            $history = new blink_cameraCmd();
+            $history->setName(__('Historique', __FILE__));
+        }
+        $history->setDisplay('icon','<i class="fa fa-folder-open"></i>'); 
+        $history->setEqLogic_id($this->getId());
+        $history->setLogicalId('history');
+        $history->setType('action');
+        $history->setSubType('other');
+        $history->setOrder(14);
+        $history->useIconAndName();
+        $history->save();
 
         $this::refreshCameraInfos();
         $this::getLastEventDate();
@@ -826,10 +851,10 @@ class blink_camera extends eqLogic
 
     public function postUpdate()
     {
-        //		$cmd = $this->getCmd(null, 'refresh'); // On recherche la commande refresh de l’équipement
-//		if (is_object($cmd)) { //elle existe et on lance la commande
-//			 $cmd->execCmd();
-//		}
+		$cmd = $this->getCmd(null, 'refresh'); 
+		if (is_object($cmd)) { 
+			 $cmd->execCmd();
+		}
         //self::cronHourly($this->getId());
     }
 
@@ -844,8 +869,7 @@ class blink_camera extends eqLogic
     
     public function toHtml($_version = 'dashboard', $_fluxOnly = false)
     {
-        if ($_version=="dashboard" && $this->getConfiguration("blink_dashboard_custom_widget")==="0") {
-            log::add('blink_camera', 'debug', 'blink_camera->toHtml() use custom widget');
+        if ($_version=="dashboard" && $this->getConfiguration("blink_dashboard_custom_widget")==="1") {
             if ($_fluxOnly) {
                 $replace = $this->preToHtml($_version, array(), true);
             } else {
@@ -858,8 +882,7 @@ class blink_camera extends eqLogic
             $version2 = jeedom::versionAlias($_version, false);
             $action = '';
             $info = '';
-            //log::add('blink_camera', 'debug', 'blink_camera->toHtml() before actions');
-
+           
             foreach ($this->getCmd() as $cmd) {
                 if ($cmd->getIsVisible() == 1) {
                     if ($cmd->getLogicalId() != 'refresh') {
@@ -997,10 +1020,64 @@ class blink_cameraCmd extends cmd
 
 
     /*     * *********************Methode d'instance************************* */
-    /*public function toHtml($_version = 'dashboard') {
+    public function toHtml($_version = 'dashboard', $_options = '', $_cmdColor = null) {
+        if ($this->getLogicalId()==='thumbnail') {
+            $bl_cam=$this->getEqLogic();
+            $urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$bl_cam->getId().'"/>';
+            $urlFile=blink_camera::ERROR_IMG;
+            if ($bl_cam->isConfigured()) {
+                if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="1") {
+                    // On affiche la vignette de la caméra
+                    $urlFile=$bl_cam->getCameraThumbnail();
+                } else {
+                    $temp=$bl_cam->getLastEvent(false);
+                    if (isset($temp) && isset($temp['created_at'])) {
+                        if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="3") {
+                            //On affiche la video
+                            $facteur= (float) config::byKey('blink_size_videos', 'blink_camera');
+                            $tailleVideo=720*$facteur;
+                            $dir= dirname(__FILE__).'/../../../../';
+                            $media_type='media';
+                            $urlLine ='<video class="displayVideo vignette" height="'.$tailleVideo.'"  data-eqLogic_id="'.$bl_cam->getId().'" controls loop data-src="core/php/downloadFile.php?pathfile=#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="core/php/downloadFile.php?pathfile=#urlFile#">Your browser does not support the video tag.</video>';
+                            $urlFile=urlencode($dir.blink_camera::getMedia($temp[$media_type], $bl_cam->getId(), blink_camera::getDateJeedomTimezone($temp['created_at'])));
+                        } else {
+                            //On affiche la vignette de la derniere video
+                            $media_type='thumbnail';
+                            $urlFile=blink_camera::getMedia($temp[$media_type], $bl_cam->getId(), blink_camera::getDateJeedomTimezone($temp['created_at']));
+                        }
+                    }
+                }
+            }
+            $replace['#urlFile#']=$urlFile;
+            return template_replace($replace, $urlLine);
+        } else if ($this->getLogicalId()==='history') {
+            $bl_cam=$this->getEqLogic();
+            if ($_cmdColor === null && $version != 'scenario') {
+                $eqLogic = $this->getEqLogic();
+                $vcolor = ($version == 'mobile') ? 'mcmdColor' : 'cmdColor';
+                if ($eqLogic->getPrimaryCategory() == '') {
+                    $_cmdColor = jeedom::getConfiguration('eqLogic:category:default:' . $vcolor);
+                } else {
+                    $_cmdColor = jeedom::getConfiguration('eqLogic:category:' . $eqLogic->getPrimaryCategory() . ':' . $vcolor);
+                }
+            }
+            $name_display =($this->getDisplay('icon') != '') ? $this->getDisplay('icon') : $this->getName();
+            if ($this->getDisplay('showIconAndName' . $_version, 0) == 1) {
+                $name_display = $this->getDisplay('icon') . ' ' . $this->getName();
+            }
+            $result='<span class="cmd reportModeHidden cmd-widget camera_history" style="display: inline !important;margin-right: 2px;" data-type="action" data-subtype="other" data-cmd_id="'.$this->getId().'" data-cmd_uid="'.'cmd' . $this->getId() . eqLogic::UIDDELIMITER . mt_rand() . eqLogic::UIDDELIMITER.'" data-version="'.$_version.'" data-eqLogic_id="'.$bl_cam->getId().'">';
+            $result.='<a class="btn btn-sm btn-default action cmdName tooltips" title="'.$this->getName().'" style="background-color:'.$_cmdColor.' !important;border-color : transparent !important;margin-top: 2px;">'.$name_display.'</a>';
+            $result.='<script>$(\'.camera_history[data-eqLogic_id="'.$bl_cam->getId().'"]\').off().on(\'click\', function () {';
+            $result.='$(\'#md_modal\').dialog({title: "Historique '.$bl_cam->getName().'"});';
+            $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'\').dialog(\'open\');});';
+            $result.="</script>";
 
-        return "<DIV>AFA AFAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</DIV>";
-    }*/
+            return $result;
+        } else {
+            return parent::toHtml($_version, $_options, $_cmdColor);
+        }
+        
+    }
     /*
      * Non obligatoire permet de demander de ne pas supprimer les commandes même si elles ne sont pas dans la nouvelle configuration de l'équipement envoyé en JS
       public function dontRemoveCmd() {

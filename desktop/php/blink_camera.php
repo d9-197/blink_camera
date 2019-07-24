@@ -185,10 +185,10 @@ foreach ($eqLogics as $eqLogic) {
         </div>
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" >{{ Widget standard }}</label>
+        <label class="col-sm-3 control-label" >{{ Widget Spécifique }}</label>
         <div id="liste" class="col-sm-3">         
         <label class="checkbox-inline">
-        <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="blink_dashboard_custom_widget" />{{ Utiliser le widget standard (sans vignette) }}
+        <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="blink_dashboard_custom_widget" />{{ Utiliser le widget spécifique }}
         </label>
         </div>
     </div>
@@ -201,9 +201,14 @@ foreach ($eqLogics as $eqLogic) {
 <a class="btn btn-success btn-sm cmdAction pull-left" data-action="add" style="margin-top:5px;"><i class="fa fa-plus-circle"></i> {{Commandes}}</a><br/><br/>
 <table id="table_cmd" class="table table-bordered table-condensed">
     <thead>
-        <tr>
-            <th colspan="2">{{Nom}}</th><th>{{Type}}</th><th>{{Configuration}}</th><th>{{Action}}</th>
-        </tr>
+      <tr>
+        <th style="width: 350px;">{{Nom}}</th>
+        <th style="width: 75px;">Type</th>
+        <th style="width: 300px;">{{Liste de commandes}}</th>
+        <th>{{Paramètres}}</th>
+        <th style="width: 125px;">{{Options}}</th>
+        <th style="width: 92px;">{{Actions}}</th>
+      </tr>
     </thead>
     <tbody>
     </tbody>
