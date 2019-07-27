@@ -77,9 +77,6 @@ class blink_camera extends eqLogic
     
         foreach ($eqLogics as $blink_camera) {//parcours tous les équipements du plugin blink_camera
             if ($blink_camera->getIsEnable() == 1) {//vérifie que l'équipement est acitf
-                $blink_camera->getLastEventDate();
-				$blink_camera->getNetworkArmStatus();
-                $blink_camera->refreshCameraInfos();
                 $blink_camera->forceCleanup(true);
             }
         }
@@ -240,6 +237,7 @@ class blink_camera extends eqLogic
                     } else {
                         $jsonstr=$jsonstr."false";
                     }
+                    $jsonstr=$jsonstr.",\"id\":\"".$media['id']."\"";
                     $jsonstr=$jsonstr.",\"device_id\":\"".$media['device_id']."\",\"device_name\":\"".$media['device_name']."\",\"media\":\"".$media['media']."\",\"thumbnail\":\"".$media['thumbnail']."\",\"created_at\":\"".$media['created_at']."\"}";
                 }
             }
@@ -372,21 +370,25 @@ class blink_camera extends eqLogic
 	public function getCameraInfo() {
 		$network_id = $this->getConfiguration("network_id");
         $camera_id = $this->getConfiguration("camera_id");
-        $jsonstr="erreur";
+        $jsonrep=json_decode('{"message":erreur"}',true);
         if (self::getToken() && $this->isConfigured()) {
             $_tokenBlink=config::byKey('token', 'blink_camera');
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
-                $client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);
-				
+                $client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);	
 				$url='/network/'.$network_id.'/camera/'.$camera_id;
-				$r = $client->request('GET', $url, [
-                    'headers' => [
-                        'Host'=> 'prod.immedia-semi.com',
-                        'TOKEN_AUTH'=> $_tokenBlink
-                    ]
-                ]);
+				try {
+                    $r = $client->request('GET', $url, [
+                        'headers' => [
+                            'Host'=> 'prod.immedia-semi.com',
+                            'TOKEN_AUTH'=> $_tokenBlink
+                        ]
+                    ]);
+                } catch (RequestException $e) {
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    return $jsonrep;
+                }
                 $jsonrep= json_decode($r->getBody(), true);
             }
             return $jsonrep;
@@ -395,9 +397,7 @@ class blink_camera extends eqLogic
 
 	public function getCameraThumbnail() {
         $datas=$this->getHomescreenData();
-        log::add('blink_camera','debug','datas '.print_r( $datas,true));
-            
-		$camera_id = $this->getConfiguration("camera_id");
+        $camera_id = $this->getConfiguration("camera_id");
         foreach ($datas['cameras'] as $device) {
 			log::add('blink_camera','debug','devices='.$camera_id.' vs '.print_r( $device['id'],true));
                 
@@ -423,12 +423,17 @@ class blink_camera extends eqLogic
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
                 $client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);
                 $url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page='.$page;
-                $r = $client->request('GET', $url, [
-                    'headers' => [
-                        'Host'=> 'prod.immedia-semi.com',
-                        'TOKEN_AUTH'=> $_tokenBlink
-                    ]
-                ]);
+                try {
+                    $r = $client->request('GET', $url, [
+                        'headers' => [
+                            'Host'=> 'prod.immedia-semi.com',
+                            'TOKEN_AUTH'=> $_tokenBlink
+                        ]
+                    ]);
+                } catch (RequestException $e) {
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    return $jsonstr;
+                }
                 $jsonrep= json_decode($r->getBody(), true);
                 $jsonstr =self::reformatVideoDatas($jsonrep, $network_id, $camera_id);
             }
@@ -448,12 +453,17 @@ class blink_camera extends eqLogic
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
                 $client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);
                 $url='/network/'.$network_id.'/camera/'.$camera_id.'/'.$type;
-                $r = $client->request('POST', $url, [
-                    'headers' => [
-                        'Host'=> 'prod.immedia-semi.com',
-                        'TOKEN_AUTH'=> $_tokenBlink
-                    ]
-                ]);
+                try {
+                    $r = $client->request('POST', $url, [
+                        'headers' => [
+                            'Host'=> 'prod.immedia-semi.com',
+                            'TOKEN_AUTH'=> $_tokenBlink
+                        ]
+                    ]);
+                } catch (RequestException $e) {
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    return false;
+                }
                 $jsonrep= json_decode($r->getBody(), true);
             }
             return $jsonrep;
@@ -468,26 +478,28 @@ class blink_camera extends eqLogic
         $files = scandir($this->getMediaDir());
         $fich="";
         foreach ($files as $file) {
-            $trouve=false;
-            $filename="";
-            foreach (json_decode($videos, true) as $video) {
-                $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $video['created_at']);
-                $dtim=date_add($dtim, new DateInterval("PT".getTZoffsetMin()."M"));
-                $filename=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
-                $length = strlen($filename);
-                if (substr($file, 0, $length) === $filename) {
-                    $trouve=true;
+            if ($file!=="." && $file!=="..") {
+                $trouve=false;
+                $filename="";
+                foreach (json_decode($videos, true) as $video) {
+                    $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $video['created_at']);
+                    $dtim=date_add($dtim, new DateInterval("PT".getTZoffsetMin()."M"));
+                    $filename=$video['id'].'-'.date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
+                    $length = strlen($filename);
+                    if (substr($file, 0, $length) === $filename) {
+                        $trouve=true;
+                    }
                 }
-            }
-            if ($trouve===false) {
-                log::add('blink_camera', 'info', 'blink_camera->forceCleanup() Delete file: '. $this->getMediaDir().'/'.$file);
-                blink_camera::deleteMedia($this->getMediaDir().'/'.$file);
+                if ($trouve===false) {
+                    log::add('blink_camera', 'info', 'blink_camera->forceCleanup() Delete file: '. $this->getMediaDir().'/'.$file);
+                    blink_camera::deleteMedia($this->getMediaDir().'/'.$file);
+                }
             }
         }
         // Récupération des videos
         //$videos=$this->getVideoList();
         foreach (json_decode($videos, true) as $video) {
-            $filename=blink_camera::getDateJeedomTimezone($video['created_at']);
+            $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']);
             if (!$video['deleted']) {
 				if ($download) { // Si demandé, on télécharge les vidéos disponibles
 					$path=$this->getMedia($video['media'], $this->getId(), $filename);
@@ -504,7 +516,7 @@ class blink_camera extends eqLogic
     }
     public function getLastEvent($include_deleted=true)
     {
-        log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() start');
+        //log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() start');
         // on boucle sur les pages au cas ou les premières pages ne contiendraient que des event supprimés
         for ($page=1;$page<=10;$page++) {
             $jsonvideo=$this->getVideoList($page);
@@ -522,11 +534,11 @@ class blink_camera extends eqLogic
                 }
             }
             if (isset($last_event)) {
-                log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() return an event:'.$last_event['created_at']);
+                //log::add('blink_camera', 'debug', 'blink_camera->getLastEvent() return an event:'.$last_event['created_at']);
                 return $last_event;
             }
         }
-        $jsonstr='[{"deleted":false,"device_id":"xxxxx","device_name":"xxxx","media":"xxxxxxx","thumbnail":"/plugins/blink_camera/medias/x0.png","created_at":"2019-01-01T00:00:01+0000"}]';
+        $jsonstr='[{"id":"error",deleted":false,"device_id":"xxxxx","device_name":"xxxx","media":"xxxxxxx","thumbnail":"/plugins/blink_camera/medias/x0.png","created_at":"2019-01-01T00:00:01+0000"}]';
         return json_decode($jsonstr, true);
     }
 
@@ -548,19 +560,21 @@ class blink_camera extends eqLogic
 	public function refreshCameraInfos() {
 		if ($this->isConfigured()) {
             $datas=$this->getCameraInfo();
-            /* MAJ Température */
-			$tempe=(float) $datas['camera_status']['temperature'];
-			$blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
-			if ($blink_tempUnit==="C") {
-				$tempe =($tempe - 32) / 1.8;
-			}
-            $this->checkAndUpdateCmd('temperature', $tempe);
-            /* MAJ Power */
-            $power=(float) $datas['camera_status']['battery_voltage'];
-            $this->checkAndUpdateCmd('power', ($power/100));
-            /* MAJ WIFI */
-            $wifi=(float) $datas['camera_status']['wifi_strength'];
-			$this->checkAndUpdateCmd('wifi_strength', $wifi);
+            if (!$datas['message']) {
+                /* MAJ Température */
+                $tempe=(float) $datas['camera_status']['temperature'];
+                $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
+                if ($blink_tempUnit==="C") {
+                    $tempe =($tempe - 32) / 1.8;
+                }
+                $this->checkAndUpdateCmd('temperature', $tempe);
+                /* MAJ Power */
+                $power=(float) $datas['camera_status']['battery_voltage'];
+                $this->checkAndUpdateCmd('power', ($power/100));
+                /* MAJ WIFI */
+                $wifi=(float) $datas['camera_status']['wifi_strength'];
+                $this->checkAndUpdateCmd('wifi_strength', $wifi);
+            }
 		}
     }
     
@@ -579,15 +593,20 @@ class blink_camera extends eqLogic
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
                 $client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);
                 $url="/network/$network_id/arm";
-                $r = $client->request('POST', $url, [
-                    'headers' => [
-                        'Host'=> 'prod.immedia-semi.com',
-                        'TOKEN_AUTH'=> $_tokenBlink
-                    ]
-                ]);
+                try {
+                    $r = $client->request('POST', $url, [
+                        'headers' => [
+                            'Host'=> 'prod.immedia-semi.com',
+                            'TOKEN_AUTH'=> $_tokenBlink
+                        ]
+                    ]);
+                } catch (RequestException $e) {
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    return false;
+                }
                 $jsonrep= json_decode($r->getBody(), true);
-               /* sleep(2);
-                $this->getNetworkArmStatus();*/
+                sleep(1);
+                $this->getNetworkArmStatus();
                 return true;
             }
         }
@@ -603,12 +622,17 @@ class blink_camera extends eqLogic
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
                 $client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);
                 $url="/network/$network_id/disarm";
-                $r = $client->request('POST', $url, [
-                    'headers' => [
-                        'Host'=> 'prod.immedia-semi.com',
-                        'TOKEN_AUTH'=> $_tokenBlink
-                    ]
-                ]);
+                try {
+                    $r = $client->request('POST', $url, [
+                        'headers' => [
+                            'Host'=> 'prod.immedia-semi.com',
+                            'TOKEN_AUTH'=> $_tokenBlink
+                        ]
+                    ]);
+                } catch (RequestException $e) {
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    return false;
+                }
                 $jsonrep= json_decode($r->getBody(), true);
                 sleep(1);
                 $this->getNetworkArmStatus();
@@ -636,14 +660,7 @@ class blink_camera extends eqLogic
                 ]);
                 }
                 catch (RequestException $e) {
-                    log::add('blink_camera','warn','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
-                    /*$cmd= $this->getCmd(null, 'arm_status');
-                    if (!is_object($cmd)) {
-                        return false;
-                    }
-                    // Si erreur on essai de renvoyer la valeur précédente
-                    return $cmd->getValue();
-                    */
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
                     return false;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -659,11 +676,68 @@ class blink_camera extends eqLogic
         return false;
     }
 
-    public static function deleteMedia($filepath) {
+    public static function deleteMedia($filepath,$folder=false) {
+        $filepath=realpath($filepath);
         // On controle que l'on soit bien dans le dossier de stockage des medias du plugin !
         if (strpos($filepath, '/plugins/blink_camera/') !== false && strpos($filepath, '/medias/') !== false) {
-            shell_exec('rm -rf ' . $filepath);
+           $commande='rm ';
+            if ($folder) {
+                $commande.='-rf ';
+            }
+            $commande.="'".$filepath."'";
+            log::add('blink_camera','debug','delete: '.$commande);
+            shell_exec($commande);
+        } else {
+            log::add('blink_camera','error','Plugin blink camera try to delete file not in "medias" folder');
         }
+    }
+    
+    public static function deleteMediaCloud($filepath) {
+        $filepath=realpath($filepath);
+        // On controle que l'on soit bien dans le dossier de stockage des medias du plugin !                
+        if (strpos($filepath, '/plugins/blink_camera/') !== false && strpos($filepath, '/medias/') !== false) {
+            $mediaId=explode('-',basename($filepath))[0];
+            $datas='{"media_list":['.$mediaId.']}';
+            if (isset($mediaId) && $mediaId!="" && self::getToken()) {
+                $_tokenBlink=config::byKey('token', 'blink_camera');
+                $_accountBlink=config::byKey('account', 'blink_camera');
+                $_regionBlink=config::byKey('region', 'blink_camera');
+                if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
+                    $client = new GuzzleHttp\Client(['base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com']);
+                    $url='/api/v1/accounts/'.$_accountBlink.'/media/delete';
+                    try {
+                        $r = $client->request('POST', $url, [
+                            'headers' => [
+                                'Host'=> 'prod.immedia-semi.com',
+                                'TOKEN_AUTH'=> $_tokenBlink
+                            ],
+                            'json' => json_decode($datas)
+                        ]);
+                    }
+                    catch (RequestException $e) {
+                        log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                        return false;
+                    }
+                    $jsonrep= json_decode($r->getBody(), true);
+                    if ($jsonrep['code']==='711') {
+                        return true;
+                    } 
+                    return false;
+                }
+            }
+        } else {
+            log::add('blink_camera','error','Plugin blink camera try to delete file in Blink cloud but not in "medias" folder');
+        }
+    }
+
+    public static function endsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        if ($length == 0) {
+            return true;
+        }
+
+        return (substr($haystack, -$length) === $needle);
     }
 
     public function preInsert()
@@ -899,7 +973,7 @@ class blink_camera extends eqLogic
 
     public function preRemove()
     {
-        blink_camera::deleteMedia($this->getMediaDir());
+        blink_camera::deleteMedia($this->getMediaDir(),true);
     }
 
     public function postRemove()
@@ -972,12 +1046,12 @@ class blink_camera extends eqLogic
                             $dir= dirname(__FILE__).'/../../../../';
                             $media_type='media';
                             $urlLine ='<video class="displayVideo vignette" height="'.$hauteurVignette.'" controls loop data-src="core/php/downloadFile.php?pathfile=#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="core/php/downloadFile.php?pathfile=#urlFile#">Your browser does not support the video tag.</video>';
-                            $replace['#urlFile#']=urlencode($dir.self::getMedia($temp[$media_type], $replace['#id#'], blink_camera::getDateJeedomTimezone($temp['created_at'])));
+                            $replace['#urlFile#']=urlencode($dir.self::getMedia($temp[$media_type], $replace['#id#'], $temp['id'].'-'.blink_camera::getDateJeedomTimezone($temp['created_at'])));
                         } else {
                             //On affiche la vignette de la derniere video
                             $media_type='thumbnail';
                             $urlLine ='  <img src="#urlFile#" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
-                            $replace['#urlFile#']=self::getMedia($temp[$media_type], $replace['#id#'], blink_camera::getDateJeedomTimezone($temp['created_at']));
+                            $replace['#urlFile#']=self::getMedia($temp[$media_type], $replace['#id#'], $temp['id'].'-'.blink_camera::getDateJeedomTimezone($temp['created_at']));
                         }
                     }
                 }

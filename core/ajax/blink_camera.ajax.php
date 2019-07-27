@@ -29,8 +29,11 @@ try {
     if (init('action') == 'removeRecord') {
         $file = init('file');
         $dir = init('dir');
-        $file = str_replace('..', '', $file);
-        blink_camera::deleteMedia($dir.'/'.$file);
+        $filepath = realpath($dir.'/'.$file);
+        blink_camera::deleteMedia($filepath);
+        if (!blink_camera::endsWith($file, "*")) {
+            blink_camera::deleteMediaCloud($filepath);
+        }
         ajax::success();
     }
 

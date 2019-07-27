@@ -13,12 +13,14 @@ if ($blink_camera->getEqType_name() != 'blink_camera') {
     throw new Exception(__('Cet équipement n\'est pas de type blink_camera : ', __FILE__) . $blink_camera->getEqType_name());
 }
 
-$dir= dirname(__FILE__) ."/../../medias/" . $blink_camera->getId();
+$dir= realpath(dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/');
 ?>
 <div id='div_blink_cameraRecordAlert' style="display: none;"></div>
 <?php
-echo '<a class="btn btn-danger bt_removefile pull-right" data-all="1" data-dirname="'.$dir.'" data-filename="/'.$date.'*"><i class="fas fa-trash"></i> {{Tout supprimer}}</a>';
-echo '<a class="btn btn-success  pull-right" target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($dir .'/*') . '" ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';
+echo '<legend>';
+echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*').'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
+echo '</legend>';
+   
 ?>
 <?php
 $i = 0;
@@ -53,6 +55,8 @@ foreach ($videoFiltered as $date => $videoByDate) {
     echo '<legend>';
     echo '<span class="blink_cameraHistoryDate">'.$date.'</span>';
     echo ' <a class="btn btn-xs btn-default toggleList"><i class="fa fa-chevron-down"></i></a> ';
+    echo '<a class="btn btn-danger bt_removefile" data-day="1" data-dirname="'.$dir.'" data-filename="*" data-filedate="'.$date.'"><i class="fas fa-trash"></i> {{Supprimer la journée}}</a>';
+    echo '<a class="btn btn-success" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*'.$date.'*').'" ><i class="fas fa-download"></i> {{Télécharger la journée}}</a>';
     echo '</legend>';
     echo '<div class="blink_cameraThumbnailContainer" >';
     foreach ($videoByDate as $video) {
@@ -60,7 +64,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
         if ($nbMax>0 && $cptVideo>$nbMax) {
             break;
         };
-        $filename=blink_camera::getDateJeedomTimezone($video['created_at']);
+        $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']);
         $datetime = explode(" ", $filename);
         $time=$datetime[1];
         $path=$blink_camera->getMedia($video['media'], init('id'), $filename);
@@ -69,14 +73,8 @@ foreach ($videoFiltered as $date => $videoByDate) {
         $path=$dir.'/'.$file;
         $nom = $video['created_at'];
         $blink_cameraName = str_replace(' ', '-', $blink_camera->getName());
-        //echo '<div class="panel panel-primary blink_cardVideo" style="width:402px" >';
         echo '<div class="panel panel-primary blink_cardVideo reveal">';
         echo '<div class="panel-heading blink_cameraHistoryDate">'.$time.'</div>';
-        /*echo '<legend>';
-        echo '<a class="btn btn-xs btn-danger bt_removefile" data-day="1" data-dirname="'.$dir.'" data-filename="/*"><i class="fas fa-trash"></i> {{Supprimer}}</a> ';
-        echo '<a class="btn btn-xs btn-success" target="_blank"  href="core/php/downloadFile.php?pathfile=' . urlencode($path) . '" ><i class="fas fa-download"></i> {{Télécharger}}</a> ';
-        echo '</legend>';
-        */
         echo '<div  class="blink_cameraThumbnailContainer2">';
         $fontType = 'fas-camera';
         if (strpos($file, '.mp4')) {
@@ -103,14 +101,6 @@ foreach ($videoFiltered as $date => $videoByDate) {
 ?>
 <script>
 $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
-/*$('.displayImage').on('click', function() {
-	$('#md_modal2').dialog({title: "Image"});
-	$('#md_modal2').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.displayImage&src='+ $(this).attr('src')).dialog('open');
-});
-$('.displayVideo').on('click', function() {
-	$('#md_modal2').dialog({title: "Vidéo"});
-	$('#md_modal2').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.displayVideo&src='+ $(this).attr('data-src')).dialog('open');
-});*/
 $('.bt_removefile').on('click', function() {
 	var filename = $(this).attr('data-filename');
 	var direct = $(this).attr('data-dirname');
