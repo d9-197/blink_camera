@@ -17,18 +17,30 @@ $dir= realpath(dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/')
 ?>
 <div id='div_blink_cameraRecordAlert' style="display: none;"></div>
 <?php
-echo '<legend>';
+echo '<div>';
 echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*').'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
-echo '</legend>';
+echo '</div>';
    
 ?>
 <?php
 $i = 0;
 $videoFiltered=array();
+$nbMax= (int) config::byKey('nb_max_video', 'blink_camera');
+if ($nbMax <= 0) {
+    $nbMax=-1;
+}
+$cptVideo=0;
 for ($page=1;$page<=10;$page++) {
+    if ($nbMax>0 && $cptVideo>=($nbMax)) {
+        break;
+    };
     $videos=$blink_camera->getVideoList($page);
     foreach (json_decode($videos, true) as $video) {
+        if ($nbMax>0 && $cptVideo>=($nbMax)) {
+            break;
+        };
         if (!$video['deleted']) {
+            $cptVideo++;
             $datetime = explode(" ", blink_camera::getDateJeedomTimezone($video['created_at']));
             $date=$datetime[0];
             if (array_key_exists($date, $videoFiltered)) {
@@ -39,24 +51,23 @@ for ($page=1;$page<=10;$page++) {
         }
     }
 }
-$nbMax= (int) config::byKey('nb_max_video', 'blink_camera');
+
 $facteur= (float) config::byKey('blink_size_videos', 'blink_camera');
 $tailleVideo=720*$facteur;
-echo '<!-- NB VIDEO MAX : '.$nbMax.' -->';
-if ($nbMax <= 0) {
-    $nbMax=-1;
-}
+
 $cptVideo=0;
+$cptDate=0;
 foreach ($videoFiltered as $date => $videoByDate) {
     if ($nbMax>0 && $cptVideo>=($nbMax)) {
         break;
     };
+    $cptDate++;
     echo '<div class="div_dayContainer reveal">';
     echo '<legend>';
     echo '<span class="blink_cameraHistoryDate">'.$date.'</span>';
     echo ' <a class="btn btn-xs btn-default toggleList"><i class="fa fa-chevron-down"></i></a> ';
-    echo '<a class="btn btn-danger bt_removefile" data-day="1" data-dirname="'.$dir.'" data-filename="*" data-filedate="'.$date.'"><i class="fas fa-trash"></i> {{Supprimer la journée}}</a>';
-    echo '<a class="btn btn-success" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*'.$date.'*').'" ><i class="fas fa-download"></i> {{Télécharger la journée}}</a>';
+    //echo '<a class="btn btn-xs btn-danger bt_removefile" data-day="1" data-dirname="'.$dir.'" data-filename="*" data-filedate="'.$date.'"><i class="fas fa-trash"></i></a>';
+    echo '<a class="btn btn-xs btn-success" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*'.$date.'*').'" ><i class="fas fa-download"></i></a>';
     echo '</legend>';
     echo '<div class="blink_cameraThumbnailContainer" >';
     foreach ($videoByDate as $video) {
@@ -84,7 +95,12 @@ foreach ($videoFiltered as $date => $videoByDate) {
         echo '<div class="cameraDisplayCard" style="padding:auto !important ;">';
         echo '<center style="margin-top:5px;">';
         if (strpos($file, '.mp4')) {
-            echo '<video class="displayVideo" height="'.$tailleVideo.'" controls loop data-src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '" style="cursor:pointer"><source src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '">Your browser does not support the video tag.</video>';
+            $strVideo= '<video class="displayVideo"';
+            if ($cptDate==1) {
+                $strVideo.= ' preload ';
+            }
+            $strVideo.= ' height="'.$tailleVideo.'" controls loop data-src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '" style="cursor:pointer"><source src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '">Your browser does not support the video tag.</video>';
+            echo $strVideo;
         } else {
             echo '<center><img class="img-responsive cursor displayImage lazy" src="plugins/blink_camera/core/img/no-image.png" data-original="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) .  '" width="150" style="max-height:80px;"/></center>';
         }

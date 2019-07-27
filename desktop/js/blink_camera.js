@@ -32,7 +32,6 @@ function addCmdToTable(_cmd) {
         else {
             tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '" style="background:#ECF8E0">';
         }
-        //tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '" style="background:#F2F2F2">';
         tr += '<td>';
         tr += '<div style="width:100%;">';
         tr += '<a class="cmdAction btn btn-default btn-sm" data-l1key="chooseIcon"><i class="fa fa-flag"></i> Icône</a>';
@@ -45,13 +44,10 @@ function addCmdToTable(_cmd) {
         tr += '</td>';
         tr += '<td>';
         tr += '<input class="cmdAttr form-control input-sm" data-l1key="id" style="display : none;" readonly>';
-        //tr += '<span><center>' + init(_cmd.type) + '</center></span><span style="display:none;" class="type" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>';
-        //tr += '<span><center>' + init(_cmd.subType) + '</center></span><span style="display:none;" class="subType" subType="' + init(_cmd.subType) + '"></span>';
         tr += '<span><center>{{' + init(_cmd.type) + '}}</center></span>';
         tr += '<span><center style="font-size:x-small;">({{' + init(_cmd.subType) + '}})</center></span>';
         tr += '</td>';
         tr += '<td><input class="cmdAttr form-control input-sm" data-l1key="logicalId" value="0" style="width : 98%; display : inline-block;" title="{{Commande par défaut du plugin}}" readonly><br/>';
-        //tr += '<td><span><center>{{' + init(_cmd.logicalId) + '}}</center></span>';
         tr += '</td>';
         tr += '<td>';
         tr += '<span><label class="checkbox-inline"><input type="checkbox" class="cmdAttr checkbox-inline" data-l1key="isVisible" checked/>{{Afficher}}</label></span> ';
@@ -70,7 +66,7 @@ function addCmdToTable(_cmd) {
             tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
             tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fa fa-rss"></i> Tester</a>';
         }
- } else {	// is new created command
+ } else {
          if (!is_numeric(_cmd.id)) {
              tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '" style="background:#F5F6CE">';
          }
@@ -115,11 +111,9 @@ function addCmdToTable(_cmd) {
          if (is_numeric(_cmd.id)) {
              tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
              tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fa fa-rss"></i> Tester</a>';
-         }
-        /* if (_cmd.configuration.googlecast_cmd_mod===undefined) {
-             tr += '<br><center><i class="fa fa-minus-circle cmdAction cursor" style="margin-top:10px;font-size:18px;color:red" data-action="remove"></i></center></td>';
-         }*/
-     }
+        }
+
+    }
     tr += '</tr>';
     $('#table_cmd tbody').append(tr);
     var tr = $('#table_cmd tbody tr:last');
