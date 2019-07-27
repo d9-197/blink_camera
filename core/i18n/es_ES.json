@@ -2,10 +2,10 @@
     "plugins\/blink_camera\/desktop\/php\/blink_camera.php": {
         "Ajouter un équipement": "Ajouter un équipement",
         "Rechercher": "Rechercher",
-        "Mes équipements": "Mes équipements",
         "Gestion": "Gestion",
         "Ajouter": "Ajouter",
         "Configuration": "Configuration",
+        "Mes équipements": "Mes équipements",
         "Sauvegarder": "Sauvegarder",
         "Supprimer": "Supprimer",
         "Configuration avancée": "Configuration avancée",
@@ -17,19 +17,50 @@
         "Catégorie": "Catégorie",
         "Activer": "Activer",
         "Visible": "Visible",
-        " Type de vdm ": " Type de vdm ",
-        "Aleatoire": "Aleatoire",
-        "Coquin": "Coquin",
-        "Best": "Best",
+        " Réseau ": " Réseau ",
+        " Caméra ": " Caméra ",
+        " Widget Spécifique ": " Widget Spécifique ",
+        " Utiliser le widget spécifique ": " Utiliser le widget spécifique ",
         "Nom": "Nom",
-        "Type": "Type",
-        "Action": "Action"
+        "Liste de commandes": "Liste de commandes",
+        "Paramètres": "Paramètres",
+        "Options": "Options",
+        "Actions": "Actions"
+    },
+    "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
+        "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
+        "' + init(_cmd.subType) + '": "' + init(_cmd.subType) + '",
+        "Commande par défaut du plugin": "Commande par défaut du plugin",
+        "' + init(_cmd.logicalId) + '": "' + init(_cmd.logicalId) + '",
+        "Afficher": "Afficher",
+        "Historiser": "Historiser",
+        "ex : cmd=tts|value=Mon texte TTS (voir documentation pour plus d\\'info)": "ex : cmd=tts|value=Mon texte TTS (voir documentation pour plus d\\'info)",
+        "Limité à 128 caractères": "Limité à 128 caractères",
+        "Liste de valeurs au format \\'<id>|<texte>;<id>|<texte>;...\\'\\n Si la commande a pour nom \\'cmdlist_<XXX>\\', <id> => <commandes> (avec ^ pour séparateur), sinon utiliser \\'#listValue#\\' pour récuperer <id> dans la liste de commandes.": "Liste de valeurs au format \\'<id>|<texte>;<id>|<texte>;...\\'\\n Si la commande a pour nom \\'cmdlist_<XXX>\\', <id> => <commandes> (avec ^ pour séparateur), sinon utiliser \\'#listValue#\\' pour récuperer <id> dans la liste de commandes.",
+        "Inverser": "Inverser",
+        "Valeur retour d\\'état": "Valeur retour d\\'état",
+        "Durée avant retour d\\'état (min)": "Durée avant retour d\\'état (min)"
+    },
+    "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
+        "Choisir": "Choisir"
     },
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
-        "Global param 1": "Compte Blink (email)",
-        "Global param 2": "Mot de passe",
-        "Global param 3": "Global param 3",
-        "value1": "valeur 1",
-        "value2": "valeur 2"
+        "Compte Blink": "Compte Blink",
+        "Email": "Email",
+        "Mot de passe": "Mot de passe",
+        "Unité de température": "Unité de température",
+        "° C": "° C",
+        "° F": "° F",
+        "Widget": "Widget",
+        "Contenu de la vignette": "Contenu de la vignette",
+        "Vignette de la caméra": "Vignette de la caméra",
+        "Vignette de la dernière vidéo": "Vignette de la dernière vidéo",
+        "Dernière vidéo": "Dernière vidéo",
+        "Vue historique": "Vue historique",
+        "Nombre maximum de vidéos téléchargées": "Nombre maximum de vidéos téléchargées",
+        "Taille des aperçus des vidéos": "Taille des aperçus des vidéos"
+    },
+    "plugins\/blink_camera\/desktop\/php\/panel.php": {
+        "Rechercher": "Rechercher"
     }
 }

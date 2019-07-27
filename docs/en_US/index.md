@@ -3,18 +3,18 @@ Description
 
 Plugin dédié aux caméras Blink
 
-Configuration du plugin
+The plugin configuration
 ===
 
-- Compte BLink
+- Blink account
 - Panel 
 
 (à compléter)
 
-Configuration d'un équipements
-===
+Equipment Configuration
+=== 
 
-Ajout d'un équipement
+Adding a device
 ---
 
 (à compléter)
@@ -24,24 +24,24 @@ Configuration
 
 (à compléter)
 
-Commandes
+Commands
 ---
 
 
 
 
 
-Widget du dashboard
+Dashboard widget
 ===
 
 (à compléter)
 
-Vue historique
+History view
 ===
 
 (à compléter)
 
-Vue "panel"
+Panel view
 ===
 
 (à compléter)
