@@ -30,7 +30,7 @@ try {
         $file = init('file');
         $dir = init('dir');
         $file = str_replace('..', '', $file);
-        shell_exec('rm -rf ' . $dir . '/' . $file);
+        blink_camera::deleteMedia($dir.'/'.$file);
         ajax::success();
     }
 

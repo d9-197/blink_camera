@@ -140,8 +140,8 @@ $('.bt_removefile').on('click', function() {
 			}
 			card.remove();
 			$(".blink_cameraThumbnailContainer").slideToggle(1);
-			$('.blink_cameraThumbnailContainer').packery({gutter : 5});
 			$(".blink_cameraThumbnailContainer").slideToggle(1);
+            $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 		}
 	});
 });
@@ -150,6 +150,7 @@ $(".blink_cameraThumbnailContainer").slideToggle(1);
 $(".blink_cameraThumbnailContainer").eq(0).slideToggle(1);
 $('.toggleList').on('click', function() {
 	$(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").slideToggle("slow");
+    $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 });
   
 $("img.lazy").lazyload({

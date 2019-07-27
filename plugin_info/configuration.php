@@ -51,9 +51,21 @@ if (!isConnect()) {
             <label class="col-lg-3 control-label">{{Contenu de la vignette}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_dashboard_content_type">
-                    <!--option value="1">{{Vignette de la caméra}}</option-->
+                    <option value="1">{{Vignette de la caméra}}</option>
                     <option value="2">{{Vignette de la dernière vidéo}}</option>
                     <option value="3">{{Dernière vidéo}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">{{Taille de la vignette}}</label>
+            <div class="col-lg-3">
+                <select  class="configKey form-control" data-l1key="blink_size_thumbnail">
+                    <option value="0.1">10%</option>
+                    <option value="0.2">20%</option>
+                    <option value="0.3">30%</option>
+                    <option value="0.4">40%</option>
+                    <option value="0.5">50%</option>
                 </select>
             </div>
         </div>

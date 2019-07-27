@@ -133,7 +133,7 @@ foreach ($eqLogics as $eqLogic) {
     
     $datas=blink_camera::getConfigDatas();
     $erreur=false;
-    log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas, true));
+    //log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas, true));
     if ($datas['message']) {
         echo '<script>';
         echo 'var tbl_reseau = [{""}];';
