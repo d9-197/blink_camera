@@ -503,10 +503,10 @@ class blink_camera extends eqLogic
             if (!$video['deleted']) {
 				if ($download) { // Si demandé, on télécharge les vidéos disponibles
 					$path=$this->getMedia($video['media'], $this->getId(), $filename);
-					log::add('blink_camera', 'info', 'blink_camera->forceCleanup() Download file: '. $path);
+					//log::add('blink_camera', 'info', 'blink_camera->forceCleanup() Download file: '. $path);
 				}
             } else {
-				log::add('blink_camera', 'info', 'blink_camera->forceCleanup() Delete file: '. $this->getMediaDir().'/'.$file);
+				//log::add('blink_camera', 'info', 'blink_camera->forceCleanup() Delete file: '. $this->getMediaDir().'/'.$file);
                 blink_camera::deleteMedia($this->getMediaDir().'/'.$filename);
             }
 		}
@@ -685,10 +685,10 @@ class blink_camera extends eqLogic
                 $commande.='-rf ';
             }
             $commande.="'".$filepath."'";
-            log::add('blink_camera','debug','delete: '.$commande);
+            //log::add('blink_camera','debug','delete: '.$commande);
             shell_exec($commande);
         } else {
-            log::add('blink_camera','error','Plugin blink camera try to delete file not in "medias" folder');
+            log::add('blink_camera','error','Plugin blink camera try to delete file not in "medias" folder : '.$filepath);
         }
     }
     
