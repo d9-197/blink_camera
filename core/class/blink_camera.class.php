@@ -679,7 +679,7 @@ class blink_camera extends eqLogic
     public static function deleteMedia($filepath,$folder=false) {
         $filepath=realpath($filepath);
         // On controle que l'on soit bien dans le dossier de stockage des medias du plugin !
-        if (strpos($filepath, '/plugins/blink_camera/') !== false && strpos($filepath, '/medias/') !== false) {
+        if ($filepath!=="" && strpos($filepath, '/plugins/blink_camera/') !== false && strpos($filepath, '/medias/') !== false) {
            $commande='rm ';
             if ($folder) {
                 $commande.='-rf ';
@@ -769,7 +769,9 @@ class blink_camera extends eqLogic
             $info->setType('info');
             $info->setTemplate('dashboard', 'default');
             $info->setSubType('binary');
+            $info->setConfiguration('generic_type',"LOCK_STATE");
             $info->setOrder(1);
+            $info->setTemplate(array('dashboard' => 'lock', 'mobile' => 'lock'));
             $info->save();
         }
         
@@ -798,8 +800,6 @@ class blink_camera extends eqLogic
 			$info->setDisplay("showNameOndashboard", 1);
 			$info->setConfiguration('generic_type',"TEMPERATURE");
 			$info->setConfiguration('historizeRound',"1");
-            $info->setConfiguration('generic_type',"TEMPERATURE");
-            $info->setConfiguration('historizeRound',"1");
             $info->setUnite('°'.config::byKey('blink_tempUnit', 'blink_camera'));
             $info->setIsVisible(true);
             $info->setLogicalId('temperature');
@@ -965,10 +965,9 @@ class blink_camera extends eqLogic
     public function postUpdate()
     {
 		$cmd = $this->getCmd(null, 'refresh'); 
-		if (is_object($cmd)) { 
+		if (($this->getIsEnable() == 1) && is_object($cmd)) { 
 			 $cmd->execCmd();
 		}
-        //self::cronHourly($this->getId());
     }
 
     public function preRemove()
@@ -1127,6 +1126,7 @@ class blink_camera extends eqLogic
 class blink_cameraCmd extends cmd
 {
     /*     * *************************Attributs****************************** */
+    public static $_widgetPossibility = array('custom' => true, 'custom::layout' => true);
 
 
     /*     * ***********************Methode static*************************** */
@@ -1134,6 +1134,7 @@ class blink_cameraCmd extends cmd
 
     /*     * *********************Methode d'instance************************* */
     public function toHtml($_version = 'dashboard', $_options = '', $_cmdColor = null) {
+        //log::add('blink_camera','debug','cmd:'.print_r($this->getTemplate(),true));
         if ($this->getLogicalId()==='thumbnail') {
             $bl_cam=$this->getEqLogic();
             $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
@@ -1223,13 +1224,15 @@ class blink_cameraCmd extends cmd
                 // Nettoyage des fichiers du dossier medias
 				//$eqlogic->forceCleanup();
 				//$eqlogic->getLastEvent();
-                //rafraichissement de la datetime du dernier event
-                $eqlogic->getLastEventDate();
+                if ($eqlogic->isConfigured()) {
+                    //rafraichissement de la datetime du dernier event
+                    $eqlogic->getLastEventDate();
 
-                // Refresh du statut du reseau
-				$eqlogic->getNetworkArmStatus();
-				
-                $eqlogic->refreshCameraInfos();
+                    // Refresh du statut du reseau
+                    $eqlogic->getNetworkArmStatus();
+                
+                    $eqlogic->refreshCameraInfos();
+                }
 				break;
 			case 'force_download':
                 // Nettoyage des fichiers du dossier medias
