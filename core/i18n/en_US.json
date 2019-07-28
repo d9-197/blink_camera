@@ -58,9 +58,13 @@
         "Dernière vidéo": "Dernière vidéo",
         "Vue historique": "Vue historique",
         "Nombre maximum de vidéos téléchargées": "Nombre maximum de vidéos téléchargées",
-        "Taille des aperçus des vidéos": "Taille des aperçus des vidéos"
+        "Taille des aperçus des vidéos": "Taille des aperçus des vidéos",
+        "Taille de la vignette": "Taille de la vignette"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Rechercher"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
+        "Tout télécharger": "Tout télécharger"
     }
 }
