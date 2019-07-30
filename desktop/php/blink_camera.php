@@ -128,10 +128,8 @@ foreach ($eqLogics as $eqLogic) {
 	</div>
 
 
-<?php
-
-    
-    $datas=blink_camera::getConfigDatas();
+<?php 
+    $datas=blink_camera::getAccountConfigDatas();
     $erreur=false;
     //log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas, true));
     if ($datas['message']) {
