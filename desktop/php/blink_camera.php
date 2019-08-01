@@ -142,7 +142,7 @@ foreach ($eqLogics as $eqLogic) {
     }
     echo '<script>';
     foreach ($datas as $key => $value) {
-        if ($key.trim()=="networks") {
+        if (trim($key)=="networks") {
             echo 'var tbl_reseau = [';
             foreach ($value as $network) {
                 echo '{"network_id":"' .  $network['network_id']. '","network_name":"' . $network['network_name'] . '"},';
@@ -151,7 +151,7 @@ foreach ($eqLogics as $eqLogic) {
         }
     }
     foreach ($datas as $key => $value) {
-        if ($key.trim()=="networks") {
+        if (trim($key)=="networks") {
             echo 'var tbl_camera = [';
             foreach ($value as $network) {
                 foreach ($network as $key2 => $value2) {

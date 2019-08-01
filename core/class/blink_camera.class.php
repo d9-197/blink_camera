@@ -30,8 +30,8 @@ class blink_camera extends eqLogic
     const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;//2019-07-15T18:40:44+00:00
     const FORMAT_DATETIME_OUT="Y-m-d H:i:s" ;//2019-07-15T18:40:44+00:00
     const ERROR_IMG="/plugins/blink_camera/img/error.png";
-    public static $_widgetPossibility = array('custom' => true, 'custom::layout' => true);
-	/*public static $_widgetPossibility = array('custom' => array(
+    //public static $_widgetPossibility = array('custom' => true, 'custom::layout' => true);
+	public static $_widgetPossibility = array('custom' => array(
         'visibility' => true,
         'displayName' => true,
         'displayObjectName' => true,
@@ -41,7 +41,7 @@ class blink_camera extends eqLogic
         'border' => true,
         'border-radius' => true,
         'layout' => true
-    ));*/
+    ));
 
    /* public static function cron5($_eqLogic_id = null)
     {
@@ -315,16 +315,16 @@ class blink_camera extends eqLogic
                             }
                         }
                         catch (RequestException $e) {
-                            log::add('blink_camera', 'warn', 'An error occured during Blink Cloud call: '.$urlMedia. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                            log::add('blink_camera', 'error', 'An error occured during Blink Cloud call: '.$urlMedia. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
                             blink_camera::deleteMedia($folderBase.$filename);
                             return blink_camera::ERROR_IMG;
                         }
                     }
                 } else {
-                    log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : error.png");
+                    //log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : error.png");
                     return blink_camera::ERROR_IMG;
                 }
-                log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : $filename");
+                //log::add('blink_camera', 'debug', "blink_camera->getMedia() url : $urlMedia - path : $filename");
                 return '/plugins/blink_camera/medias/'.$equipement_id.'/'.$filename;
             }
         }
@@ -405,12 +405,9 @@ class blink_camera extends eqLogic
         $datas=$this->getHomescreenData();
         $camera_id = $this->getConfiguration("camera_id");
         foreach ($datas['cameras'] as $device) {
-			log::add('blink_camera','debug','devices='.$camera_id.' vs '.print_r( $device['id'],true));
-                
             if ("".$device['id']==="".$camera_id) {
 				//log::add('blink_camera','debug','devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
                 $path=$this->getMedia($device['thumbnail'].'.jpg', $this->getId(),"thumbnail","jpg");
-                log::add('blink_camera','debug','devices='.$this->getConfiguration('camera_id').' Path:'.$path);
             }
         }
 		return $path;
@@ -780,18 +777,20 @@ class blink_camera extends eqLogic
     }
 
     public static function deleteMedia($filepath,$folder=false) {
-        $filepath=realpath($filepath);
-        // On controle que l'on soit bien dans le dossier de stockage des medias du plugin !
-        if ($filepath!=="" && strpos($filepath, '/plugins/blink_camera/') !== false && strpos($filepath, '/medias/') !== false) {
-           $commande='rm ';
-            if ($folder) {
-                $commande.='-rf ';
+        $filepath=trim(realpath($filepath));
+        if (!empty($filepath)) {
+            // On controle que l'on soit bien dans le dossier de stockage des medias du plugin !
+            if (strpos($filepath, '/plugins/blink_camera/') !== false && strpos($filepath, '/medias/') !== false) {
+            $commande='rm ';
+                if ($folder) {
+                    $commande.='-rf ';
+                }
+                $commande.="'".$filepath."'";
+                //log::add('blink_camera','debug','delete: '.$commande);
+                shell_exec($commande);
+            } else {
+                log::add('blink_camera','error','Plugin blink camera try to delete file not in "medias" folder : '.$filepath);
             }
-            $commande.="'".$filepath."'";
-            //log::add('blink_camera','debug','delete: '.$commande);
-            shell_exec($commande);
-        } else {
-            log::add('blink_camera','error','Plugin blink camera try to delete file not in "medias" folder : '.$filepath);
         }
     }
     
@@ -1148,7 +1147,8 @@ class blink_camera extends eqLogic
 		$cmd = $this->getCmd(null, 'refresh'); 
 		if (($this->getIsEnable() == 1) && is_object($cmd)) { 
 			 $cmd->execCmd();
-		}
+        }
+        $this::refreshCacheWidget();
     }
 
     public function preRemove()
@@ -1338,7 +1338,7 @@ class blink_cameraCmd extends cmd
                             $dir= dirname(__FILE__).'/../../../../';
                             $media_type='media';
                             $urlLine ='<video class="displayVideo vignette" height="'.$hauteurVignette.'"  data-eqLogic_id="'.$bl_cam->getId().'" controls loop data-src="core/php/downloadFile.php?pathfile=#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="core/php/downloadFile.php?pathfile=#urlFile#">Your browser does not support the video tag.</video>';
-                            $urlFile=urlencode($dir.blink_camera::getMedia($temp[$media_type], $bl_cam->getId(), blink_camera::getDateJeedomTimezone($temp['created_at'])));
+                            $urlFile=urlencode($dir.blink_camera::getMedia($temp[$media_type], $bl_cam->getId(), $temp['id'].'-'.blink_camera::getDateJeedomTimezone($temp['created_at'])));
                         } else {
                             //On affiche la vignette de la derniere video
                             $media_type='thumbnail';
