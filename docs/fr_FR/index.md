@@ -77,16 +77,23 @@ Des icônes sont associées aux actions, vous pouvez les modifier de manière cl
 
 Vue historique
 ===
-
-(à compléter)
+La vue historique est accessible depuis le widget de la caméra. (commande Historique)
+Cette vue vous donne accès aux dernières vidéos de la caméra.
+Le nombre de vidéos affichées ainsi que la taille des vignettes est configurable sur le plugin : voir [Configuration du plugin](#-Configuration-du-plugin)
 
 Vue "panel"
 ===
+Un panel est activable de la configuration du plugin. voir [Configuration du plugin](#-Configuration-du-plugin)
 
-(à compléter)
+Si celui ci est activé, il est accessible dans le menu "Accueil"/"Blink Camera".
+
+Ce panel affiche l'ensemble des caméras configurées.
 
 
 Widget spécifique du dashboard
 ===
+**Attention : Cette fonctionnalité sera désactivée dans les prochaines version du plugin**
 
-(à compléter)
+Un widget avec un affichage spécifique peut être utilisé à la place de l'affichage classique Jeedom.
+
+
