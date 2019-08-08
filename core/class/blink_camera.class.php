@@ -107,13 +107,14 @@ class blink_camera extends eqLogic
                 $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
                 try {
                     $r = $client->request('GET', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (ClientException $e) {
-                    log::add('blink_camera','debug','An error occured during Blink Cloud call: '.$url.' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','debug','An error occured during Blink Cloud call: '.$url.' - ERROR:'.print_r($e->getMessage(), true));
                     $need_new_token=true;
                 }
             } else {
@@ -134,6 +135,7 @@ class blink_camera extends eqLogic
         $client = new GuzzleHttp\Client(['base_uri' => 'https://rest.prod.immedia-semi.com/']);
         try {
             $r = $client->request('POST', 'login', [
+            //'http_errors' => false,
             'headers' => [
                 'Host'=> 'prod.immedia-semi.com',
                 'Content-Type'=> 'application/json'
@@ -141,7 +143,7 @@ class blink_camera extends eqLogic
             'json' => json_decode($data)
             ]);
         } catch (ClientException $e) {
-            log::add('blink_camera','error','An error occured during Blink Cloud call: /login - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+            log::add('blink_camera','error','An error occured during Blink Cloud call: /login - ERROR:'.print_r($e->getMessage(), true));
             return false;
         }
         $jsonrep= json_decode($r->getBody(), true);
@@ -206,13 +208,14 @@ class blink_camera extends eqLogic
                 $url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page=0';
                 try {
                     $r = $client->request('GET', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (RequestException $e) {
-                    log::add('blink_camera','debug','An error occured during Blink Cloud call: '.$url.' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','debug','An error occured during Blink Cloud call: '.$url.' - ERROR:'.print_r($e->getMessage(), true));
                     $jsonstr='{"message":"Unable to get configuration information from Blink Cloud"}';
                     return json_decode($jsonstr, true);
                 }
@@ -304,6 +307,7 @@ class blink_camera extends eqLogic
                                 'GET',
                                 $urlMedia,
                                 ['sink' => $file_path,
+                                //'http_errors' => false,
                                 'headers' => [
                                     'Host'=> 'prod.immedia-semi.com',
                                     'TOKEN_AUTH'=> $_tokenBlink
@@ -315,7 +319,7 @@ class blink_camera extends eqLogic
                             }
                         }
                         catch (RequestException $e) {
-                            log::add('blink_camera', 'error', 'An error occured during Blink Cloud call: '.$urlMedia. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                            log::add('blink_camera', 'error', 'An error occured during Blink Cloud call: '.$urlMedia. ' - ERROR:'.print_r($e->getMessage(), true));
                             blink_camera::deleteMedia($folderBase.$filename);
                             return blink_camera::ERROR_IMG;
                         }
@@ -357,6 +361,7 @@ class blink_camera extends eqLogic
                 //$url='/network/'.$network_id.'/homescreen';
                 try {
                     $r = $client->request('GET', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
@@ -365,7 +370,7 @@ class blink_camera extends eqLogic
                     $jsonrep= json_decode($r->getBody(), true);
                 }
                 catch (RequestException $e) {
-                    $errorTxt='An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true);
+                    $errorTxt='An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true);
                     log::add('blink_camera', 'warn', $errorTxt);
                     $jsonrep=json_decode('{"message":"'.$errorTxt.'"}',true);
                 }
@@ -386,13 +391,14 @@ class blink_camera extends eqLogic
 				$url='/network/'.$this->getConfiguration('network_id').'/camera/'.$this->getConfiguration('camera_id');
 				try {
                     $r = $client->request('GET', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (RequestException $e) {
-                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return $jsonrep;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -428,13 +434,14 @@ class blink_camera extends eqLogic
                 $url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page='.$page;
                 try {
                     $r = $client->request('GET', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (RequestException $e) {
-                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return $jsonstr;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -458,13 +465,14 @@ class blink_camera extends eqLogic
                 $url='/network/'.$this->getConfiguration('network_id').'/camera/'.$this->getConfiguration('camera_id').'/'.$type;
                 try {
                     $r = $client->request('POST', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (RequestException $e) {
-                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -638,13 +646,14 @@ class blink_camera extends eqLogic
                 $url="/network/".$this->getConfiguration('network_id')."/arm";
                 try {
                     $r = $client->request('POST', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (RequestException $e) {
-                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -666,13 +675,14 @@ class blink_camera extends eqLogic
                 $url="/network/".$this->getConfiguration('network_id')."/disarm";
                 try {
                     $r = $client->request('POST', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (RequestException $e) {
-                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -695,6 +705,7 @@ class blink_camera extends eqLogic
                 $url='/network/'.$this->getConfiguration('network_id');
                 try {
                     $r = $client->request('GET', $url, [
+                    //'http_errors' => false,
                     'headers' => [
                         'Host'=> 'prod.immedia-semi.com',
                         'TOKEN_AUTH'=> $_tokenBlink
@@ -702,7 +713,7 @@ class blink_camera extends eqLogic
                 ]); 
                 }
                 catch (RequestException $e) {
-                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -729,13 +740,14 @@ class blink_camera extends eqLogic
                 $url="/network/".$this->getConfiguration('network_id')."/camera/".$this->getConfiguration('camera_id')."/enable";
                 try {
                     $r = $client->request('POST', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (RequestException $e) {
-                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -758,13 +770,14 @@ class blink_camera extends eqLogic
                 $url="/network/".$this->getConfiguration('network_id')."/camera/".$this->getConfiguration('camera_id')."/disable";
                 try {
                     $r = $client->request('POST', $url, [
+                        //'http_errors' => false,
                         'headers' => [
                             'Host'=> 'prod.immedia-semi.com',
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
                 } catch (RequestException $e) {
-                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                    log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
                 $jsonrep= json_decode($r->getBody(), true);
@@ -809,6 +822,7 @@ class blink_camera extends eqLogic
                     $url='/api/v1/accounts/'.$_accountBlink.'/media/delete';
                     try {
                         $r = $client->request('POST', $url, [
+                            //'http_errors' => false,
                             'headers' => [
                                 'Host'=> 'prod.immedia-semi.com',
                                 'TOKEN_AUTH'=> $_tokenBlink
@@ -817,7 +831,7 @@ class blink_camera extends eqLogic
                         ]);
                     }
                     catch (RequestException $e) {
-                        log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getResponse()->getStatusCode(), true));
+                        log::add('blink_camera','error','An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                         return false;
                     }
                     $jsonrep= json_decode($r->getBody(), true);
