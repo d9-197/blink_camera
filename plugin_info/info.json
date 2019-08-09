@@ -1,11 +1,11 @@
 {
 	"id" : "blink_camera",
 	"name" : "Blink Camera",
-	"version" : "2.0",
+	"version" : "1.1",
 	"description" : "Plugin for Blink Camera",
 	"licence" : "AGPL",
 	"author" : "Alain Farina",
-	"require" : "4.0",
+	"require" : "3.3",
 	"category" : "security",
 	"display" : "",
 	"mobile":"",
