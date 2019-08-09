@@ -558,15 +558,18 @@ class blink_camera extends eqLogic
         if ($this->isConfigured()) {
 			$event = $this->getLastEvent(false);
 			$infoCmd=$this->getCmd(null, 'last_event');
-            $previous=$infoCmd->execCmd();
-            $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $event['created_at']);
-            $dtim=date_add($dtim, new DateInterval("PT".getTZoffsetMin()."M"));
-			$new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
-			if (isset($new) && $new!="" && $new>$previous) {
-				log::add('blink_camera','debug','New event detected:'.$new. ' (previous:'.$previous.')');
-                $this->checkAndUpdateCmd('last_event', $new);
-                $this->checkAndUpdateCmd('last_event_thumbnail',blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at'])));
-                $this->checkAndUpdateCmd('last_event_video',blink_camera::getMedia($event['media'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at'])));
+            if (is_object($infoCmd)) {
+                $previous=$infoCmd->execCmd();
+                $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $event['created_at']);
+                $dtim=date_add($dtim, new DateInterval("PT".getTZoffsetMin()."M"));
+                $new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
+             
+                if (isset($new) && $new!="" && $new>$previous) {
+                    log::add('blink_camera','debug','New event detected:'.$new. ' (previous:'.$previous.')');
+                    $this->checkAndUpdateCmd('last_event', $new);
+                    $this->checkAndUpdateCmd('thumb_path',blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at'])));
+                    $this->checkAndUpdateCmd('clip_path',blink_camera::getMedia($event['media'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at'])));
+                }
             }
         }
 	}
@@ -574,7 +577,7 @@ class blink_camera extends eqLogic
 		if ($this->isConfigured()) {
             $datas=$this->getCameraInfo();
             if (!$datas['message']) {
-                /* MAJ Température */
+                // MAJ Température 
                 $tempe=(float) $datas['camera_status']['temperature'];
                 $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
                 if ($blink_tempUnit==="C") {
@@ -582,11 +585,11 @@ class blink_camera extends eqLogic
                 }
                 $this->checkAndUpdateCmd('temperature', $tempe);
                 $this->setConfiguration('camera_temperature',$tempe);
-                /* MAJ Power */
+                // MAJ Power 
                 $power=(float) $datas['camera_status']['battery_voltage'];
                 $this->checkAndUpdateCmd('power', ($power/100));
                 $this->setConfiguration('camera_voltage',($power/100));
-                /* MAJ WIFI */
+                // MAJ WIFI
                 $wifi=(float) $datas['camera_status']['wifi_strength'];
                 $this->checkAndUpdateCmd('wifi_strength', $wifi);
                 $this->setConfiguration('camera_wifi',$wifi);
@@ -883,14 +886,13 @@ class blink_camera extends eqLogic
             $info->setLogicalId('arm_status');
             $info->setEqLogic_id($this->getId());
             $info->setType('info');
-            $info->setTemplate('dashboard', 'default');
+            $info->setTemplate('dashboard', 'lock');
+            $info->setTemplate('mobile', 'lock');
             $info->setSubType('binary');
             $info->setConfiguration('generic_type',"LOCK_STATE");
             $info->setOrder(1);
-            $info->setTemplate(array('dashboard' => 'lock', 'mobile' => 'lock'));
             $info->save();
         }
-        
         $info = $this->getCmd(null, 'arm_status_camera');
         if (!is_object($info)) {
             log::add('blink_camera','info', 'Create new information : arm_status_camera');
@@ -901,11 +903,11 @@ class blink_camera extends eqLogic
             $info->setLogicalId('arm_status_camera');
             $info->setEqLogic_id($this->getId());
             $info->setType('info');
-            $info->setTemplate('dashboard', 'default');
+            $info->setTemplate('dashboard', 'lock');
+            $info->setTemplate('mobile', 'lock');
             $info->setSubType('binary');
             $info->setConfiguration('generic_type',"LOCK_STATE");
             $info->setOrder(2);
-            $info->setTemplate(array('dashboard' => 'lock', 'mobile' => 'lock'));
             $info->save();
         }
 
@@ -998,30 +1000,30 @@ class blink_camera extends eqLogic
             $info->save();
         }
 
-        $info = $this->getCmd(null, 'last_event_video');
+        $info = $this->getCmd(null, 'clip_path');
         if (!is_object($info)) {
-            log::add('blink_camera','info', 'Create new information : last_event_video');
+            log::add('blink_camera','info', 'Create new information : clip_path');
             $info = new blink_cameraCmd();
-            $info->setName(__('Chemin vidéo du dernier événement', __FILE__));
+            $info->setName(__('Chemin vidéo', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
-            $info->setIsVisible(false);
+            $info->setIsVisible(true);
             $info->setTemplate('dashboard', 'default');
-            $info->setLogicalId('last_event_video');
+            $info->setLogicalId('clip_path');
             $info->setEqLogic_id($this->getId());
             $info->setType('info');
             $info->setSubType('string');
             $info->setOrder(8);
             $info->save();
         }
-        $info = $this->getCmd(null, 'last_event_thumbnail');
+        $info = $this->getCmd(null, 'thumb_path');
         if (!is_object($info)) {
-            log::add('blink_camera','info', 'Create new information : last_event_thumbnail');
+            log::add('blink_camera','info', 'Create new information : thumb_path');
             $info = new blink_cameraCmd();
-            $info->setName(__('Chemin vignette du dernier événement', __FILE__));
+            $info->setName(__('Chemin vignette', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
-            $info->setIsVisible(false);
+            $info->setIsVisible(true);
             $info->setTemplate('dashboard', 'default');
-            $info->setLogicalId('last_event_thumbnail');
+            $info->setLogicalId('thumb_path');
             $info->setEqLogic_id($this->getId());
             $info->setType('info');
             $info->setSubType('string');
@@ -1037,7 +1039,7 @@ class blink_camera extends eqLogic
             $refresh->setLogicalId('refresh');
             $refresh->setType('action');
             $refresh->setSubType('other');
-            $refresh->setOrder(100);
+            //$refresh->setOrder(100);
             $refresh->save();
         }
         
@@ -1050,7 +1052,7 @@ class blink_camera extends eqLogic
             $arm_network->setLogicalId('arm_network');
             $arm_network->setType('action');
             $arm_network->setSubType('other');
-            $arm_network->setOrder(101);
+            //$arm_network->setOrder(101);
             $arm_network->setDisplay('icon','<i class="jeedom jeedom-lock-ferme"></i>'); 
             $arm_network->useIconAndName();
             $arm_network->save();
@@ -1065,7 +1067,7 @@ class blink_camera extends eqLogic
             $arm_network->setLogicalId('disarm_network');
             $arm_network->setType('action');
             $arm_network->setSubType('other');
-            $arm_network->setOrder(102);
+            //$arm_network->setOrder(102);
             $arm_network->setDisplay('icon','<i class="jeedom jeedom-lock-ouvert"></i>'); 
             $arm_network->useIconAndName();
             $arm_network->save();
@@ -1080,7 +1082,7 @@ class blink_camera extends eqLogic
             $arm_camera->setLogicalId('arm_camera');
             $arm_camera->setType('action');
             $arm_camera->setSubType('other');
-            $arm_camera->setOrder(103);
+            //$arm_camera->setOrder(103);
             $arm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ferme"></i>'); 
             $arm_camera->useIconAndName();
             $arm_camera->save();
@@ -1095,7 +1097,7 @@ class blink_camera extends eqLogic
             $arm_camera->setLogicalId('disarm_camera');
             $arm_camera->setType('action');
             $arm_camera->setSubType('other');
-            $arm_camera->setOrder(104);
+            //$arm_camera->setOrder(104);
             $arm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ouvert"></i>'); 
             $arm_camera->useIconAndName();
             $arm_camera->save();
@@ -1106,12 +1108,12 @@ class blink_camera extends eqLogic
             log::add('blink_camera','info', 'Create new action : history');
             $history = new blink_cameraCmd();
             $history->setName(__('Historique', __FILE__));
-            $history->setDisplay('icon','<i class="fa fa-folder-open"></i>'); 
+            $history->setDisplay('icon','<i class="fa fa-clock"></i>'); 
             $history->setEqLogic_id($this->getId());
             $history->setLogicalId('history');
             $history->setType('action');
             $history->setSubType('other');
-            $history->setOrder(105);
+            //$history->setOrder(105);
             $history->useIconAndName();
             $history->save();
         }
@@ -1124,9 +1126,9 @@ class blink_camera extends eqLogic
             $newClip->setLogicalId('new_clip');
             $newClip->setType('action');
             $newClip->setSubType('other');
-            $newClip->setDisplay('icon','<i class="fa fa-video-camera"></i>'); 
+            $newClip->setDisplay('icon','<i class="fa fa-video"></i>'); 
             $newClip->useIconAndName();
-            $newClip->setOrder(106);
+            //$newClip->setOrder(106);
             $newClip->save();
         }
 
@@ -1139,9 +1141,9 @@ class blink_camera extends eqLogic
             $force_download->setLogicalId('force_download');
             $force_download->setType('action');
             $force_download->setSubType('other');
-            $force_download->setDisplay('icon','<i class="nature nature-planet5"></i>'); 
+            $force_download->setDisplay('icon','<i class="fa fa-download"></i>'); 
             $force_download->useIconAndName();
-            $force_download->setOrder(107);
+            //$force_download->setOrder(107);
             $force_download->save();
         }
 
@@ -1162,7 +1164,7 @@ class blink_camera extends eqLogic
 		if (($this->getIsEnable() == 1) && is_object($cmd)) { 
 			 $cmd->execCmd();
         }
-        $this::refreshCacheWidget();
+        //$this::refreshCacheWidget();
     }
 
     public function preRemove()
@@ -1371,7 +1373,10 @@ class blink_cameraCmd extends cmd
             $result.="</script>";
             return template_replace($replace, $result);
         } else if ($this->getLogicalId()==='history') {
+            log::add('blink_camera','debug','toHtml history : '.print_r(parent::toHtml($_version,$_options,$_cmdColor),true));
+            $result=parent::toHtml($_version,$_options,$_cmdColor);
             $bl_cam=$this->getEqLogic();
+            /*
             if ($_cmdColor === null && $_version != 'scenario') {
                 $eqLogic = $this->getEqLogic();
                 $vcolor = ($_version == 'mobile') ? 'mcmdColor' : 'cmdColor';
@@ -1385,10 +1390,13 @@ class blink_cameraCmd extends cmd
             if ($this->getDisplay('showIconAndName' . $_version, 0) == 1) {
                 $name_display = $this->getDisplay('icon') . ' ' . $this->getName();
             }
-            $result='<span class="cmd reportModeHidden cmd-widget camera_history" style="display: inline !important;margin-right: 2px;" data-type="action" data-subtype="other" data-cmd_id="'.$this->getId().'" data-cmd_uid="'.'cmd' . $this->getId() . eqLogic::UIDDELIMITER . mt_rand() . eqLogic::UIDDELIMITER.'" data-version="'.$_version.'" data-eqLogic_id="'.$bl_cam->getId().'">';
+            $result='<span class="cmd reportModeHidden cmd-widget camera_history" style="display: inline;margin-right: 2px;" data-type="action" data-subtype="other" data-cmd_id="'.$this->getId().'" data-cmd_uid="'.'cmd' . $this->getId() . eqLogic::UIDDELIMITER . mt_rand() . eqLogic::UIDDELIMITER.'" data-version="'.$_version.'" data-eqLogic_id="'.$bl_cam->getId().'">';
+            $result.='<div class="content-sm">';
             $result.='<a class="btn btn-sm btn-default action cmdName tooltips" title="'.$this->getName().'" style="background-color:'.$_cmdColor.' !important;border-color : transparent !important;margin-top: 2px;">'.$name_display.'</a>';
+            $result.='</div>';
             $result.='</span>';
-            $result.='<script>$(\'.camera_history[data-eqLogic_id="'.$bl_cam->getId().'"]\').off().on(\'click\', function () {';
+            */
+            $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']:last .action\').off(\'click\').on(\'click\', function () {';
             $result.='$(\'#md_modal\').dialog({title: "Historique '.$bl_cam->getName().'"});';
             $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'\').dialog(\'open\');});';
             $result.="</script>";

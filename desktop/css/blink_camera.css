@@ -19,3 +19,10 @@
 .reveal-loaded .reveal-4 {
     transition-delay: .3s;
 }
+
+.spacer-left-5 {
+    margin-left: 5px !important;
+}
+.spacer-left-10 {
+    margin-left: 10px !important;
+}

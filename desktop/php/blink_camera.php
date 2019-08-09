@@ -1,23 +1,3 @@
-<script>
-/*const handleIntersect = function (entries, observer) {
-  entries.forEach(function (entry) {
-    if (entry.intersectionRatio > threshold) {
-      entry.target.classList.remove('reveal')
-      observer.unobserve(entry.target)
-    }
-  })
-}
-
-document.documentElement.classList.add('reveal-loaded')
-
-window.addEventListener("DOMContentLoaded", function () {
-  const observer = new IntersectionObserver(handleIntersect)
-  const targets = document.querySelectorAll('.reveal')
-  targets.forEach(function (target) {
-    observer.observe(target)
-  })
-})*/
-</script>
 <?php
 if (!isConnect('admin')) {
     throw new Exception('{{401 - Accès non autorisé}}');
@@ -100,7 +80,7 @@ foreach ($eqLogics as $eqLogic) {
                     <select id="sel_object" class="eqLogicAttr form-control" data-l1key="object_id">
                         <option value="">{{Aucun}}</option>
                         <?php
-                        foreach (object::all() as $object) {
+                        foreach (jeeObject::all() as $object) {
                             echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
                         }
                         ?>
@@ -182,14 +162,14 @@ foreach ($eqLogics as $eqLogic) {
             <select id="select_camera" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="camera_id"></select>
         </div>
     </div>
-    <div class="form-group">
+    <!--div class="form-group">
         <label class="col-sm-3 control-label" >{{ Widget Spécifique }}</label>
         <div id="liste" class="col-sm-3">         
         <label class="checkbox-inline">
         <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="blink_dashboard_custom_widget" />{{ Utiliser le widget spécifique }}
         </label>
         </div>
-    </div>
+    </div-->
     <?php
     } ?>
 </fieldset>
@@ -220,4 +200,4 @@ foreach ($eqLogics as $eqLogic) {
 <?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
 <?php include_file('core', 'plugin.template', 'js');?>
 <?php include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');?>
-<?php //include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
+<?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
