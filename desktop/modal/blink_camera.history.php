@@ -1,3 +1,40 @@
+<script>
+/*
+ thresholdReveal = .3;
+
+     optionsReveal = {
+    root: null,
+    rootMargin: '0px',
+    thresholdReveal
+    }
+
+
+
+     handleIntersect = function (entries, observer) {
+    entries.forEach(function (entry) {
+        alert('observer');
+        if (entry.intersectionRatio > thresholdReveal) {
+        entry.target.classList.remove('reveal')
+        observer.unobserve(entry.target)
+        }
+    })
+    }
+
+
+
+document.documentElement.classList.add('reveal-loaded')
+
+document.querySelector('#md_modal').addEventListener('DOMContentLoaded', (event)=> {
+  const observer = new IntersectionObserver(handleIntersect, optionsReveal)
+  const targets = document.querySelectorAll('.reveal')
+  targets.forEach(function (target) {
+    observer.observe(target);
+  })
+})
+*/
+</script>
+
+<?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
 <?php
 if (!isConnect()) {
     throw new Exception('{{401 - Accès non autorisé}}');
@@ -23,7 +60,6 @@ echo '</div>';
    
 ?>
 <?php
-$i = 0;
 $videoFiltered=array();
 $nbMax= (int) config::byKey('nb_max_video', 'blink_camera');
 if ($nbMax <= 0) {
@@ -62,12 +98,11 @@ foreach ($videoFiltered as $date => $videoByDate) {
         break;
     };
     $cptDate++;
-    echo '<div class="div_dayContainer reveal">';
+    echo '<div class="div_dayContainer">';
     echo '<legend>';
-    echo '<span class="blink_cameraHistoryDate">'.$date.'</span>';
     echo ' <a class="btn btn-xs btn-default toggleList"><i class="fa fa-chevron-down"></i></a> ';
-    //echo '<a class="btn btn-xs btn-danger bt_removefile" data-day="1" data-dirname="'.$dir.'" data-filename="*" data-filedate="'.$date.'"><i class="fas fa-trash"></i></a>';
-    echo '<a class="btn btn-xs btn-success" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*'.$date.'*').'" ><i class="fas fa-download"></i></a>';
+    echo '<span class="blink_cameraHistoryDate spacer-left-5">'.$date.'</span>';
+    echo '<a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*'.$date.'*').'" ><i class="fas fa-download"></i></a>';
     echo '</legend>';
     echo '<div class="blink_cameraThumbnailContainer" >';
     foreach ($videoByDate as $video) {
@@ -85,14 +120,12 @@ foreach ($videoFiltered as $date => $videoByDate) {
         $nom = $video['created_at'];
         $blink_cameraName = str_replace(' ', '-', $blink_camera->getName());
         echo '<div class="panel panel-primary blink_cardVideo reveal">';
-        echo '<div class="panel-heading blink_cameraHistoryDate">'.$time.'</div>';
+        echo '<div class="panel-heading blink_cameraHistoryDate">'.$time;
+        echo '<a target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($path) . '" class="btn btn-success btn-xs pull-right" style="color : white"><i class="fas fa-download"></i></a>';
+        echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
+        echo '</div>';
         echo '<div  class="blink_cameraThumbnailContainer2">';
-        $fontType = 'fas-camera';
-        if (strpos($file, '.mp4')) {
-            $fontType = 'fas-video-camera';
-            $i++;
-        }
-        echo '<div class="cameraDisplayCard" style="padding:auto !important ;">';
+        echo '<div style="padding:auto !important ;">';
         echo '<center style="margin-top:5px;">';
         if (strpos($file, '.mp4')) {
             $strVideo= '<video class="displayVideo"';
@@ -105,9 +138,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
             echo '<center><img class="img-responsive cursor displayImage lazy" src="plugins/blink_camera/core/img/no-image.png" data-original="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) .  '" width="150" style="max-height:80px;"/></center>';
         }
         echo '</center>';
-        echo '<center style="margin-top:5px;"><a target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($path) . '" class="btn btn-success btn-xs" style="color : white"><i class="fas fa-download"></i></a>';
-        echo ' <a class="btn btn-danger bt_removefile btn-xs" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a></center>';
-        echo '</div>';
+                echo '</div>';
         echo '</div>';
         echo '</div>';
     }
@@ -152,8 +183,8 @@ $('.bt_removefile').on('click', function() {
 	});
 });
 
-$(".blink_cameraThumbnailContainer").slideToggle(1);
-$(".blink_cameraThumbnailContainer").eq(0).slideToggle(1);
+//$(".blink_cameraThumbnailContainer").slideToggle(1);
+//$(".blink_cameraThumbnailContainer").eq(0).slideToggle(1);
 $('.toggleList').on('click', function() {
 	$(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").slideToggle("slow");
     $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
