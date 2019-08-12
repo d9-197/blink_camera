@@ -69,7 +69,7 @@ Les commandes sont automatiquement créées lors de la création de l'équipemen
 Des icônes sont associées aux actions, vous pouvez les modifier de manière classique dans Jeedom.
 
 ![Onglet commandes](..\assets\images\cfg_commands.png "Commandes")
-
+ 
 
 
 
@@ -77,16 +77,14 @@ Des icônes sont associées aux actions, vous pouvez les modifier de manière cl
 
 Vue historique
 ===
-
-(à compléter)
+La vue historique est accessible depuis le widget de la caméra. (commande Historique)
+Cette vue vous donne accès aux dernières vidéos de la caméra.
+Le nombre de vidéos affichées ainsi que la taille des vignettes est configurable sur le plugin : voir [Configuration du plugin](#-Configuration-du-plugin)
 
 Vue "panel"
 ===
+Un panel est activable depuis la configuration du plugin. voir [Configuration du plugin](#-Configuration-du-plugin)
 
-(à compléter)
+Si celui ci est activé, il est accessible dans le menu "Accueil"/"Blink Camera".
 
-
-Widget spécifique du dashboard
-===
-
-(à compléter)
+Ce panel affiche l'ensemble des caméras Blink configurées.
