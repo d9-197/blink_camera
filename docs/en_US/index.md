@@ -1,7 +1,7 @@
 # Description
 
 Plugin dédié aux caméras Blink.
-Il permet d'afficher les vidéos des différentes caméras, d'armer/désarmer la détection de mouvement d'un réseau ou d'une caméra.
+Il permet d'afficher les vidéos des différentes caméras, d'armer/désarmer la détection de mouvement d'un système ou d'une caméra.
 Les informations liées à la caméra sont également disponibles :
 
 * Température,
@@ -56,9 +56,8 @@ La fenêtre de configuration de l'équipement s'ouvre ensuite.
 Les options standard des équipements Jeedom sont en haut de l'écran.
 
 Si vous avez correctement configuré votre compte Blink (voir configuration du plugin), 3 autres options sont diposnibles dans la partie basse de l'écran :
-- Réseau : Correspond au réseau créé dans votre application Blink.
+- Système : Correspond au "Système" créé dans votre application Blink.
 - Caméra : vous permet de sélectionner la caméra à utiliser avec cet équipement
-- Widget spécifique : Si coché, un widget spécifique au plugin sera affiché. (les possibilités de configuration sont alors plus limitées qu'avec le widget standard)
 
 **N'oubliez pas de cliquer sur le bouton "Sauvegarder"**
 

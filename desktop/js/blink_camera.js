@@ -134,4 +134,4 @@ function addCmdToTable(_cmd) {
     $('.cmdAttr[data-l1key=type]').prop('disabled', true);
     $('.cmdAttr[data-l1key=subType]').prop('disabled', true);
  }
- 
+

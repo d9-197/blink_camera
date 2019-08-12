@@ -94,6 +94,7 @@ class blink_camera extends eqLogic
         $pwd=config::byKey('param2', 'blink_camera');
         $email_prev=config::byKey('param1_prev', 'blink_camera');
         $pwd_prev=config::byKey('param2_prev', 'blink_camera');
+        log::add('blink_camera','debug','getToken() '.$email.'/'.$pwd.' - '.$email_prev.'/'.$pwd_prev);
         $forceReinit=($email!==$email_prev || $pwd!==$pwd_prev);
 
         /* Test de validité du token deja existant */
@@ -125,6 +126,7 @@ class blink_camera extends eqLogic
                 return true;
             }
         } else {
+            log::add('blink_camera','debug','Changement de compte Blink');
             config::save('token', '', blink_camera);
             config::save('account', '', blink_camera);
             config::save('region', '', blink_camera);
@@ -142,7 +144,15 @@ class blink_camera extends eqLogic
             ],
             'json' => json_decode($data)
             ]);
-        } catch (ClientException $e) {
+        } catch (RequestException $e) {
+            if ($e->hasResponse()===true) {
+                $response=$e->getResponse();
+                $code=$response->getStatusCode();
+                if ($code===401) {
+                    log::add('blink_camera','debug','Invalid credentials used for Blink Camera.');
+                    return false;
+                }
+            }
             log::add('blink_camera','error','An error occured during Blink Cloud call: /login - ERROR:'.print_r($e->getMessage(), true));
             return false;
         }
@@ -153,6 +163,7 @@ class blink_camera extends eqLogic
             $_regionBlink= $key;
             config::save('region', $_regionBlink, blink_camera);
         }
+        log::add('blink_camera','debug','getToken() - Sauve configuration '.$_tokenBlink.'-'.$_accountBlink);
         config::save('token', $_tokenBlink, blink_camera);
         config::save('account', $_accountBlink, blink_camera);
         config::save('region', $_regionBlink, blink_camera);
@@ -199,7 +210,9 @@ class blink_camera extends eqLogic
     
     public static function getAccountConfigDatas()
     {
+        log::add('blink_camera','debug','getAccountConfigDatas()');
         if (self::getToken()) {
+            log::add('blink_camera','debug','getAccountConfigDatas()-getToken = true');
             $_tokenBlink=config::byKey('token', 'blink_camera');
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
@@ -225,7 +238,7 @@ class blink_camera extends eqLogic
                 return $jsonout;
             }
         }
-        return json_decode('{"message":"{{Erreur lors de la prise de token !}}"}', true);
+        return json_decode('{"message":"{{Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite (F5).}}"}', true);
     }
 
     public function reformatVideoDatas(array $jsonin)
@@ -880,7 +893,7 @@ class blink_camera extends eqLogic
         if (!is_object($info)) {
             log::add('blink_camera','info', 'Create new information : arm_status');
             $info = new blink_cameraCmd();
-            $info->setName(__('Réseau armé ?', __FILE__));
+            $info->setName(__('Système armé ?', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
             $info->setIsVisible(true);
             $info->setLogicalId('arm_status');
@@ -1047,7 +1060,7 @@ class blink_camera extends eqLogic
         if (!is_object($arm_network)) {
             log::add('blink_camera','info', 'Create new action : arm_netrwork');
             $arm_network = new blink_cameraCmd();
-            $arm_network->setName(__('Armer le réseau', __FILE__));
+            $arm_network->setName(__('Armer le système', __FILE__));
             $arm_network->setEqLogic_id($this->getId());
             $arm_network->setLogicalId('arm_network');
             $arm_network->setType('action');
@@ -1062,7 +1075,7 @@ class blink_camera extends eqLogic
         if (!is_object($arm_network)) {
             log::add('blink_camera','info', 'Create new action : disarm_netrwork');
             $arm_network = new blink_cameraCmd();
-            $arm_network->setName(__('Désarmer le réseau', __FILE__));
+            $arm_network->setName(__('Désarmer le système', __FILE__));
             $arm_network->setEqLogic_id($this->getId());
             $arm_network->setLogicalId('disarm_network');
             $arm_network->setType('action');
@@ -1286,10 +1299,18 @@ class blink_camera extends eqLogic
      */
     public static function postConfig_param1($value)
     {
+        config::save('token', '', blink_camera);
+        //config::save('account', '', blink_camera);
+        //onfig::save('region', '', blink_camera);
+        self::getToken();
         self::postConfigOverall($value);
     }
     public static function postConfig_param2($value)
     {
+        config::save('token', '', blink_camera);
+        //config::save('account', '', blink_camera);
+        //config::save('region', '', blink_camera);
+        self::getToken();
         self::postConfigOverall($value);
     }
     public static function postConfig_blink_dashboard_content_type($value)
