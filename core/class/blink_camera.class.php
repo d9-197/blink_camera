@@ -94,7 +94,6 @@ class blink_camera extends eqLogic
         $pwd=config::byKey('param2', 'blink_camera');
         $email_prev=config::byKey('param1_prev', 'blink_camera');
         $pwd_prev=config::byKey('param2_prev', 'blink_camera');
-        log::add('blink_camera','debug','getToken() '.$email.'/'.$pwd.' - '.$email_prev.'/'.$pwd_prev);
         $forceReinit=($email!==$email_prev || $pwd!==$pwd_prev);
 
         /* Test de validité du token deja existant */
@@ -126,7 +125,6 @@ class blink_camera extends eqLogic
                 return true;
             }
         } else {
-            log::add('blink_camera','debug','Changement de compte Blink');
             config::save('token', '', blink_camera);
             config::save('account', '', blink_camera);
             config::save('region', '', blink_camera);
@@ -163,7 +161,6 @@ class blink_camera extends eqLogic
             $_regionBlink= $key;
             config::save('region', $_regionBlink, blink_camera);
         }
-        log::add('blink_camera','debug','getToken() - Sauve configuration '.$_tokenBlink.'-'.$_accountBlink);
         config::save('token', $_tokenBlink, blink_camera);
         config::save('account', $_accountBlink, blink_camera);
         config::save('region', $_regionBlink, blink_camera);
@@ -210,9 +207,7 @@ class blink_camera extends eqLogic
     
     public static function getAccountConfigDatas()
     {
-        log::add('blink_camera','debug','getAccountConfigDatas()');
         if (self::getToken()) {
-            log::add('blink_camera','debug','getAccountConfigDatas()-getToken = true');
             $_tokenBlink=config::byKey('token', 'blink_camera');
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
