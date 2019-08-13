@@ -19,52 +19,52 @@
         "Visible": "Visible",
         " Réseau ": "Network",
         " Caméra ": "Camera",
-        " Widget Spécifique ": " Widget Spécifique ",
-        " Utiliser le widget spécifique ": " Utiliser le widget spécifique ",
+        " Widget Spécifique ": "Specific widget",
+        " Utiliser le widget spécifique ": "Use the specific widget",
         "Nom": "Name",
-        "Liste de commandes": "Liste de commandes",
-        "Paramètres": "Paramètres",
+        "Liste de commandes": "List of commands",
+        "Paramètres": "Settings",
         "Options": "Options",
         "Actions": "Actions"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
         "' + init(_cmd.subType) + '": "' + init(_cmd.subType) + '",
-        "Commande par défaut du plugin": "Commande par défaut du plugin",
+        "Commande par défaut du plugin": "Default plugin command",
         "' + init(_cmd.logicalId) + '": "' + init(_cmd.logicalId) + '",
         "Afficher": "Display",
         "Historiser": "Historize",
         "ex : cmd=tts|value=Mon texte TTS (voir documentation pour plus d\\'info)": "ex : cmd=tts|value=Mon texte TTS (voir documentation pour plus d\\'info)",
-        "Limité à 128 caractères": "Limité à 128 caractères",
+        "Limité à 128 caractères": "Limited to 128 characters",
         "Liste de valeurs au format \\'<id>|<texte>;<id>|<texte>;...\\'\\n Si la commande a pour nom \\'cmdlist_<XXX>\\', <id> => <commandes> (avec ^ pour séparateur), sinon utiliser \\'#listValue#\\' pour récuperer <id> dans la liste de commandes.": "Liste de valeurs au format \\'<id>|<texte>;<id>|<texte>;...\\'\\n Si la commande a pour nom \\'cmdlist_<XXX>\\', <id> => <commandes> (avec ^ pour séparateur), sinon utiliser \\'#listValue#\\' pour récuperer <id> dans la liste de commandes.",
-        "Inverser": "Inverser",
-        "Valeur retour d\\'état": "Valeur retour d\\'état",
-        "Durée avant retour d\\'état (min)": "Durée avant retour d\\'état (min)"
+        "Inverser": "Invert",
+        "Valeur retour d\\'état": "State return value",
+        "Durée avant retour d\\'état (min)": "Time before state return (min)"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
-        "Choisir": "Choisir"
+        "Choisir": "Select"
     },
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
-        "Compte Blink": "Compte Blink",
-        "Email": "Email",
-        "Mot de passe": "Mot de passe",
-        "Unité de température": "Unité de température",
+        "Compte Blink": "Blink account",
+        "Email": "E-mail",
+        "Mot de passe": "Password",
+        "Unité de température": "Temperature unit",
         "° C": "° C",
         "° F": "° F",
         "Widget": "Widget",
         "Contenu de la vignette": "Contenu de la vignette",
         "Vignette de la caméra": "Vignette de la caméra",
         "Vignette de la dernière vidéo": "Vignette de la dernière vidéo",
-        "Dernière vidéo": "Dernière vidéo",
+        "Dernière vidéo": "Latest video",
         "Vue historique": "Vue historique",
         "Nombre maximum de vidéos téléchargées": "Nombre maximum de vidéos téléchargées",
         "Taille des aperçus des vidéos": "Taille des aperçus des vidéos",
         "Taille de la vignette": "Taille de la vignette"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
-        "Rechercher": "Rechercher"
+        "Rechercher": "Search"
     },
     "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
-        "Tout télécharger": "Tout télécharger"
+        "Tout télécharger": "Download all"
     }
 }
