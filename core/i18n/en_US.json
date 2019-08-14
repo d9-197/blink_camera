@@ -17,29 +17,14 @@
         "Catégorie": "Category",
         "Activer": "Enable",
         "Visible": "Visible",
-        " Réseau ": "Network",
+        " Système ": " Système ",
         " Caméra ": "Camera",
-        " Widget Spécifique ": "Specific widget",
-        " Utiliser le widget spécifique ": "Use the specific widget",
         "Nom": "Name",
         "Liste de commandes": "List of commands",
         "Paramètres": "Settings",
         "Options": "Options",
-        "Actions": "Actions"
-    },
-    "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
-        "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
-        "' + init(_cmd.subType) + '": "' + init(_cmd.subType) + '",
-        "Commande par défaut du plugin": "Default plugin command",
-        "' + init(_cmd.logicalId) + '": "' + init(_cmd.logicalId) + '",
-        "Afficher": "Display",
-        "Historiser": "Historize",
-        "ex : cmd=tts|value=Mon texte TTS (voir documentation pour plus d\\'info)": "ex : cmd=tts|value=Mon texte TTS (voir documentation pour plus d\\'info)",
-        "Limité à 128 caractères": "Limited to 128 characters",
-        "Liste de valeurs au format \\'<id>|<texte>;<id>|<texte>;...\\'\\n Si la commande a pour nom \\'cmdlist_<XXX>\\', <id> => <commandes> (avec ^ pour séparateur), sinon utiliser \\'#listValue#\\' pour récuperer <id> dans la liste de commandes.": "Liste de valeurs au format \\'<id>|<texte>;<id>|<texte>;...\\'\\n Si la commande a pour nom \\'cmdlist_<XXX>\\', <id> => <commandes> (avec ^ pour séparateur), sinon utiliser \\'#listValue#\\' pour récuperer <id> dans la liste de commandes.",
-        "Inverser": "Invert",
-        "Valeur retour d\\'état": "State return value",
-        "Durée avant retour d\\'état (min)": "Time before state return (min)"
+        "Actions": "Actions",
+        "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite (F5).": "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite (F5)."
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
         "Choisir": "Select"
@@ -59,12 +44,45 @@
         "Vue historique": "Vue historique",
         "Nombre maximum de vidéos téléchargées": "Nombre maximum de vidéos téléchargées",
         "Taille des aperçus des vidéos": "Taille des aperçus des vidéos",
-        "Taille de la vignette": "Taille de la vignette"
+        "Taille de la vignette": "Taille de la vignette",
+        "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?": "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
     },
     "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
         "Tout télécharger": "Download all"
+    },
+    "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
+        "Système armé ?": "Système armé ?",
+        "Caméra armée ?": "Caméra armée ?",
+        "Température": "Température",
+        "Pile": "Pile",
+        "Puissance Wifi": "Puissance Wifi",
+        "Dernier événement": "Dernier événement",
+        "Vignette": "Vignette",
+        "Chemin vidéo": "Chemin vidéo",
+        "Chemin vignette": "Chemin vignette",
+        "Rafraichir": "Rafraichir",
+        "Armer le système": "Armer le système",
+        "Désarmer le système": "Désarmer le système",
+        "Armer la caméra": "Armer la caméra",
+        "Désarmer la caméra": "Désarmer la caméra",
+        "Historique": "Historique",
+        "Prendre une vidéo": "Prendre une vidéo",
+        "Forcer le téléchargement": "Forcer le téléchargement"
+    },
+    "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
+        "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
+        "' + init(_cmd.subType) + '": "' + init(_cmd.subType) + '",
+        "Commande par défaut du plugin": "Default plugin command",
+        "Afficher": "Display",
+        "Historiser": "Historize",
+        "ex : cmd=tts|value=Mon texte TTS (voir documentation pour plus d\\'info)": "ex : cmd=tts|value=Mon texte TTS (voir documentation pour plus d\\'info)",
+        "Limité à 128 caractères": "Limited to 128 characters",
+        "Liste de valeurs au format \\'<id>|<texte>;<id>|<texte>;...\\'\\n Si la commande a pour nom \\'cmdlist_<XXX>\\', <id> => <commandes> (avec ^ pour séparateur), sinon utiliser \\'#listValue#\\' pour récuperer <id> dans la liste de commandes.": "Liste de valeurs au format \\'<id>|<texte>;<id>|<texte>;...\\'\\n Si la commande a pour nom \\'cmdlist_<XXX>\\', <id> => <commandes> (avec ^ pour séparateur), sinon utiliser \\'#listValue#\\' pour récuperer <id> dans la liste de commandes.",
+        "Inverser": "Invert",
+        "Valeur retour d\\'état": "State return value",
+        "Durée avant retour d\\'état (min)": "Time before state return (min)"
     }
 }
