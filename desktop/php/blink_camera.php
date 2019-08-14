@@ -41,6 +41,8 @@ foreach ($eqLogics as $eqLogic) {
   <legend><i class="fa fa-table"></i> {{Mes équipements}}</legend>
 <div class="eqLogicThumbnailContainer">
     <?php
+    
+
 foreach ($eqLogics as $eqLogic) {
                 $opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive');
                 echo '<div class="eqLogicDisplayCard cursor" data-eqLogic_id="' . $eqLogic->getId() . '" style="text-align: center; background-color : #ffffff; height : 200px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;' . $opacity . '" >';
@@ -54,6 +56,43 @@ foreach ($eqLogics as $eqLogic) {
 </div>
 
 <div class="col-lg-10 col-md-9 col-sm-8 eqLogic" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
+<?php
+$datas=blink_camera::getAccountConfigDatas();
+$erreurBlink=false;
+//log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas, true));
+if ($datas['message']) {
+    echo '<script>';
+    echo 'var tbl_reseau = [{""}];';
+    echo 'var tbl_camera = [{""}];';
+    echo '</script>';
+    $erreurBlink=true;
+}
+echo '<script>';
+foreach ($datas as $key => $value) {
+    if (trim($key)=="networks") {
+        echo 'var tbl_reseau = [';
+        foreach ($value as $network) {
+            echo '{"network_id":"' .  $network['network_id']. '","network_name":"' . $network['network_name'] . '"},';
+        }
+        echo '];';
+    }
+}
+foreach ($datas as $key => $value) {
+    if (trim($key)=="networks") {
+        echo 'var tbl_camera = [';
+        foreach ($value as $network) {
+            foreach ($network as $key2 => $value2) {
+                foreach ($value2 as $camera) {
+                    echo '{"network_id":"' .  $network['network_id']. '","device_id":"' .  $camera['device_id']. '","device_name":"' . $camera['device_name'] . '"},';
+                }
+            }
+        }
+        echo '];';
+    }
+}
+echo '</script>';
+?>
+
 	<a class="btn btn-success eqLogicAction pull-right" data-action="save"><i class="fa fa-check-circle"></i> {{Sauvegarder}}</a>
   <a class="btn btn-danger eqLogicAction pull-right" data-action="remove"><i class="fa fa-minus-circle"></i> {{Supprimer}}</a>
   <a class="btn btn-default eqLogicAction pull-right" data-action="configure"><i class="fa fa-cogs"></i> {{Configuration avancée}}</a>
@@ -109,49 +148,17 @@ foreach ($eqLogics as $eqLogic) {
 
 
 <?php 
-    $datas=blink_camera::getAccountConfigDatas();
-    $erreur=false;
-    //log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas, true));
-    if ($datas['message']) {
-        echo '<script>';
-        echo 'var tbl_reseau = [{""}];';
-        echo 'var tbl_camera = [{""}];';
-        echo '</script>';
-        echo '<div class="alert alert-danger div_alert"><span id="span_errorMessage">'.$datas['message'].'</span></div>';
-        $erreur=true;
-    }
-    echo '<script>';
-    foreach ($datas as $key => $value) {
-        if (trim($key)=="networks") {
-            echo 'var tbl_reseau = [';
-            foreach ($value as $network) {
-                echo '{"network_id":"' .  $network['network_id']. '","network_name":"' . $network['network_name'] . '"},';
-            }
-            echo '];';
-        }
-    }
-    foreach ($datas as $key => $value) {
-        if (trim($key)=="networks") {
-            echo 'var tbl_camera = [';
-            foreach ($value as $network) {
-                foreach ($network as $key2 => $value2) {
-                    foreach ($value2 as $camera) {
-                        echo '{"network_id":"' .  $network['network_id']. '","device_id":"' .  $camera['device_id']. '","device_name":"' . $camera['device_name'] . '"},';
-                    }
-                }
-            }
-            echo '];';
-        }
-    }
 
-    echo '</script>';
-    if (!$erreur) {
+
+    if ($erreurBlink) {
+        echo '<div class="alert alert-danger div_alert"><span id="span_errorMessage">'.$datas['message'].'</span></div>';
+    } else {
         ?>
 
 
     
     <div class="form-group">
-        <label class="col-sm-3 control-label" >{{ Réseau }}</label>
+        <label class="col-sm-3 control-label" >{{ Système }}</label>
         <div id="liste" class="col-sm-3">
             <select id="select_reseau" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="network_id"></select>
         </div>

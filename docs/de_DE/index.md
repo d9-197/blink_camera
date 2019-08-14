@@ -69,7 +69,7 @@ Les commandes sont automatiquement créées lors de la création de l'équipemen
 Des icônes sont associées aux actions, vous pouvez les modifier de manière classique dans Jeedom.
 
 ![Onglet commandes](..\assets\images\cfg_commands.png "Commandes")
-
+ 
 
 
 
@@ -83,17 +83,8 @@ Le nombre de vidéos affichées ainsi que la taille des vignettes est configurab
 
 Vue "panel"
 ===
-Un panel est activable de la configuration du plugin. voir [Configuration du plugin](#-Configuration-du-plugin)
+Un panel est activable depuis la configuration du plugin. voir [Configuration du plugin](#-Configuration-du-plugin)
 
 Si celui ci est activé, il est accessible dans le menu "Accueil"/"Blink Camera".
 
-Ce panel affiche l'ensemble des caméras configurées.
-
-
-Widget spécifique du dashboard
-===
-**Attention : Cette fonctionnalité sera désactivée dans les prochaines version du plugin**
-
-Un widget avec un affichage spécifique peut être utilisé à la place de l'affichage classique Jeedom.
-
-
+Ce panel affiche l'ensemble des caméras Blink configurées.
