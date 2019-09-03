@@ -56,7 +56,7 @@ La fenêtre de configuration de l'équipement s'ouvre ensuite.
 Les options standard des équipements Jeedom sont en haut de l'écran.
 
 Si vous avez correctement configuré votre compte Blink (voir configuration du plugin), 3 autres options sont diposnibles dans la partie basse de l'écran :
-- Système : Correspond au "Système" créé dans votre application Blink.
+- Système : Correspond au système créé dans votre application Blink.
 - Caméra : vous permet de sélectionner la caméra à utiliser avec cet équipement
 
 **N'oubliez pas de cliquer sur le bouton "Sauvegarder"**
@@ -68,7 +68,7 @@ Les commandes sont automatiquement créées lors de la création de l'équipemen
 Des icônes sont associées aux actions, vous pouvez les modifier de manière classique dans Jeedom.
 
 ![Onglet commandes](..\assets\images\cfg_commands.png "Commandes")
- 
+
 
 
 
