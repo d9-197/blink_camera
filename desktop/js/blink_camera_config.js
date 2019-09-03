@@ -85,27 +85,28 @@ function getDataFromTable( condition, table) {
        param = document.getElementById( id);
        valeur = param ? param.value : '';
      }
-  
-    switch (id){
-      case 'init':
-        liste = getDataFromTable( '*', tbl_reseau);
-        // mise Ã  jour du select
-        valeur = updateSelect( 'select_reseau', liste, 'network_id', 'network_name');
-        // chainage sur le select liÃ©
-        chainSelect('select_reseau');
-        break;
-      case 'select_reseau':
-        // rÃ©cup. des donnÃ©es
-        liste = getDataFromTable( 'network_id=' +valeur, tbl_camera);
-        
-        // mise Ã  jour du select
-        valeur = updateSelect( 'select_camera', liste, 'device_id', 'device_name');
-        // chainage sur le select liÃ©
-        chainSelect('select_camera');
-        break;
-      case 'select_camera':
-        document.getElementById('select_camera').value = valeur;
-        break;
+    if (tbl_reseau && tbl_camera) {
+      switch (id){
+        case 'init':
+          liste = getDataFromTable( '*', tbl_reseau);
+          // mise Ã  jour du select
+          valeur = updateSelect( 'select_reseau', liste, 'network_id', 'network_name');
+          // chainage sur le select liÃ©
+          chainSelect('select_reseau');
+          break;
+        case 'select_reseau':
+          // rÃ©cup. des donnÃ©es
+          liste = getDataFromTable( 'network_id=' +valeur, tbl_camera);
+          
+          // mise Ã  jour du select
+          valeur = updateSelect( 'select_camera', liste, 'device_id', 'device_name');
+          // chainage sur le select liÃ©
+          chainSelect('select_camera');
+          break;
+        case 'select_camera':
+          document.getElementById('select_camera').value = valeur;
+          break;
+      }
     }
   }
 

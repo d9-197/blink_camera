@@ -17,15 +17,59 @@
         "Catégorie": "Category",
         "Activer": "Enable",
         "Visible": "Visible",
-        " Réseau ": "Network",
+        " Système ": "System",
         " Caméra ": "Camera",
-        " Widget Spécifique ": "Specific widget",
-        " Utiliser le widget spécifique ": "Use the specific widget",
         "Nom": "Name",
         "Liste de commandes": "List of commands",
         "Paramètres": "Settings",
         "Options": "Options",
-        "Actions": "Actions"
+        "Actions": "Actions",
+		"Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite.": "Unable to connect at your Blink account. Check your login and password. Refresh the page after."
+    },
+    "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
+        "Choisir": "Select"
+    },
+    "plugins\/blink_camera\/plugin_info\/configuration.php": {
+        "Compte Blink": "Blink account",
+        "Email": "E-mail",
+        "Mot de passe": "Password",
+        "Unité de température": "Temperature unit",
+        "° C": "° C",
+        "° F": "° F",
+        "Widget": "Widget",
+        "Contenu de la vignette": "Thumbnail content",
+        "Vignette de la caméra": "Camera thumbnail",
+        "Vignette de la dernière vidéo": "Thumbnail of last video",
+        "Dernière vidéo": "Latest video",
+        "Vue historique": "Historical view",
+        "Nombre maximum de vidéos téléchargées": "Maximum number of downloaded videos",
+        "Taille des aperçus des vidéos": "Size of video thumbnails",
+        "Taille de la vignette": "Thumbnail size"
+    },
+    "plugins\/blink_camera\/desktop\/php\/panel.php": {
+        "Rechercher": "Search"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
+        "Tout télécharger": "Download all"
+    },
+    "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
+        "Système armé ?": "System enabled ?",
+        "Caméra armée ?": "Camera enabled ?",
+        "Température": "Temperature",
+        "Pile": "Battery",
+        "Puissance Wifi": "Wifi strength",
+        "Dernier événement": "Last event",
+        "Vignette": "Thumbnail",
+        "Chemin vidéo": "Video path",
+        "Chemin vignette": "Thumbnail path",
+        "Rafraichir": "Refresh",
+        "Armer le système": "Enable system",
+        "Désarmer le système": "Disable system",
+        "Armer la caméra": "Enable camera",
+        "Désarmer la caméra": "Disable camera",
+        "Historique": "Historical",
+        "Prendre une vidéo": "Take a video",
+        "Forcer le téléchargement": "Force the download"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
@@ -40,31 +84,5 @@
         "Inverser": "Invert",
         "Valeur retour d\\'état": "State return value",
         "Durée avant retour d\\'état (min)": "Time before state return (min)"
-    },
-    "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
-        "Choisir": "Select"
-    },
-    "plugins\/blink_camera\/plugin_info\/configuration.php": {
-        "Compte Blink": "Blink account",
-        "Email": "E-mail",
-        "Mot de passe": "Password",
-        "Unité de température": "Temperature unit",
-        "° C": "° C",
-        "° F": "° F",
-        "Widget": "Widget",
-        "Contenu de la vignette": "Contenu de la vignette",
-        "Vignette de la caméra": "Vignette de la caméra",
-        "Vignette de la dernière vidéo": "Vignette de la dernière vidéo",
-        "Dernière vidéo": "Latest video",
-        "Vue historique": "Vue historique",
-        "Nombre maximum de vidéos téléchargées": "Nombre maximum de vidéos téléchargées",
-        "Taille des aperçus des vidéos": "Taille des aperçus des vidéos",
-        "Taille de la vignette": "Taille de la vignette"
-    },
-    "plugins\/blink_camera\/desktop\/php\/panel.php": {
-        "Rechercher": "Search"
-    },
-    "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
-        "Tout télécharger": "Download all"
-    }
+	}
 }

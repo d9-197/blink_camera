@@ -26,7 +26,7 @@ try {
     
     ajax::init();
 
-    if (init('action') == 'removeRecord') {
+    if (init('action') == 'removeRecord') { 
         $file = init('file');
         $dir = init('dir');
         $filepath = realpath($dir.'/'.$file);
@@ -37,6 +37,18 @@ try {
         ajax::success();
     }
 
+    if (init('action') == 'getConfig') {
+        $config = blink_camera::getAccountConfigDatas2(false);
+		if ($config==null) {
+			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
+        }
+        if ($config['message']) {
+            ajax::error($config['message']);            
+        }
+        $return=json_encode($config);
+		ajax::success($return);
+    }
+    
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {

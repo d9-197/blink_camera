@@ -25,6 +25,7 @@ if (!isConnect()) {
 <form class="form-horizontal">
 <script>
 // page reload is needed
+/*
 $("#bt_savePluginConfig").unbind('click');
 $("#bt_savePluginConfig").on('click', function (event) {
     savePluginConfig();
@@ -35,6 +36,7 @@ $("#bt_savePluginConfig").on('click', function (event) {
     });
     return false;
 });
+*/
 </script>
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>

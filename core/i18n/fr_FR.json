@@ -24,7 +24,7 @@
         "Paramètres": "Paramètres",
         "Options": "Options",
         "Actions": "Actions",
-        "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite (F5).": "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite (F5)."
+        "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite.": "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite (F5)."
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
         "Choisir": "Choisir"
