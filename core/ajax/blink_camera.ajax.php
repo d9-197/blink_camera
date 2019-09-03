@@ -42,9 +42,10 @@ try {
 		if ($config==null) {
 			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
         }
+        /*
         if ($config['message']) {
-            ajax::error($config['message']);            
-        }
+            ajax::error("".str_replace("{{","",str_replace("}}","","".$config['message'])));            
+        }*/
         $return=json_encode($config);
 		ajax::success($return);
     }

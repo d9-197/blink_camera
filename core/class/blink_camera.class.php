@@ -168,6 +168,7 @@ class blink_camera extends eqLogic
                 $response=$e->getResponse();
                 $code=$response->getStatusCode();
                 if ($code===401) {
+                    config::save('token', '', blink_camera);
                     //blink_camera::logdebug('Invalid credentials used for Blink Camera.');
                     return false;
                 }

@@ -170,7 +170,7 @@ if ($datas['message']) {
         <?php
         if ($erreurBlink) {
             echo '$(".blink_cfg").hide();';
-            echo '$("#div_alert").showAlert({message: "'.$datas['message'].'", level: "danger"});';
+            echo '$("#div_alert").showAlert({message: "'.str_replace("{{","",str_replace("}}","","".$datas['message'])).'", level: "warning"});';
         } else {
             echo '$(".blink_cfg").show();';
         }
@@ -197,7 +197,7 @@ if ($datas['message']) {
                         dataParsed=$.parseJSON(data.result);
                         if (dataParsed.message) {
                             $('.blink_cfg').hide();
-                            $('#div_alert').showAlert({message: dataParsed.message, level: 'danger'});
+                            $('#div_alert').showAlert({message: dataParsed.message.replace('\{\{','{{').replace('\}\}','}}'), level: 'warning'});
                         } else {
                             $.each(dataParsed.networks,function(i, item)
                             {
