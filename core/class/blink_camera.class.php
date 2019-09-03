@@ -337,7 +337,13 @@ class blink_camera extends eqLogic
     public static function getDateJeedomTimezone(string $date="")
     {
         $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $date);
-        $dtim=date_add($dtim, new DateInterval("PT".getTZoffsetMin()."M"));
+        // Manage negative timezone
+        // https://github.com/d9-197/blink_camera/issues/13
+        if (getTZoffsetMin()<0) {
+            $dtim=date_sub($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
+        } else {
+            $dtim=date_add($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
+        }
         return date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
     }
     public static function getMedia($urlMedia, $equipement_id, $filename="default",$format="mp4")
