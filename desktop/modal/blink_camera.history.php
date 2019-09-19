@@ -66,28 +66,31 @@ if ($nbMax <= 0) {
     $nbMax=-1;
 }
 $cptVideo=0;
-for ($page=1;$page<=10;$page++) {
-    if ($nbMax>0 && $cptVideo>=($nbMax)) {
-        break;
-    };
-    $videos=$blink_camera->getVideoList($page);
-    foreach (json_decode($videos, true) as $video) {
+if ($blink_camera->getToken()) {
+    for ($page=1;$page<=10;$page++) {
         if ($nbMax>0 && $cptVideo>=($nbMax)) {
             break;
         };
-        if (!$video['deleted']) {
-            $cptVideo++;
-            $datetime = explode(" ", blink_camera::getDateJeedomTimezone($video['created_at']));
-            $date=$datetime[0];
-            if (array_key_exists($date, $videoFiltered)) {
-                array_push($videoFiltered[$date], $video);
-            } else {
-                $videoFiltered[$date]=array($video);
+        $videos=$blink_camera->getVideoList($page);
+        foreach (json_decode($videos, true) as $video) {
+            if ($nbMax>0 && $cptVideo>=($nbMax)) {
+                break;
+            };
+            if (!$video['deleted']) {
+                $cptVideo++;
+                $datetime = explode(" ", blink_camera::getDateJeedomTimezone($video['created_at']));
+                $date=$datetime[0];
+                if (array_key_exists($date, $videoFiltered)) {
+                    array_push($videoFiltered[$date], $video);
+                } else {
+                    $videoFiltered[$date]=array($video);
+                }
             }
         }
     }
+} else {
+    //TODO : get already downloaded videos...
 }
-
 $facteur= (float) config::byKey('blink_size_videos', 'blink_camera');
 $tailleVideo=720*$facteur;
 
