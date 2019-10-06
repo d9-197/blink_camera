@@ -82,8 +82,10 @@ if ($datas['message']) {
             echo 'var tbl_camera = [';
             foreach ($value as $network) {
                 foreach ($network as $key2 => $value2) {
-                    foreach ($value2 as $camera) {
-                        echo '{"network_id":"' .  $network['network_id']. '","device_id":"' .  $camera['device_id']. '","device_name":"' . $camera['device_name'] . '"},';
+                    if (trim($key2)=="camera") {
+                        foreach ($value2 as $camera) {
+                            echo '{"network_id":"' .  $network['network_id']. '","device_id":"' .  $camera['device_id']. '","device_name":"' . $camera['device_name'] . '"},';
+                        }
                     }
                 }
             }

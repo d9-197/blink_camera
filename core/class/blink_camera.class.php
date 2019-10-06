@@ -273,12 +273,12 @@ class blink_camera extends eqLogic
             $jsonstr=$jsonstr."{\"network_id\":\"".$currentnet."\" ,\"network_name\":\"".$currentnetname."\" ,\"camera\" :[";
             foreach ($jsonin['cameras'] as $cams) {
                 if ($cams['network_id']==$currentnet) {
-                    if (!in_array($cams['device_id'], $cameras, true)) {
+                    if (!in_array($cams['id'], $cameras, true)) {
                         if ($nbCam>0) {
                             $jsonstr=$jsonstr.",";
                         }
                         $nbCam=$nbCam + 1;
-                        $cameras[]=$cams['device_id'];
+                        $cameras[]=$cams['id'];
                         $jsonstr=$jsonstr."{\"device_id\":\"".$cams['id']."\",\"device_name\":\"".$cams['name']."\"}";
                     }
                 }
@@ -291,8 +291,9 @@ class blink_camera extends eqLogic
     public function getAccountConfigDatas2($force_json_string=false) {
         if (self::getToken()) {
             $datas=blink_camera::getHomescreenData();
+            blink_camera::logdebug('getAccountConfigDatas2() '.print_r($reto,true));
             $reto=self::reformatConfigDatas2($datas);
-            //blink_camera::logdebug('getAccountConfigDatas2() '.print_r($reto,true));
+            blink_camera::logdebug('getAccountConfigDatas2() after reformat '.print_r($reto,true));
             return $force_json_string ? $reto : json_decode($reto,true);
         }
         $messag='{"message":"{{Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mots de passe. Recharger la page ensuite.}}"}';
