@@ -23,6 +23,21 @@ if (!isConnect()) {
 }
 ?>
 <form class="form-horizontal">
+<script>
+// page reload is needed
+/*
+$("#bt_savePluginConfig").unbind('click');
+$("#bt_savePluginConfig").on('click', function (event) {
+    savePluginConfig();
+    bootbox.confirm('{{La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?}}', function (result) {
+        if (result) {
+            loadPage(document.location.href);
+        }
+    });
+    return false;
+});
+*/
+</script>
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
         <div class="form-group">
