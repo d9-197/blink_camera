@@ -617,7 +617,7 @@ class blink_camera extends eqLogic
                             foreach ($videosJson as $video) {
                                 if (!$video['deleted']) {
                                     $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']).'.mp4';
-                                    $fileCloud[]=$filename;
+                                    $fileCloud[$filename]=$video['media'];
                                     if ($file === $filename) {
                                         $fileOnCloudAndOnJeedom[]=$filename;
                                         //blink_camera::logdebug( 'blink_camera->forceCleanup() fichier existant trouve sur le cloud : '. $filename);
@@ -632,13 +632,13 @@ class blink_camera extends eqLogic
                 $fileCloud=array_unique($fileCloud);
                 arsort($fileCloud);
                 // Récupération des videos
-                foreach ($fileCloud as $filename) {
+                foreach ($fileCloud as $filename => $urlMedia) {
                     if ($nbMax>0 && $cptVideo>=$nbMax) {
                         $fileToDelete[]=$filename;
                     } else {
                         if ($download) { // Si demandé, on télécharge les vidéos disponibles
                             if (($key = array_search($filename, $fileOnCloudAndOnJeedom)) == false) {
-                                $path=$this->getMedia($video['media'], $this->getId(), $filename);
+                                $path=$this->getMedia($urlMedia, $this->getId(), $filename);
                                 //blink_camera::logdebug( 'blink_camera->forceCleanup() get file: '. $filename);
                             }
                         }
