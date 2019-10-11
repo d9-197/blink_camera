@@ -107,7 +107,11 @@ foreach ($videoFiltered as $date => $videoByDate) {
     echo '<span class="blink_cameraHistoryDate spacer-left-5">'.$date.'</span>';
     echo '<a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*'.$date.'*').'" ><i class="fas fa-download"></i></a>';
     echo '</legend>';
-    echo '<div class="blink_cameraThumbnailContainer" >';
+    if ($cptDate==1) {
+        echo '<div class="blink_cameraThumbnailContainer" >';
+    } else {
+        echo '<div class="blink_cameraThumbnailContainer" style="display:none;">'; 
+    }
     foreach ($videoByDate as $video) {
         $cptVideo++;
         if ($nbMax>0 && $cptVideo>$nbMax) {
