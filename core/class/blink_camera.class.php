@@ -20,8 +20,8 @@
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 require_once dirname(__FILE__) .'/../../vendor/autoload.php';
 use GuzzleHttp\Client;
-//use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\TransferException;
+//use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7;
  
 class blink_camera extends eqLogic
@@ -68,11 +68,11 @@ class blink_camera extends eqLogic
         } else {
             $eqLogics = array(self::byId($_eqLogic_id));
         }
-        foreach ($eqLogics as $blink_camera) {
-            if ($blink_camera->getIsEnable() == 1  && $blink_camera->getToken()) {
-                $last_event=$blink_camera->getLastEvent();
+        foreach ($eqLogics as $cam) {
+            if ($cam->getIsEnable() == 1  && $cam->getToken()) {
+                $last_event=$cam->getLastEvent();
                 if (isset($last_event)) {
-                   self::getMediaForce($last_event['media'], $blink_camera->getId(), 'last','mp4',true);
+                   self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                 }
             }
         }
@@ -85,10 +85,13 @@ class blink_camera extends eqLogic
         } else {
             $eqLogics = array(self::byId($_eqLogic_id));
         }
-        foreach ($eqLogics as $blink_camera) {
-            if ($blink_camera->getIsEnable() == 1 && $blink_camera->getToken()) {
-                $blink_camera->getLastEventDate();
-                $blink_camera->refreshCameraInfos();
+        foreach ($eqLogics as $cam) {
+            //blink_camera::logdebug('blink_camera->cron() '.$cam->getConfiguration("camera_id"));
+               
+            if ($cam->getIsEnable() == 1 && $cam->getToken()) {
+                //blink_camera::logdebug('blink_camera->cron() camera active');
+                $cam->getLastEventDate();
+                $cam->refreshCameraInfos();
             }
         }
     }
@@ -96,15 +99,19 @@ class blink_camera extends eqLogic
 
     public static function cronHourly($_eqLogic_id = null)
     {
+         blink_camera::logdebug('blink_camera->cron5()');
+           
         if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
             $eqLogics = self::byType('blink_camera', true);
         } else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
             $eqLogics = array(self::byId($_eqLogic_id));
         }
     
-        foreach ($eqLogics as $blink_camera) {//parcours tous les équipements du plugin blink_camera
-            if ($blink_camera->getIsEnable() == 1  && $blink_camera->getToken()) {//vérifie que l'équipement est acitf
-                $blink_camera->forceCleanup(true);
+        foreach ($eqLogics as $cam) {//parcours tous les équipements du plugin blink_camera
+            if ($cam->getIsEnable() == 1  && $cam->getToken()) {//vérifie que l'équipement est acitf
+                $cam->forceCleanup(true);
+                $cam->getLastEventDate();
+                $cam->refreshCameraInfos();
             }
         }
     }
@@ -138,7 +145,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException  $e) {
+                } catch (TransferException  $e) {
                     blink_camera::logdebug('An error occured during Blink Cloud call: '.$url.' - ERROR:'.print_r($e->getMessage(), true));
                     $need_new_token=true;
                 }
@@ -177,7 +184,7 @@ class blink_camera extends eqLogic
             ],
             'json' => json_decode($data)
             ]);
-        } catch (BadResponseException $e) {
+        } catch (TransferException $e) {
             if ($e->hasResponse()===true) {
                 $response=$e->getResponse();
                 $code=$response->getStatusCode();
@@ -318,7 +325,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException $e) {
+                } catch (TransferException $e) {
                     blink_camera::logdebug('An error occured during Blink Cloud call: '.$url.' - ERROR:'.print_r($e->getMessage(), true));
                     $jsonstr='{"message":"Unable to get configuration information from Blink Cloud"}';
                     return json_decode($jsonstr, true);
@@ -431,7 +438,7 @@ class blink_camera extends eqLogic
                                 chmod($folderBase.$filename, 0775);
                             }
                         }
-                        catch (BadResponseException $e) {
+                        catch (TransferException $e) {
                             blink_camera::logerror('An error occured during Blink Cloud call: '.$urlMedia. ' - ERROR:'.print_r($e->getMessage(), true));
                             blink_camera::deleteMedia($folderBase.$filename);
                             return blink_camera::ERROR_IMG;
@@ -469,7 +476,7 @@ class blink_camera extends eqLogic
                     ]);
                     $jsonrep= json_decode($r->getBody(), true);
                 }
-                catch (BadResponseException $e) {
+                catch (TransferException $e) {
                     $errorTxt='An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true);
                     blink_camera::logwarn($errorTxt);
                     $jsonrep=json_decode('{"message":"'.$errorTxt.'"}',true);
@@ -509,7 +516,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException $e) {
+                } catch (TransferException $e) {
                     blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return $jsonrep;
                 }
@@ -552,7 +559,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException $e) {
+                } catch (TransferException $e) {
                     blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return $jsonstr;
                 }
@@ -583,7 +590,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException $e) {
+                } catch (TransferException $e) {
                     blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
@@ -628,25 +635,36 @@ class blink_camera extends eqLogic
                     }
                 }
             }  
-           
-                $fileCloud=array_unique($fileCloud);
-                arsort($fileCloud);
-                // Récupération des videos
-                foreach ($fileCloud as $filename => $urlMedia) {
-                    if ($nbMax>0 && $cptVideo>=$nbMax) {
-                        $fileToDelete[]=$filename;
-                    } else {
-                        if ($download) { // Si demandé, on télécharge les vidéos disponibles
-                            if (($key = array_search($filename, $fileOnCloudAndOnJeedom)) == false) {
-                                $path=$this->getMedia($urlMedia, $this->getId(), $filename);
-                                //blink_camera::logdebug( 'blink_camera->forceCleanup() get file: '. $filename);
-                            }
+
+            // SUPPRESSION DES FICHIERS QUI NE SONT PLUS SUR CLOUD
+            foreach ($existingFilesOnJeedom as $file) {
+                if (($key = array_search($file, $fileOnCloudAndOnJeedom)) == false) {
+                    blink_camera::logdebug( 'blink_camera->forceCleanup() fichier existant en local mais pas sur le cloud : '. $file);
+                    if ($file!=="." && $file!=="..") {
+                        $fileToDelete[]=$file;
+                    }
+                }
+            }
+
+            // TELECHARGEMENT DES FICHIERS MANQUANTS
+            $fileCloud=array_unique($fileCloud);
+            arsort($fileCloud);
+            // Récupération des videos
+            foreach ($fileCloud as $filename => $urlMedia) {
+                if ($nbMax>0 && $cptVideo>=$nbMax) {
+                    $fileToDelete[]=$filename;
+                } else {
+                    if ($download) { // Si demandé, on télécharge les vidéos disponibles
+                        if (($key = array_search($filename, $fileOnCloudAndOnJeedom)) == false) {
+                            $path=$this->getMedia($urlMedia, $this->getId(), $filename);
+                            //blink_camera::logdebug( 'blink_camera->forceCleanup() get file: '. $filename);
                         }
                     }
-                    $cptVideo++;
                 }
+                $cptVideo++;
+            }
         }
-        
+       
                
         // Nettoyage des fichiers du dossier medias
         foreach ($fileToDelete as $file) {
@@ -798,7 +816,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException $e) {
+                } catch (TransferException $e) {
                     blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
@@ -827,7 +845,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException $e) {
+                } catch (TransferException $e) {
                     blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
@@ -858,7 +876,7 @@ class blink_camera extends eqLogic
                     ]
                 ]); 
                 }
-                catch (BadResponseException $e) {
+                catch (TransferException $e) {
                     blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
@@ -892,7 +910,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException $e) {
+                } catch (TransferException $e) {
                     blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
@@ -922,7 +940,7 @@ class blink_camera extends eqLogic
                             'TOKEN_AUTH'=> $_tokenBlink
                         ]
                     ]);
-                } catch (BadResponseException $e) {
+                } catch (TransferException $e) {
                     blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
@@ -976,7 +994,7 @@ class blink_camera extends eqLogic
                             'json' => json_decode($datas)
                         ]);
                     }
-                    catch (BadResponseException $e) {
+                    catch (TransferException $e) {
                         blink_camera::logerror('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                         return false;
                     }
