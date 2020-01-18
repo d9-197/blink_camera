@@ -722,9 +722,12 @@ class blink_camera extends eqLogic
             if (is_object($infoCmd)) {
                 $previous=$infoCmd->execCmd();
                 $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $event['created_at']);
-                $dtim=date_add($dtim, new DateInterval("PT".getTZoffsetMin()."M"));
+                if (getTZoffsetMin()<0) {
+                    $dtim=date_sub($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
+                } else {
+                    $dtim=date_add($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
+                }
                 $new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
-             
                 if (isset($new) && $new!="" && $new>$previous) {
                     blink_camera::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
                     $this->checkAndUpdateCmd('last_event', $new);
