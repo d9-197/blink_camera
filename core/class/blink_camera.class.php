@@ -99,7 +99,7 @@ class blink_camera extends eqLogic
 
     public static function cronHourly($_eqLogic_id = null)
     {
-         blink_camera::logdebug('blink_camera->cron5()');
+         blink_camera::logdebug('blink_camera->cronHourly()');
            
         if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
             $eqLogics = self::byType('blink_camera', true);
@@ -732,7 +732,11 @@ class blink_camera extends eqLogic
                     blink_camera::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
                     $this->checkAndUpdateCmd('last_event', $new);
                     $this->checkAndUpdateCmd('thumb_path',blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at'])));
+                    $this->checkAndUpdateCmd('thumb_url',(!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/plugins/blink_camera/medias/'.$this->getId().'/thumbnail.jpg');
+                    //$this->logdebug("ROOT: ".(!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/');
+
                     $this->checkAndUpdateCmd('clip_path',blink_camera::getMedia($event['media'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at'])));
+                    $this->checkAndUpdateCmd('clip_url',(!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/plugins/blink_camera/medias/'.$this->getId().'/last.mp4');
                 }
             }
         }
@@ -1170,7 +1174,7 @@ class blink_camera extends eqLogic
             $info = new blink_cameraCmd();
             $info->setName(__('Chemin vidéo', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
-            $info->setIsVisible(true);
+            //$info->setIsVisible(true);
             $info->setTemplate('dashboard', 'default');
             $info->setLogicalId('clip_path');
             $info->setEqLogic_id($this->getId());
@@ -1185,13 +1189,43 @@ class blink_camera extends eqLogic
             $info = new blink_cameraCmd();
             $info->setName(__('Chemin vignette', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
-            $info->setIsVisible(true);
+            //$info->setIsVisible(true);
             $info->setTemplate('dashboard', 'default');
             $info->setLogicalId('thumb_path');
             $info->setEqLogic_id($this->getId());
             $info->setType('info');
             $info->setSubType('string');
             $info->setOrder(9);
+            $info->save();
+        }
+        $info = $this->getCmd(null, 'thumb_url');
+        if (!is_object($info)) {
+            blink_camera::loginfo( 'Create new information : thumb_url');
+            $info = new blink_cameraCmd();
+            $info->setName(__('URL vignette', __FILE__));
+            $info->setDisplay("showNameOndashboard", 1);
+            //$info->setIsVisible(false);
+            $info->setTemplate('dashboard', 'default');
+            $info->setLogicalId('thumb_url');
+            $info->setEqLogic_id($this->getId());
+            $info->setType('info');
+            $info->setSubType('string');
+            $info->setOrder(10);
+            $info->save();
+        }
+        $info = $this->getCmd(null, 'clip_url');
+        if (!is_object($info)) {
+            blink_camera::loginfo( 'Create new information : clip_url');
+            $info = new blink_cameraCmd();
+            $info->setName(__('URL dernière vidéo', __FILE__));
+            $info->setDisplay("showNameOndashboard", 1);
+            //$info->setIsVisible(false);
+            $info->setTemplate('dashboard', 'default');
+            $info->setLogicalId('clip_url');
+            $info->setEqLogic_id($this->getId());
+            $info->setType('info');
+            $info->setSubType('string');
+            $info->setOrder(11);
             $info->save();
         }
         $refresh = $this->getCmd(null, 'refresh');
