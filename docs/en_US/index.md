@@ -23,7 +23,7 @@ Dans l'écran de configuration du plugin les options suivantes sont disponibles 
 * Vue historique
   + Cette vue est accessible depuis le widget
   + Elle affiche les dernières vidéos disponibles
-  + Le nombre maximum de vidéos télécharger permet de limiter la quantité de données à télécharger à l'ouverture de la vue historique
+  + Le nombre maximum de vidéos téléchargées permet de limiter la quantité de données à télécharger à l'ouverture de la vue historique
   + La taille des aperçus des vidéos peut également être confirgurée.
 
 *Attention : Si vous configurez une taille importante et un nombre important de vidéos, cela peut entrainer des lenteurs dans la vue historique*
@@ -80,10 +80,3 @@ La vue historique est accessible depuis le widget de la caméra. (commande Histo
 Cette vue vous donne accès aux dernières vidéos de la caméra.
 Le nombre de vidéos affichées ainsi que la taille des vignettes est configurable sur le plugin : voir [Configuration du plugin](#-Configuration-du-plugin)
 
-Vue "panel"
-===
-Un panel est activable depuis la configuration du plugin. voir [Configuration du plugin](#-Configuration-du-plugin)
-
-Si celui ci est activé, il est accessible dans le menu "Accueil"/"Blink Camera".
-
-Ce panel affiche l'ensemble des caméras Blink configurées.
