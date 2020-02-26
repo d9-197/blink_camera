@@ -84,6 +84,15 @@ $("#bt_savePluginConfig").on('click', function (event) {
                 </select>
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
+            <div class="col-lg-3">
+                <select  class="configKey form-control" data-l1key="blink_base_url">
+                    <option value="internal">Interne</option>
+                    <option value="external">Externe</option>
+                </select>
+            </div>
+        </div>
         <h4 class="icon_blue"><i class="fa fa-folder-open"></i> {{Vue historique}}</h4>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Nombre maximum de vidéos téléchargées}}</label>
@@ -109,6 +118,7 @@ $("#bt_savePluginConfig").on('click', function (event) {
                 </select>
             </div>
         </div>
+
   </fieldset>
 </form>
 
