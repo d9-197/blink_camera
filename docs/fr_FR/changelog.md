@@ -1,3 +1,7 @@
+> 2020-02-28
+  + Correction du tri des vidéos dans la vue historique
+  + Modification du nom des fichiers téléchargés depuis la vue historique
+
 > 2020-02-26
   + Correction des URL de la dernière vidéo et de la vignette
   + Ajout de l'information sur le pourcentage de la batterie (gestion des seuils d'alerte)

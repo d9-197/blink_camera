@@ -88,8 +88,8 @@ $("#bt_savePluginConfig").on('click', function (event) {
             <label class="col-lg-3 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_base_url">
-                    <option value="internal">Interne</option>
-                    <option value="external">Externe</option>
+                    <option value="internal">{{Interne}}</option>
+                    <option value="external">{{Externe}}</option>
                 </select>
             </div>
         </div>

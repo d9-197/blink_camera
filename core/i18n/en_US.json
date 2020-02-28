@@ -41,10 +41,13 @@
         "Vignette de la caméra": "Camera thumbnail",
         "Vignette de la dernière vidéo": "Thumbnail of the last video",
         "Dernière vidéo": "Latest video",
-        "Vue historique": "History view",
+        "Vue historique": "Historical view",
         "Nombre maximum de vidéos téléchargées": "Maximum number of downloaded videos",
         "Taille des aperçus des vidéos": "Size of video previews",
         "Taille de la vignette": "Thumbnail size",
+        "Adresse de Jeedom à utiliser pour les URL":"Jeedom address to use for URLs",
+        "Interne": "Internal",
+        "Externe": "External",
         "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?": "The page must be reloaded to reflect the changes. Would you like to reload the page now?"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
