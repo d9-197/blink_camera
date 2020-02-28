@@ -1,3 +1,7 @@
+> 2020-02-28
+  + Fix sort of videos in historical view
+  + Update the file names of downloads from historical view
+
 > 2020-02-26
   + Fix URL to last video and last thumbnail
   + Add battery pourcentage information 

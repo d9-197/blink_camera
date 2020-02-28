@@ -23,7 +23,13 @@ try {
 	}
     unautorizedInDemo();
     $pahtFilter=init('filter');
-    $pathfile = calculPath(urldecode(init('pathfile')));
+	$pathfile = calculPath(urldecode(init('pathfile')));
+	$targetName=urldecode(init('archive'));
+	blink_camera::logdebug($targetName);
+	$archivename='archive';
+	if (!$targetName=='') {
+		$archivename=$targetName;
+	}
     $pathfileOrig=$pathfile;		
 	if ($pathfile === false) {
 		throw new Exception(__('401 - Accès non autorisé', __FILE__));
@@ -47,21 +53,21 @@ try {
 		if (!isConnect('admin')) {
 			throw new Exception(__('401 - Accès non autorisé', __FILE__));
         }
-        system('cd ' . $pathfile . ';tar cfz ' . jeedom::getTmpFolder('downloads') . '/archive.tar.gz '.$pahtFilter.' > /dev/null 2>&1');
-        $pathfile = jeedom::getTmpFolder('downloads') . '/archive.tar.gz';
+        system('cd ' . $pathfile . ';tar cfz ' . jeedom::getTmpFolder('downloads') . '/'.$archivename.'.tar.gz '.$pahtFilter.' > /dev/null 2>&1');
+        $pathfile = jeedom::getTmpFolder('downloads') . '/'.$archivename.'.tar.gz';
 	} else {
 		if (!isConnect('admin')) {
 			throw new Exception(__('401 - Accès non autorisé', __FILE__));
 		}
-        system('cd ' . $pathfile . ';tar cfz ' . jeedom::getTmpFolder('downloads') . '/archive.tar.gz ' . $pahtFilter . '> /dev/null 2>&1');
-		$pathfile = jeedom::getTmpFolder('downloads') . '/archive.tar.gz';
+        system('cd ' . $pathfile . ';tar cfz ' . jeedom::getTmpFolder('downloads') . '/'.$archivename.'.tar.gz ' . $pahtFilter . '> /dev/null 2>&1');
+		$pathfile = jeedom::getTmpFolder('downloads') . '/'.$archivename.'.tar.gz';
 	}
 	$path_parts = pathinfo($pathfile);
 	header('Content-Type: application/octet-stream');
 	header('Content-Disposition: attachment; filename=' . $path_parts['basename']);
 	readfile($pathfile);
-	if (file_exists(jeedom::getTmpFolder('downloads') . '/archive.tar.gz')) {
-		unlink(jeedom::getTmpFolder('downloads') . '/archive.tar.gz');
+	if (file_exists(jeedom::getTmpFolder('downloads') . '/'.$archivename.'.tar.gz')) {
+		unlink(jeedom::getTmpFolder('downloads') . '/'.$archivename.'.tar.gz');
 	}
 	exit;
 } catch (Exception $e) {
