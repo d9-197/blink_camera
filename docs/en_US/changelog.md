@@ -1,3 +1,11 @@
+> 2020-05-05
+
+<span style='color:red'>**WARNING :**</span>
+
+<span style='color:red'>**Blink announces for May 11, 2020 the end of support for connections by tools other than IFTTT or their official application.**</span>
+
+<span style='color:red'>**From May 11, the plugin may therefore no longer be usable in Jeedom.**</span>
+
 > 2020-02-28
   + Fix sort of videos in historical view
   + Update the file names of downloads from historical view

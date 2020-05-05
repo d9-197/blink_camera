@@ -42,7 +42,7 @@ if ($blink_camera->getToken()) {
             };
             if (!$video['deleted']) {
                 $cptVideo++;
-                $datetime = explode(" ", blink_camera::getDateJeedomTimezone($video['created_at']));
+                $datetime = explode("_", blink_camera::getDateJeedomTimezone($video['created_at']));
                 $date=$datetime[0];
                 if (array_key_exists($date, $videoFiltered)) {
                     array_push($videoFiltered[$date], $video);
@@ -84,8 +84,9 @@ foreach ($videoFiltered as $date => $videoByDate) {
             break;
         };
         $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']);
-        $datetime = explode(" ", $filename);
+        $datetime = explode("_", $filename);
         $time=$datetime[1];
+        $time=substr($time,0,2)."h".substr($time,2,2)."m".substr($time,4,2)."s";
         $path=$blink_camera->getMedia($video['media'], init('id'), $filename);
         $reversedParts = explode('/', strrev($path), 2);
         $file= strrev($reversedParts[0]);

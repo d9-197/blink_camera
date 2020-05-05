@@ -38,6 +38,11 @@ $("#bt_savePluginConfig").on('click', function (event) {
 });
 */
 </script>
+<div style='color:red'><b>ATTENTION :</b></div>
+
+<div style='color:red'><b>Blink annonce pour le 11 mai 2020 la fin du support des connexions par des outils autres que IFTTT ou leur application officielle.</b></div>
+
+<div style='color:red'><b>A partir de cette date, le plugin risque donc de ne plus être utilisable dans Jeedom.</b></div>
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
         <div class="form-group">
