@@ -2,6 +2,7 @@
 
 Plugin dédié aux caméras Blink.
 Il permet d'afficher les vidéos des différentes caméras, d'armer/désarmer la détection de mouvement d'un système ou d'une caméra.
+
 Les informations liées à la caméra sont également disponibles :
 
 * Température,
@@ -9,6 +10,7 @@ Les informations liées à la caméra sont également disponibles :
 * URL et chemin de la dernière vidéo (et de sa vignette),
 * Puissance du wifi,
 * Voltage des piles.
+
 
 # Configuration du plugin
 
