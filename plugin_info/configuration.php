@@ -38,6 +38,11 @@ $("#bt_savePluginConfig").on('click', function (event) {
 });
 */
 </script>
+<div style='color:red'><b>ATTENTION :</b></div>
+
+<div style='color:red'><b>Blink annonce pour le 11 mai 2020 la fin du support des connexions par des outils autres que IFTTT ou leur application officielle.</b></div>
+
+<div style='color:red'><b>A partir de cette date, le plugin risque donc de ne plus être utilisable dans Jeedom.</b></div>
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
         <div class="form-group">
@@ -88,8 +93,8 @@ $("#bt_savePluginConfig").on('click', function (event) {
             <label class="col-lg-3 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_base_url">
-                    <option value="internal">Interne</option>
-                    <option value="external">Externe</option>
+                    <option value="internal">{{Interne}}</option>
+                    <option value="external">{{Externe}}</option>
                 </select>
             </div>
         </div>

@@ -1,39 +1,3 @@
-<script>
-/*
- thresholdReveal = .3;
-
-     optionsReveal = {
-    root: null,
-    rootMargin: '0px',
-    thresholdReveal
-    }
-
-
-
-     handleIntersect = function (entries, observer) {
-    entries.forEach(function (entry) {
-        alert('observer');
-        if (entry.intersectionRatio > thresholdReveal) {
-        entry.target.classList.remove('reveal')
-        observer.unobserve(entry.target)
-        }
-    })
-    }
-
-
-
-document.documentElement.classList.add('reveal-loaded')
-
-document.querySelector('#md_modal').addEventListener('DOMContentLoaded', (event)=> {
-  const observer = new IntersectionObserver(handleIntersect, optionsReveal)
-  const targets = document.querySelectorAll('.reveal')
-  targets.forEach(function (target) {
-    observer.observe(target);
-  })
-})
-*/
-</script>
-
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
 <?php
 if (!isConnect()) {
@@ -55,7 +19,7 @@ $dir= realpath(dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/')
 <div id='div_blink_cameraRecordAlert' style="display: none;"></div>
 <?php
 echo '<div>';
-echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*').'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
+echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*').'&archive='.urlencode('blink_all').'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
 echo '</div>';
    
 ?>
@@ -78,7 +42,7 @@ if ($blink_camera->getToken()) {
             };
             if (!$video['deleted']) {
                 $cptVideo++;
-                $datetime = explode(" ", blink_camera::getDateJeedomTimezone($video['created_at']));
+                $datetime = explode("_", blink_camera::getDateJeedomTimezone($video['created_at']));
                 $date=$datetime[0];
                 if (array_key_exists($date, $videoFiltered)) {
                     array_push($videoFiltered[$date], $video);
@@ -87,7 +51,7 @@ if ($blink_camera->getToken()) {
                 }
             }
         }
-    }
+    } 
 } else {
     //TODO : get already downloaded videos...
 }
@@ -96,6 +60,7 @@ $tailleVideo=720*$facteur;
 
 $cptVideo=0;
 $cptDate=0;
+krsort($videoFiltered);
 foreach ($videoFiltered as $date => $videoByDate) {
     if ($nbMax>0 && $cptVideo>=($nbMax)) {
         break;
@@ -105,21 +70,23 @@ foreach ($videoFiltered as $date => $videoByDate) {
     echo '<legend>';
     echo ' <a class="btn btn-xs btn-default toggleList"><i class="fa fa-chevron-down"></i></a> ';
     echo '<span class="blink_cameraHistoryDate spacer-left-5">'.$date.'</span>';
-    echo '<a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*'.$date.'*').'" ><i class="fas fa-download"></i></a>';
+    echo '<a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode('*'.$date.'*').'&archive='.urlencode($date).'" ><i class="fas fa-download"></i></a>';
     echo '</legend>';
     if ($cptDate==1) {
         echo '<div class="blink_cameraThumbnailContainer" >';
     } else {
         echo '<div class="blink_cameraThumbnailContainer" style="display:none;">'; 
     }
+    rsort($videoByDate);
     foreach ($videoByDate as $video) {
         $cptVideo++;
         if ($nbMax>0 && $cptVideo>$nbMax) {
             break;
         };
         $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']);
-        $datetime = explode(" ", $filename);
+        $datetime = explode("_", $filename);
         $time=$datetime[1];
+        $time=substr($time,0,2)."h".substr($time,2,2)."m".substr($time,4,2)."s";
         $path=$blink_camera->getMedia($video['media'], init('id'), $filename);
         $reversedParts = explode('/', strrev($path), 2);
         $file= strrev($reversedParts[0]);

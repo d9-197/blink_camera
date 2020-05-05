@@ -1,95 +1,101 @@
 # Description
 
-Plugin dédié aux caméras Blink.
-Il permet d'afficher les vidéos des différentes caméras, d'armer/désarmer la détection de mouvement d'un système ou d'une caméra.
+<span style='color:red'>**WARNING :**</span>
 
-Les informations liées à la caméra sont également disponibles :
+<span style='color:red'>**Blink announces for May 11, 2020 the end of support for connections by tools other than IFTTT or their official application.**</span>
 
-* Température,
-* Date du dernier évenement,
-* URL et chemin de la dernière vidéo (et de sa vignette),
-* Puissance du wifi,
-* Voltage des piles.
+<span style='color:red'>**From May 11, the plugin may therefore no longer be usable in Jeedom.**</span>
+
+Plugin dedicated to Blink cameras.
+It is used to display the videos of the various cameras, to arm / disarm the motion detection of a system or a camera.
+
+Camera related information is also available:
+
+* Temperature,
+* Date of last event,
+* URL and path of the last video (and its thumbnail),
+* Wifi power,
+* Battery voltage.
 
 
-# Configuration du plugin
+# Configuration of the plugin
 
-Dans l'écran de configuration du plugin les options suivantes sont disponibles :
+In the plugin configuration screen the following options are available:
 
-* Compte Blink
-  + Zone permettant de saisir l'email et le mot de passe associés à votre compte Blink
+* Blink account
+  + Area for entering the email and password associated with your Blink account
 
 * Widget
-  + Contenu de la vignette : permet de choisir ce qui est affiché dans le widget
-  + Taille de la vignette : permet de définir la réduction à appliquer (en pourcentage de la taille initiale).
-  + Adresse de Jeedom à utiliser pour les URL : permet de choisir qu'elle URL de Jeedom sera utilisée dans les infos "URL dernière vidéo" et "URL vignette".
+  + Thumbnail content: allows you to choose what is displayed in the widget
+  + Thumbnail size: allows you to define the reduction to be applied (as a percentage of the initial size).
+  + Jeedom address to use for URLs: allows you to choose which Jeedom URL will be used in the "Last video URL" and "Thumbnail URL" infos.
+    *These URLs correspond to those you defined in the configuration of your Jeedom system: "Settings / System / Configuration" menu then "Networks" tab: internal access or external access.*
+    
+* Historical view
+  + This view is accessible from the widget
+  + It displays the latest videos available
+  + The maximum number of downloaded videos allows you to limit the amount of data to download when opening the historical view
+  + The size of the video previews can also be configured.
 
-    *Ces URL correspondent à celles que vous avez défini dans la configuration de votre système Jeedom : Menu "Réglages / Système / Configuration" puis onglet "Réseaux" : accès interne ou accès externe.*
-
-* Vue historique
-  + Cette vue est accessible depuis le widget
-  + Elle affiche les dernières vidéos disponibles
-  + Le nombre maximum de vidéos téléchargées permet de limiter la quantité de données à télécharger à l'ouverture de la vue historique
-  + La taille des aperçus des vidéos peut également être confirgurée.
-
-    *Attention : Si vous configurez une taille importante et un nombre important de vidéos, cela peut entrainer des lenteurs dans la vue historique*
+    *Warning: If you configure a large size and a large number of videos, this can cause slowness in the historical view*
 
 
->**N'oubliez pas de cliquer sur le bouton "Sauvegarder"**
-
+>**Don't forget to click on the "Save" button**
 
 ![Configuration du plugin](..\assets\images\cfg_plugin.png "Configuraion du plugin")
 
-# Création et configuration d'un équipements
+# Creation and configuration of equipment
 
 
-## Ajout d'un équipement
+## Adding equipment
 
 
-L'ajout des équipements se fait manuellement.
+Adding equipment is done manually.
 
-Pour cela, vous devez cliquer sur le bouton "Ajouter" ayant l'icône "+".
+To do this, you must click on the "Add" button with the "+" icon.
 
 ![Ajout d'un équipment](..\assets\images\cfg_plugin_general.png "Ajout d'un équipment")
 
-Vous pouvez alors renseigner un nom pour l'équipement.
+You can then enter a name for the equipment.
 
-La fenêtre de configuration de l'équipement s'ouvre ensuite.
+The equipment configuration window then opens.
 
-## Configuration d'un équipement
+## Equipment configuration
 
-### Onglet Equipement
+### Equipment tab
 ![Onglet équipement](..\assets\images\cfg_equipment.png "Equipement")
 
-Les options standard des équipements Jeedom sont en haut de l'écran.
+The standard options for Jeedom equipment are at the top of the screen.
 
-Si vous avez correctement configuré votre compte Blink (voir configuration du plugin), 3 autres options sont diposnibles dans la partie basse de l'écran :
-- Système : Correspond au système créé dans votre application Blink.
-- Caméra : vous permet de sélectionner la caméra à utiliser avec cet équipement
-
-
->**N'oubliez pas de cliquer sur le bouton "Sauvegarder"**
+If you have correctly configured your Blink account (see configuration of the plugin), 3 other options are available in the lower part of the screen:
+- System: Corresponds to the system created in your Blink application.
+- Camera: allows you to select the camera to use with this equipment
 
 
-### Onglet Commandes
+>**Don't forget to click on the "Save" button**
 
-Les commandes sont automatiquement créées lors de la création de l'équipement.
 
-Des icônes sont associées aux actions, vous pouvez les modifier de manière classique dans Jeedom.
+### Commands tab
+
+Commands are automatically created when the equipment is created.
+
+Icons are associated with actions, you can modify them in the classic way in Jeedom.
 
 ![Onglet commandes](..\assets\images\cfg_commands.png "Commandes")
 
 
-Vue historique
+Historical view
 ===
-La vue historique est accessible depuis le widget de la caméra. (commande Historique)
-Cette vue vous donne accès aux dernières vidéos de la caméra.
-Le nombre de vidéos affichées ainsi que la taille des vignettes est configurable sur le plugin : voir [Configuration du plugin](#-Configuration-du-plugin)
+The history view is accessible from the camera widget. (History command)
 
-Utilisation dans des scénarios
+This view gives you access to the latest videos from the camera.
+
+The number of videos displayed as well as the size of the thumbnails is configurable on the plugin: see [Configuration du plugin](#-Configuration-du-plugin)
+
+Use in scenarios
 ===
-Vous pouvez déclencher un scénario en mettant directement comme déclencheur l'information "Dernier événement"
+You can trigger a scenario by directly activating the information "Last event"
 
-> Voir champ "Evénement" dans l'image ci-dessous
+> See "Event" field in the image below
 
 ![Utilisation dans des scénarios](..\assets\images\scenario.png "Utilisation dans des scénarios")

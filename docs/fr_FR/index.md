@@ -1,5 +1,11 @@
 # Description
 
+<span style='color:red'>**ATTENTION :**</span>
+
+<span style='color:red'>**Blink annonce pour le 11 mai 2020 la fin du support des connexions par des outils autres que IFTTT ou leur application officielle.**</span>
+
+<span style='color:red'>**A partir de cette date, le plugin risque donc de ne plus être utilisable dans Jeedom.**</span>
+
 Plugin dédié aux caméras Blink.
 Il permet d'afficher les vidéos des différentes caméras, d'armer/désarmer la détection de mouvement d'un système ou d'une caméra.
 
