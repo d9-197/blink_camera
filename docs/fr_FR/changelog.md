@@ -1,10 +1,6 @@
-> 2020-05-05
-
-<span style='color:red'>**ATTENTION :**</span>
-
-<span style='color:red'>**Blink annonce pour le 11 mai 2020 la fin du support des connexions par des outils autres que IFTTT ou leur application officielle.**
-
-<span style='color:red'>**A partir de cette date, le plugin risque donc de ne plus être utilisable dans Jeedom.**</span>
+> 2020-08-26
+  + V2.0.0
+  + Modification du plugin pour permettre l'authentification en 2 étapes (mot de passe + code envoyé par Blink par email)
 
 > 2020-02-28
   + Correction du tri des vidéos dans la vue historique

@@ -37,12 +37,15 @@ $("#bt_savePluginConfig").on('click', function (event) {
     return false;
 });
 */
+
 </script>
-<div style='color:red'><b>ATTENTION :</b></div>
 
-<div style='color:red'><b>Blink annonce pour le 11 mai 2020 la fin du support des connexions par des outils autres que IFTTT ou leur application officielle.</b></div>
 
-<div style='color:red'><b>A partir de cette date, le plugin risque donc de ne plus être utilisable dans Jeedom.</b></div>
+<!--div style='color:red'><b>ATTENTION :</b></div-->
+
+<!--div style='color:red'><b>Blink annonce pour le 11 mai 2020 la fin du support des connexions par des outils autres que IFTTT ou leur application officielle.</b></div-->
+
+<!--div style='color:red'><b>A partir de cette date, le plugin risque donc de ne plus être utilisable dans Jeedom.</b></div-->
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
         <div class="form-group">
@@ -50,12 +53,35 @@ $("#bt_savePluginConfig").on('click', function (event) {
             <div class="col-lg-3">
                 <input class="configKey form-control" data-l1key="param1" />
             </div>
+            <div class="col-lg-3">
+                <a id="bt_test_blink" class="btn btn-success btn-xs">{{Sauvegarder et tester la connexion Blink}}</a>
+            </div>
         </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Mot de passe}}</label>
             <div class="col-lg-3">
                 <input type="password" class="configKey form-control" data-l1key="param2"/>
             </div>
+            <div class="col-lg-3">
+                <div id="div_test_blink_result"></div>
+            </div>
+        </div>
+
+        <div id="verifdiv">
+
+        <div class="form-group">
+            <label class="col-lg-9 control-label text-danger">{{Vous allez recevoir un email de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton "Envoyer".}}</label>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">{{Code PIN de vérification}}</label>
+            <div class="col-lg-3">
+                <input  class="form-control" id="pincode"/>
+            </div>
+            <div class="col-lg-3">
+                <a id="bt_verifypin" class="btn btn-success btn-xs">{{Envoyer}}</a>
+            </div>
+            <div id ="pinstatus"></div>
+        </div>
         </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Unité de température}}</label>
@@ -127,3 +153,68 @@ $("#bt_savePluginConfig").on('click', function (event) {
   </fieldset>
 </form>
 
+<script>
+    function checkConnexionBlink() {
+        $.ajax({
+                    type: "POST",
+                    url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
+                    data: {
+                        action: "test_blink",
+                    },
+                    dataType: 'json',
+                    error: function(request, status, error) {
+                        handleAjaxError(request, status, error,$('#div_alert'));
+                    },
+                    success: function(data) {
+                        $res = JSON.parse(JSON.parse(data.result));
+                        if ($res.token == "true") {
+                            $('#div_test_blink_result').showAlert({message: "{{Connexion à votre compte Blink OK}}", level: 'info'});
+                            $('#div_alert').hideAlert();
+                            $('#verifdiv').hide();
+                            $('.blink_cfg').show();
+                            checkBlinkCameraConfig();
+                            sessionStorage.setItem("blink_camera_refresh","REFRESH");
+                        } else if ($res.token == "verif") {
+                            $('#div_test_blink_result').showAlert({message: "{{Connexion à votre compte Blink OK mais un code de vérification est nécessaire}}", level: 'warning'});
+                            $('#div_alert').showAlert({message: "{{Connexion à votre compte Blink OK - Email de vérification nécessaire}}", level: 'info'});
+                            $('#verifdiv').show();
+                        } else {
+                            $('#div_test_blink_result').showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
+                            $('#verifdiv').hide();
+                            $('#div_alert').showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
+                            $('.blink_cfg').hide();
+                        }
+                        return;
+                    }
+                });
+    };
+    $('#verifdiv').hide();
+    $('#bt_verifypin').on('click', function() {
+        $.ajax({
+            type: 'POST',
+            url: 'plugins/blink_camera/core/ajax/blink_camera.ajax.php',
+            data: {
+                action: 'verifyPinCode',
+                pin: document.getElementById("pincode").value,
+            },
+            dataType: 'json',
+            global: false,
+            error: function (request, status, error) {
+                bootbox.alert("ERREUR 'verifyPinCode' !<br>Erreur lors l'envoi du code de vérification à Blink.");
+            },
+            success: function (json_res) {
+                checkConnexionBlink();   
+            }
+        });
+    });
+    $('#bt_test_blink').on('click', function() {
+            $('#div_test_blink_result').hideAlert();
+            savePluginConfig();
+            checkConnexionBlink();
+            sleep(1000);
+            checkConnexionBlink();
+
+    })
+    checkConnexionBlink();
+    </script>
+<?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
