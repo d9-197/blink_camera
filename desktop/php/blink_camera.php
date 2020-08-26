@@ -56,52 +56,14 @@ foreach ($eqLogics as $eqLogic) {
 </div>
 
 <div class="col-lg-10 col-md-9 col-sm-8 eqLogic" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
-<?php
-$datas=blink_camera::getAccountConfigDatas2(false);
-$erreurBlink=false;
-//log::add('blink_camera', 'debug', 'blink_camera.php $datas :'.print_r($datas, true));
-if ($datas['message']) {
-    echo '<script>';
-    echo 'var tbl_reseau = [{}];';
-    echo 'var tbl_camera = [{}];';
-    echo '</script>';
-    $erreurBlink=true;
-} else {
-    echo '<script>';
-    foreach ($datas as $key => $value) {
-        if (trim($key)=="networks") {
-            echo 'var tbl_reseau = [';
-            foreach ($value as $network) {
-                echo '{"network_id":"' .  $network['network_id']. '","network_name":"' . $network['network_name'] . '"},';
-            }
-            echo '];';
-        }
-    }
-    foreach ($datas as $key => $value) {
-        if (trim($key)=="networks") {
-            echo 'var tbl_camera = [';
-            foreach ($value as $network) {
-                foreach ($network as $key2 => $value2) {
-                    if (trim($key2)=="camera") {
-                        foreach ($value2 as $camera) {
-                            echo '{"network_id":"' .  $network['network_id']. '","device_id":"' .  $camera['device_id']. '","device_name":"' . $camera['device_name'] . '"},';
-                        }
-                    }
-                }
-            }
-            echo '];';
-        }
-    }
-    echo '</script>';
-    }
-?>
+
 
 	<a class="btn btn-success eqLogicAction pull-right" data-action="save"><i class="fa fa-check-circle"></i> {{Sauvegarder}}</a>
   <a class="btn btn-danger eqLogicAction pull-right" data-action="remove"><i class="fa fa-minus-circle"></i> {{Supprimer}}</a>
   <a class="btn btn-default eqLogicAction pull-right" data-action="configure"><i class="fa fa-cogs"></i> {{Configuration avancée}}</a>
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fa fa-arrow-circle-left"></i></a></li>
-    <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fa fa-tachometer"></i> {{Equipement}}</a></li>
+    <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab" id="eqlogictabId"><i class="fa fa-tachometer"></i> {{Equipement}}</a></li>
     <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Commandes}}</a></li>
   </ul>
   <div class="tab-content" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
@@ -152,7 +114,7 @@ if ($datas['message']) {
     <div class="form-group">
         <label class="col-sm-3 " ></label>
         <div class="col-sm-3">
-            <button type="button" class="btn btn-primary" id="bt_refresh_blink">{{Réactualiser}}</button>
+            <button type="button" class="btn btn-default" id="bt_refresh_blink_cfg">{{Recharger la configuration}}</button>
         </div>
     </div>
     <div class="form-group blink_cfg">
@@ -168,63 +130,10 @@ if ($datas['message']) {
         </div>
     </div>
 
-    <script>
-        <?php
-        if ($erreurBlink) {
-            echo '$(".blink_cfg").hide();';
-            echo '$("#div_alert").showAlert({message: "'.str_replace("{{","",str_replace("}}","","".$datas['message'])).'", level: "warning"});';
-        } else {
-            echo '$(".blink_cfg").show();';
-        }
-        ?>
-        $('#bt_refresh_blink').on('click', function() {
-            $.ajax({
-                type: "POST",
-                url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
-                data: {
-                    action: "getConfig",
-                },
-                dataType: 'json',
-                error: function(request, status, error) {
-                    handleAjaxError(request, status, error,$('#div_alert'));
-                },
-                success: function(data) {
-                    if (data.state != 'ok') {
-//                        $('#div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
-                        $('#div_alert').showAlert({message: "'"+data.result+"'", level: 'danger'});
-                        $('.blink_cfg').hide();
-                        return;
-                    } else {
-                        tbl_camera = [];
-                        dataParsed=$.parseJSON(data.result);
-                        if (dataParsed.message) {
-                            $('.blink_cfg').hide();
-                            $('#div_alert').showAlert({message: dataParsed.message.replace('\{\{','{{').replace('\}\}','}}'), level: 'warning'});
-                        } else {
-                            $.each(dataParsed.networks,function(i, item)
-                            {
-                                if (dataParsed.networks[i].network_id!=null && dataParsed.networks[i].network_id!="") {
-                                    tbl_reseau.push({"network_id":dataParsed.networks[i].network_id,"network_name":dataParsed.networks[i].network_name});
-                                    $.each(dataParsed.networks[i].camera,function(j, itemc)
-                                    {
-                                        tbl_camera.push({"network_id":dataParsed.networks[i].network_id,"device_id":dataParsed.networks[i].camera[j].device_id,"device_name":dataParsed.networks[i].camera[j].device_name});
-                                    });
-                                }
-                            });
-                            if ($('.blink_cfg').is(":hidden")) {chainSelect('select_reseau');}
-                            $('.blink_cfg').show();
-                            $('#div_alert').showAlert({message: "{{Données réactualisées}}", level: 'info'});
-                        }
-                        return;
-                    }
-                }
-            });
-        })
-    </script>
-
 </fieldset>
 </form>
 </div>
+
       <div role="tabpanel" class="tab-pane" id="commandtab">
 <a class="btn btn-success btn-sm cmdAction pull-left" data-action="add" style="margin-top:5px;"><i class="fa fa-plus-circle"></i> {{Commandes}}</a><br/><br/>
 <table id="table_cmd" class="table table-bordered table-condensed">
@@ -249,5 +158,5 @@ if ($datas['message']) {
 
 <?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
 <?php include_file('core', 'plugin.template', 'js');?>
-<?php include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');?>
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
+<?php include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');?>
