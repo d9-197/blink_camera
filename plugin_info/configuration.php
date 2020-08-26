@@ -187,7 +187,7 @@ $("#bt_savePluginConfig").on('click', function (event) {
                         return;
                     }
                 });
-    };
+    }; 
     $('#verifdiv').hide();
     $('#bt_verifypin').on('click', function() {
         $.ajax({
