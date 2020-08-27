@@ -74,9 +74,9 @@ class blink_camera extends eqLogic
             $eqLogics = array(self::byId($_eqLogic_id));
         }
         foreach ($eqLogics as $cam) {
-            if ($cam->getIsEnable() == 1  && $cam->getToken(true)) {
+            if ($cam->getIsEnable() == 1  && $cam->getToken()) {
                 $last_event=$cam->getLastEvent();
-                if (isset($last_event)) {
+                if (isset($last_event)) { 
                    self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                 }
             }
@@ -113,7 +113,7 @@ class blink_camera extends eqLogic
         }
     
         foreach ($eqLogics as $cam) {//parcours tous les équipements du plugin blink_camera
-            if ($cam->getIsEnable() == 1  && $cam->getToken()) {//vérifie que l'équipement est acitf
+            if ($cam->getIsEnable() == 1  && $cam->getToken(true)) {//vérifie que l'équipement est acitf
                 $cam->forceCleanup(true);
                 $cam->getLastEventDate();
                 $cam->refreshCameraInfos();
@@ -1654,18 +1654,18 @@ class blink_camera extends eqLogic
      */
     public static function postConfig_param1($value)
     {
-        config::save('token', '', blink_camera);
+        //config::save('token', '', blink_camera);
         //config::save('account', '', blink_camera);
         //onfig::save('region', '', blink_camera);
-        self::getToken(true);
+        //self::getToken(true);
         self::postConfigOverall($value);
     }
     public static function postConfig_param2($value)
     {
-        config::save('token', '', blink_camera);
+        //config::save('token', '', blink_camera);
         //config::save('account', '', blink_camera);
         //config::save('region', '', blink_camera);
-        self::getToken(true);
+        //self::getToken(true);
         self::postConfigOverall($value);
     }
     public static function postConfig_blink_dashboard_content_type($value)
