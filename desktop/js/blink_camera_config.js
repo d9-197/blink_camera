@@ -170,6 +170,8 @@ function checkBlinkCameraConfig() {
             level: 'warning'
           });
         } else {
+          tbl_reseau = [];
+          tbl_camera = [];
           datas_refreshed = false;
           $.each(dataParsed.networks, function (i, item) {
             if (dataParsed.networks[i].network_id != null && dataParsed.networks[i].network_id != "") {
@@ -218,6 +220,7 @@ if (!isset(tbl_reseau) || !isset(tbl_camera)) {
   var tbl_reseau = [];
   var tbl_camera = [];
 }
+
 if (isset(tbl_reseau) && isset(tbl_camera) && (tbl_reseau.length < 1 || tbl_camera.length < 1)) {
   checkBlinkCameraConfig();
 } else {
@@ -225,8 +228,9 @@ if (isset(tbl_reseau) && isset(tbl_camera) && (tbl_reseau.length < 1 || tbl_came
 }
 $('#bt_refresh_blink_cfg').on('click', function (e) {
   sessionStorage.removeItem("blink_camera_tbl_reseau");
-  sessionStorage.removeItem("blink_camera_tbl_reseau");
-  checkBlinkCameraConfig();
+  sessionStorage.removeItem("blink_camera_tbl_camera");
+
+    checkBlinkCameraConfig();
 });
 /*        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             var currId = $(e.target).attr("id");
