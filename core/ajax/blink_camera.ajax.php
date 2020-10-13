@@ -18,6 +18,7 @@
 
 try {
     require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
+    require_once dirname(__FILE__) . '/../class/blink_camera.class.php';
     include_file('core', 'authentification', 'php');
 
     if (!isConnect('admin')) {
@@ -38,7 +39,7 @@ try {
     }
 
     if (init('action') == 'getConfig') {
-        $config = blink_camera::getAccountConfigDatas2(false);
+        $config = blink_camera::getAccountConfigDatas2(false,false);
 		if ($config==null) {
 			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
         }
@@ -49,9 +50,30 @@ try {
         $return=json_encode($config);
 		ajax::success($return);
     }
+    if (init('action') == 'test_blink') {
+        $status = blink_camera::getToken(true);
+        $json='{"token":"false"}';
+        if ($status===true) {
+            $json='{"token":"true"}';
+            if ($need_pin_verification=config::byKey('verif', 'blink_camera')==="true") {
+                $json='{"token":"verif"}';
+            }
+        }
+        //blink_camera::logdebug("test connexion : ".$json);
+        $return=json_encode($json);
+		ajax::success($return);
+    }
     
+    if (init('action') == 'verifyPinCode') {
+            $pin = init('pin');
+            $status= blink_camera::queryPostPinVerify($pin);
+            ajax::success(json_encode(array('status' => $status)));
+    }
+    
+
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {
     ajax::error(displayExeption($e), $e->getCode());
 }
+?>
