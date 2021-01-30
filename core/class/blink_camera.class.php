@@ -208,7 +208,7 @@ class blink_camera extends eqLogic
             ]);
             $jsonrep= json_decode($r->getBody(), true);
             blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Réponse:'.print_r($jsonrep,true));
-            if ($jsonrep['valide']=='true') {
+            if ($jsonrep['valid']==1) {
                 blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Vérification OK');
                 config::save('verif', 'false', blink_camera);
                 return 0;
@@ -354,7 +354,7 @@ class blink_camera extends eqLogic
             $_regionBlink=$jsonrep['region']['tier'];
             $_clientIdBlink=$jsonrep['client']['id'];
             $_verifBlink="false";
-            if($jsonrep['client']['verification_required']) {
+            if($jsonrep['client']['verification_required'] && $jsonrep['authtoken']['authtoken']=="") {
                 blink_camera::loginfo("Verification required with email code");
                 $_verifBlink="true";
             }
