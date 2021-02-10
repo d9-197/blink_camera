@@ -1,3 +1,8 @@
+> 2021-02-10
+  + V2.0.1
+  + Fix issue with new login API
+  + **Authentication with pin code send by SMS has not yet been tested. So it may not work**
+
 > 2020-08-26
   + V2.0.0
   + Allow two factors authentication (password + pin code send by Blink)

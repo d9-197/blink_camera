@@ -28,9 +28,10 @@ use GuzzleHttp\Psr7;
  
 class blink_camera extends eqLogic
 {
-    const BLINK_URL_LOGIN="/api/v4/account/login";
+    const BLINK_URL_LOGIN="/api/v5/account/login";
     const BLINK_DEFAULT_USER_AGENT="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36";
-
+    const BLINK_CLIENT_NAME="Jeedom";
+    const BLINK_DEVICE_IDENTIFIER="Jeedom";
     /*     * *************************Attributs****************************** */
     const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;//2019-07-15T18:40:44+00:00
     const FORMAT_DATETIME_OUT="Y-m-d_His" ;//2019-07-15T18:40:44+00:00
@@ -152,9 +153,10 @@ class blink_camera extends eqLogic
                 'sink' => $file_path,
                 //['http_errors' => false],
                 'headers' => [
-                    //'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
+                    'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
                     'TOKEN_AUTH'=> ''.$_tokenBlink,
                     'User-Agent' =>  ''.blink_camera::BLINK_DEFAULT_USER_AGENT,
+                    'Content-Type' => 'application/json',
                     'Accept' => '/'
                     ]
             ]);
@@ -180,6 +182,11 @@ class blink_camera extends eqLogic
             'json' => json_decode($datas)
         ]);
         $jsonrep= json_decode($r->getBody(), true);
+        /*blink_camera::logdebug('#######################################');
+        blink_camera::logdebug('            queryPostLogin');        
+        blink_camera::logdebug(print_r($jsonrep,true));
+        blink_camera::logdebug('#######################################');
+		*/
         return $jsonrep;
     }
     // 
@@ -207,12 +214,18 @@ class blink_camera extends eqLogic
                 'json' => json_decode($datas)
             ]);
             $jsonrep= json_decode($r->getBody(), true);
+            /*blink_camera::logdebug('#######################################');
+            blink_camera::logdebug('            queryPostPinVerify');        
+            blink_camera::logdebug(print_r($jsonrep,true));
+            blink_camera::logdebug('#######################################');
+    		*/
             blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Réponse:'.print_r($jsonrep,true));
-            if ($jsonrep['valide']=='true') {
+            if ($jsonrep['valid']==1) {
                 blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Vérification OK');
-                config::save('verif', 'false', blink_camera);
+                config::save('verif', 'true', blink_camera);
                 return 0;
             } else {
+                config::save('verif', 'false', blink_camera);
                 //blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Vérification KO');
                 return 1;
             }
@@ -256,7 +269,7 @@ class blink_camera extends eqLogic
         //blink_camera::logdebug('isConnected Région : '.$_regionBlink);
         $_verif=config::byKey('verif', 'blink_camera');
         //blink_camera::logdebug('isConnected Vérification : '.$_verif);
-        if ($_tokenBlink!=="" && $_accountBlink!=="" && $_regionBlink!=="" && $_verif!=="true") {
+        if ($_tokenBlink!=="" && $_accountBlink!=="" && $_regionBlink!=="" && $_verif=="true") {
             return true;
         } else {
             blink_camera::logwarn("isConnected() - FALSE");
@@ -325,9 +338,8 @@ class blink_camera extends eqLogic
             config::save('param2_prev', $pwd, blink_camera);
             $notification_key=config::byKey('notification_key', 'blink_camera');
             $unique_id=config::byKey('notification_key', 'blink_camera');
-            $client_name="Jeedom";
-            $device_identifier="Jeedom";
-            $data = "{\"email\" : \"".$email."\",\"password\": \"".$pwd."\",\"notification_key\" : \"".$notification_key."\",\"unique_id\":\"".$unique_id."\",\"device_identifier\":\"".$device_identifier."\",\"client_name\":\"".$client_name."\",\"reauth\":\"false\"}";
+            $_verifBlink=config::byKey('verif', 'blink_camera');
+            $data = "{\"email\" : \"".$email."\",\"password\": \"".$pwd."\",\"notification_key\" : \"".$notification_key."\",\"unique_id\":\"".$unique_id."\",\"device_identifier\":\"".blink_camera::BLINK_DEVICE_IDENTIFIER."\",\"client_name\":\"".blink_camera::BLINK_CLIENT_NAME."\",\"reauth\":\"".$_verifBlink."\"}";
             try {
                 $jsonrep=blink_camera::queryPostLogin(blink_camera::BLINK_URL_LOGIN,$data);
             } catch (TransferException $e) {
@@ -336,7 +348,10 @@ class blink_camera extends eqLogic
                     $code=$response->getStatusCode();
                     if ($code===401) {
                         config::save('token', 'BAD_TOKEN', blink_camera);
+                        config::save('verif', 'false', blink_camera);
                         blink_camera::logdebug('Invalid credentials used for Blink Camera.');
+                        //blink_camera::logdebug(print_r($response,true));
+
                         $date = date_create();
                         $tstamp2=date_timestamp_get($date);
                         //blink_camera::logdebug('getToken()-2 END : '.($tstamp2-$tstamp1).' ms');
@@ -349,20 +364,17 @@ class blink_camera extends eqLogic
                 //blink_camera::logdebug('getToken()-3 END : '.($tstamp2-$tstamp1).' ms');
                 return false;
             }
-            $_tokenBlink=$jsonrep['authtoken']['authtoken'];
-            $_accountBlink=$jsonrep['account']['id'];
-            $_regionBlink=$jsonrep['region']['tier'];
-            $_clientIdBlink=$jsonrep['client']['id'];
-            $_verifBlink="false";
-            if($jsonrep['client']['verification_required']) {
+            $_tokenBlink=$jsonrep['auth']['token'];
+            $_accountBlink=$jsonrep['account']['account_id'];
+            $_regionBlink=$jsonrep['account']['tier'];
+            $_clientIdBlink=$jsonrep['account']['client_id'];
+            if ($_verifBlink=="false") {
                 blink_camera::loginfo("Verification required with email code");
-                $_verifBlink="true";
             }
             config::save('token', $_tokenBlink, blink_camera);
             config::save('account', $_accountBlink, blink_camera);
             config::save('region', $_regionBlink, blink_camera);
             config::save('client', $_clientIdBlink, blink_camera);
-            config::save('verif', $_verifBlink, blink_camera);
             $date = date_create();
             $tstamp2=date_timestamp_get($date);
             //blink_camera::logdebug('getToken()-4 END : '.($tstamp2-$tstamp1).' ms');
@@ -472,26 +484,7 @@ class blink_camera extends eqLogic
         return $force_json_string ? $messag : json_decode($messag,true);
 	}
 
-/*
-    public static function getAccountConfigDatas()
-    {
-        if (self::getToken()) {
-            $_tokenBlink=config::byKey('token', 'blink_camera');
-            $_accountBlink=config::byKey('account', 'blink_camera');
-            $_regionBlink=config::byKey('region', 'blink_camera');
-            $url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page=0';
-            try {
-                $jsonrep=blink_camera::queryGet($url);
-            } catch (TransferException $e) {
-                blink_camera::logdebug('An error occured during Blink Cloud call: '.$url.' - ERROR:'.print_r($e->getMessage(), true));
-                $jsonstr='{"message":"Unable to get configuration information from Blink Cloud"}';
-                return json_decode($jsonstr, true);
-            }
-            return "";
-        }
-        return json_decode('{"message":"{{Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite (F5).}}"}', true);
-    }
-*/
+
     public function reformatVideoDatas(array $jsonin)
     {
         $jsonstr= "[";
