@@ -1,3 +1,8 @@
+> 2021-02-10
+  + V2.0.1
+  + Corrections suite aux modifications des API de connexion Blink
+  + **L'authentification avec code pin envoyé par SMS n'a pas encore été testée. Donc elle peut ne pas fonctionner**
+
 > 2020-08-26
   + V2.0.0
   + Modification du plugin pour permettre l'authentification en 2 étapes (mot de passe + code envoyé par Blink par email)
