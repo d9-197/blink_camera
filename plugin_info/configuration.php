@@ -56,6 +56,9 @@ $("#bt_savePluginConfig").on('click', function (event) {
             <div class="col-lg-3">
                 <a id="bt_test_blink" class="btn btn-success btn-xs">{{Sauvegarder et tester la connexion Blink}}</a>
             </div>
+            <!--div class="col-lg-3">
+                <a id="bt_reinit_blink" class="btn btn-success btn-xs">{{Réinitialiser la config Blink du plugin}}</a>
+            </div-->
         </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Mot de passe}}</label>
@@ -188,6 +191,23 @@ $("#bt_savePluginConfig").on('click', function (event) {
                     }
                 });
     }; 
+    function reinitConfig() {
+        $.ajax({
+                    type: "POST",
+                    url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
+                    data: {
+                        action: "reinitConfig",
+                    },
+                    dataType: 'json',
+                    error: function(request, status, error) {
+                        handleAjaxError(request, status, error,$('#div_alert'));
+                    },
+                    success: function(data) {
+                        checkConnexionBlink(); 
+                        return;
+                    }
+                });
+    }; 
     $('#verifdiv').hide();
     $('#bt_verifypin').on('click', function() {
         $.ajax({
@@ -213,6 +233,10 @@ $("#bt_savePluginConfig").on('click', function (event) {
             checkConnexionBlink();
             sleep(1000);
             checkConnexionBlink();
+
+    })
+    $('#bt_reinit_blink').on('click', function() {
+            reinitConfig();
 
     })
     checkConnexionBlink();
