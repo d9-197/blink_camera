@@ -55,11 +55,24 @@ try {
         $json='{"token":"false"}';
         if ($status===true) {
             $json='{"token":"true"}';
-            if ($need_pin_verification=config::byKey('verif', 'blink_camera')==="true") {
+            if ($need_pin_verification=config::byKey('verif', 'blink_camera')==="false") {
                 $json='{"token":"verif"}';
             }
         }
         //blink_camera::logdebug("test connexion : ".$json);
+        $return=json_encode($json);
+		ajax::success($return);
+    }
+    if (init('action') == 'reinitConfig') {
+        $status = blink_camera::getToken(true);
+        $json='{"reinit":"KO"}';
+        config::save('token', '', 'blink_camera');
+        config::save('account', '', 'blink_camera');
+        config::save('region', '', 'blink_camera');
+        config::save('client', '', 'blink_camera');
+        config::save('verif', '', 'blink_camera');
+        blink_camera::logdebug("reinit config");
+        $json='{"reinit":"OK"}';
         $return=json_encode($json);
 		ajax::success($return);
     }
