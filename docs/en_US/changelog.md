@@ -1,3 +1,7 @@
+> 2021-02-10
+  + V2.0.1
+  + Fix issue with new login API
+
 > 2020-08-26
   + V2.0.0
   + Allow two factors authentication (password + pin code send by Blink)
