@@ -116,7 +116,7 @@ class blink_camera extends eqLogic
         foreach ($eqLogics as $cam) {//parcours tous les équipements du plugin blink_camera
             if ($cam->getIsEnable() == 1  && $cam->getToken(true)) {//vérifie que l'équipement est acitf
                 $cam->forceCleanup(true);
-                $cam->getLastEventDate();
+                $cam->getLastEventDate(true);
                 $cam->refreshCameraInfos();
             }
         }
@@ -339,7 +339,10 @@ class blink_camera extends eqLogic
             $notification_key=config::byKey('notification_key', 'blink_camera');
             $unique_id=config::byKey('notification_key', 'blink_camera');
             $_verifBlink=config::byKey('verif', 'blink_camera');
-            $data = "{\"email\" : \"".$email."\",\"password\": \"".$pwd."\",\"notification_key\" : \"".$notification_key."\",\"unique_id\":\"".$unique_id."\",\"device_identifier\":\"".blink_camera::BLINK_DEVICE_IDENTIFIER."\",\"client_name\":\"".blink_camera::BLINK_CLIENT_NAME."\",\"reauth\":\"".$_verifBlink."\"}";
+            if ($_verifBlink=="true") {
+                $reauthArg=",\"reauth\":\"true\"";
+            }
+            $data = "{\"email\" : \"".$email."\",\"password\": \"".$pwd."\",\"notification_key\" : \"".$notification_key."\",\"unique_id\":\"".$unique_id."\",\"device_identifier\":\"".blink_camera::BLINK_DEVICE_IDENTIFIER."\",\"client_name\":\"".blink_camera::BLINK_CLIENT_NAME."\"".$reauthArg."}";
             try {
                 $jsonrep=blink_camera::queryPostLogin(blink_camera::BLINK_URL_LOGIN,$data);
             } catch (TransferException $e) {
@@ -647,6 +650,7 @@ class blink_camera extends eqLogic
                 blink_camera::logdebug('getCameraInfo - An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                 return $jsonrep;
             }
+            //blink_camera::logdebug('getCameraInfo  '.$url. ' - response:'.print_r($jsonrep, true));
             return $jsonrep;
         }
 	}
@@ -868,7 +872,7 @@ class blink_camera extends eqLogic
         return json_decode($jsonstr, true);
     }
 
-    public function getLastEventDate()
+    public function getLastEventDate($ignorePrevious=false)
     {
         if ($this->isConfigured()) {
             //blink_camera::logdebug('blink_camera->getLastEventDate() START');
@@ -883,7 +887,7 @@ class blink_camera extends eqLogic
                     $dtim=date_add($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
                 }
                 $new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
-                if (isset($new) && $new!="" && $new>$previous) {
+                if (isset($new) && $new!="" && ($new>$previous || $ignorePrevious)) {
                     //blink_camera::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
                     $this->checkAndUpdateCmd('last_event', $new);
                     $pathThumb=blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at']));
@@ -927,6 +931,7 @@ class blink_camera extends eqLogic
 	}
 	public function refreshCameraInfos() {
 		if ($this->isConfigured()) {
+            //$urlFile=$this->getCameraThumbnail();
             if ($this->getBlinkDeviceType()!=="owl") {
                 $datas=$this->getCameraInfo();
                 if (!$datas['message']) {
@@ -936,6 +941,7 @@ class blink_camera extends eqLogic
                     if ($blink_tempUnit==="C") {
                         $tempe =($tempe - 32) / 1.8;
                     }
+                    
                     $this->checkAndUpdateCmd('temperature', $tempe);
                     $this->setConfiguration('camera_temperature',$tempe);
                     // MAJ Power 
@@ -1115,12 +1121,30 @@ class blink_camera extends eqLogic
         // On controle que l'on soit bien dans le dossier de stockage des medias du plugin !                
         if (strpos($filepath, '/plugins/blink_camera/') !== false && strpos($filepath, '/medias/') !== false) {
             $mediaId=explode('-',basename($filepath))[0];
+
+           
             if (isset($mediaId) && $mediaId!="" && self::isConnected()) {
                 $_accountBlink=config::byKey('account', 'blink_camera');
                 $datas='{"media_list":['.$mediaId.']}';
                 $url='/api/v1/accounts/'.$_accountBlink.'/media/delete';
                 try {
                     $jsonrep=blink_camera::queryPost($url,$datas);
+                    // Recup de la camera concernée pour vérifier si on est sur la suppression du dernier event
+                    $cameraId=explode('/',explode('/medias/',$filepath)[1])[0];
+                    $eqLogics = self::byType('blink_camera', true);
+                    foreach ($eqLogics as $blink_camera) {
+                        if ($blink_camera->getId() == $cameraId) {
+                                $infoCmd=$blink_camera->getCmd(null, 'last_event');
+                                if (is_object($infoCmd)) {
+                                    $previous=$infoCmd->execCmd();
+                                    $fichier=basename($filepath);
+                                    if (strpos($fichier, $previous) !== false) {
+                                        // Si on a supprimé le dernier event, on force le recalcul de la date de dernier event
+                                        $blink_camera->getLastEventDate(true);
+                                    }
+                                }
+                        }
+                    }
                     if ($jsonrep['code']==='711') {
                         return true;
                     } 
