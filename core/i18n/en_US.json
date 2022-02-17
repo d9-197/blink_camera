@@ -48,7 +48,8 @@
         "Adresse de Jeedom à utiliser pour les URL":"Jeedom address to use for URLs",
         "Interne": "Internal",
         "Externe": "External",
-        "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?": "The page must be reloaded to reflect the changes. Would you like to reload the page now?"
+        "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?": "The page must be reloaded to reflect the changes. Would you like to reload the page now?",
+        "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Show camera thumbnail if no video available?"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
