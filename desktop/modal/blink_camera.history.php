@@ -31,7 +31,7 @@ if ($nbMax <= 0) {
 }
 $cptVideo=0;
 if ($blink_camera->getToken()) {
-    for ($page=1;$page<=10;$page++) {
+    for ($page=1;$page<=50;$page++) {
         if ($nbMax>0 && $cptVideo>=($nbMax)) {
             break;
         };
