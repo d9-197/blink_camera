@@ -36,6 +36,8 @@ class blink_camera extends eqLogic
     const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;//2019-07-15T18:40:44+00:00
     const FORMAT_DATETIME_OUT="Y-m-d_His" ;//2019-07-15T18:40:44+00:00
     const ERROR_IMG="/plugins/blink_camera/img/error.png";
+    const NO_EVENT_IMG="/plugins/blink_camera/img/no_event.png";
+    
     //public static $_widgetPossibility = array('custom' => true, 'custom::layout' => true);
 	public static $_widgetPossibility = array('custom' => array(
         'visibility' => true,
@@ -76,7 +78,7 @@ class blink_camera extends eqLogic
         }
         foreach ($eqLogics as $cam) {
             if ($cam->getIsEnable() == 1  && $cam->getToken()) {
-                $last_event=$cam->getLastEvent();
+                $last_event=$cam->getLastEvent(false);
                 if (isset($last_event)) { 
                    self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                 }
@@ -422,7 +424,9 @@ class blink_camera extends eqLogic
         $jsonstr=$jsonstr."]}";
         return $jsonstr;
     }
-
+    public static function getNoEventImg() {
+        return blink_camera::NO_EVENT_IMG; 
+    }
     public static function reformatConfigDatas2(array $jsonin)
     {
         $account=config::byKey('account', 'blink_camera');
@@ -745,8 +749,8 @@ class blink_camera extends eqLogic
                 $videos=$this->getVideoList($page);
                 $videosJson=json_decode($videos, true);
                 $existVideoInPage=false;
-                // Si en cherchant des videos on a rencontré 10 pages vides, on arrete de rechercher (perfo)
-                if ($pageVide>=10) {
+                // Si en cherchant des videos on a rencontré 50 pages vides, on arrete de rechercher (perfo)
+                if ($pageVide>=50) {
                     break;
                 }
                 foreach ($videosJson as $video) {
@@ -832,18 +836,18 @@ class blink_camera extends eqLogic
             }
         }
 
-        $temp =$this->getLastEvent();
+        $temp =$this->getLastEvent(false);
         self::getMedia($temp['media'], $this->getId(), 'last','mp4');
         
 		// récup thumbnail de la caméra
 		$this->getCameraThumbnail();
     }
 
-    public function getLastEvent($include_deleted=true)
+    public function getLastEvent($include_deleted=false)
     {
         //blink_camera::logdebug('blink_camera->getLastEvent() start');
         // on boucle sur les pages au cas ou les premières pages ne contiendraient que des event supprimés
-        for ($page=1;$page<=10;$page++) {
+        for ($page=1;$page<=50;$page++) {
             $jsonvideo=$this->getVideoList($page);
             foreach (json_decode($jsonvideo, true) as $event) {
                 if ($include_deleted || $event['deleted']===false) {
@@ -866,6 +870,8 @@ class blink_camera extends eqLogic
                 //blink_camera::logdebug('blink_camera->getLastEvent() return an event:'.$last_event['created_at']);
                 self::getMedia($last_event['media'], $this->getId(), 'last','mp4');
                 return $last_event;
+            } else {
+                return null;
             }
         }
         $jsonstr='[{"id":"error",deleted":false,"device_id":"xxxxx","device_name":"xxxx","media":"xxxxxxx","thumbnail":"/plugins/blink_camera/medias/x0.png","created_at":"2019-01-01T00:00:01+0000"}]';
@@ -877,7 +883,23 @@ class blink_camera extends eqLogic
         if ($this->isConfigured()) {
             //blink_camera::logdebug('blink_camera->getLastEventDate() START');
 			$event = $this->getLastEvent(false);
-			$infoCmd=$this->getCmd(null, 'last_event');
+            $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
+            $hauteurVignette=720*$facteur;
+            $largeurVignette=1280*$facteur;
+            $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
+            $urlFile=blink_camera::ERROR_IMG;
+            if (!isset($event)) {
+                $this->checkAndUpdateCmd('last_event', "-");
+                $this->checkAndUpdateCmd('thumb_path',"-");
+                $this->checkAndUpdateCmd('thumb_url',"-");
+                $this->checkAndUpdateCmd('clip_path',"-");
+                $this->checkAndUpdateCmd('clip_url',"-");
+                $urlLine ='<img src="#urlFile#"  height="'.($hauteurVignette/2).'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
+                $replace['#urlFile#']=blink_camera::getNoEventImg();
+//                $replace['#urlFile#']=$this->getCameraThumbnail();
+                $this->checkAndUpdateCmd('thumbnail',template_replace($replace, $urlLine));
+            }
+            $infoCmd=$this->getCmd(null, 'last_event');
             if (is_object($infoCmd)) {
                 $previous=$infoCmd->execCmd();
                 $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $event['created_at']);
@@ -900,11 +922,6 @@ class blink_camera extends eqLogic
                     $urlLastVideo=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",$pathLastVideo);
                     $this->checkAndUpdateCmd('clip_url',$urlLastVideo);
                     
-                    $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
-                    $hauteurVignette=720*$facteur;
-                    $largeurVignette=1280*$facteur;
-                    $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
-                    $urlFile=blink_camera::ERROR_IMG;
                     if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="1") {
                         // On affiche la vignette de la caméra
                         $urlFile=$this->getCameraThumbnail();
@@ -931,6 +948,7 @@ class blink_camera extends eqLogic
 	}
 	public function refreshCameraInfos() {
 		if ($this->isConfigured()) {
+            $this->emptyCacheWidget();
             //$urlFile=$this->getCameraThumbnail();
             if ($this->getBlinkDeviceType()!=="owl") {
                 $datas=$this->getCameraInfo();
@@ -966,6 +984,10 @@ class blink_camera extends eqLogic
                     $this->checkAndUpdateCmd('wifi_strength', $wifi);
                     $this->setConfiguration('camera_wifi',$wifi);
                 }
+            } else {
+                $this->checkAndUpdateCmd('battery', 100);
+                $this->setConfiguration('battery',100);
+                $this->batteryStatus(100);
             }
             $datas=blink_camera::getHomescreenData();
             if (!$datas['message']) {
@@ -1563,99 +1585,8 @@ class blink_camera extends eqLogic
     
     public function toHtml($_version = 'dashboard', $_fluxOnly = false)
     {
-        if ($_version=="dashboard" && $this->getConfiguration("blink_dashboard_custom_widget")==="1") {
-            if ($_fluxOnly) {
-                $replace = $this->preToHtml($_version, array(), true);
-            } else {
-                $replace = $this->preToHtml($_version);
-            }
-            if (!is_array($replace)) {
-                return $replace;
-            }
-            $version = jeedom::versionAlias($_version);
-            $version2 = jeedom::versionAlias($_version, false);
-            $action = '';
-            $info = '';
-           
-            foreach ($this->getCmd() as $cmd) {
-                if ($cmd->getIsVisible() == 1) {
-                    if ($cmd->getLogicalId() != 'refresh') {
-                        if ($cmd->getType() == 'action' && $cmd->getSubType() == 'other') {
-                            $replaceCmd = array(
-                                '#id#' => $cmd->getId(),
-                                '#name#' => ($cmd->getDisplay('icon') != '') ? $cmd->getDisplay('icon') : $cmd->getName(),
-                            );
-                            if ($cmd->getDisplay('showNameOn' . $version2, 1) == 0) {
-                                $replaceCmd['#hideCmdName#'] = 'display:none;';
-                            }
-                            if ($cmd->getDisplay('showIconAndName' . $version2, 0) == 1) {
-                                $replaceCmd['#name#'] = $cmd->getDisplay('icon') . ' ' . $cmd->getName();
-                            }
-                            $action .= template_replace($replaceCmd, getTemplate('core', $version, 'blink_camera_action', 'blink_camera')) . ' ';
-                        } else {
-                            if ($cmd->getType() == 'info') {
-                                $info .= $cmd->toHtml($_version);
-                            } else {
-                                $action .= $cmd->toHtml($_version);
-                            }
-                        }
-                        
-                        if ($cmd->getDisplay('forceReturnLineAfter', 0) == 1) {
-                            $action .= '<br/>';
-                        }
-                    }
-                }
-            }
-    
-            $replace['#action#'] = $action;
-            $replace['#info#'] = $info;
-            $urlLine ='  <img src="#urlFile#" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
-            $replace['#urlFile#']=blink_camera::ERROR_IMG;
-            if ($this->isConfigured()) {
-                $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
-                $hauteurVignette=720*$facteur;
-                if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="1") {
-                    // On affiche la vignette de la caméra
-                        $urlLine ='  <img src="#urlFile#" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
-                        $replace['#urlFile#']=$this->getCameraThumbnail();
-                } else {
-                    $temp=$this->getLastEvent(false);
-                    //blink_camera::logdebug('blink_camera->toHtml() after last event '.$temp[$media_type]);
-                    if (isset($temp) && isset($temp['created_at'])) {
-                        if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="3") {
-                            //On affiche la video
-                            $dir= dirname(__FILE__).'/../../../../';
-                            $media_type='media';
-                            $urlLine ='<video class="displayVideo vignette" height="'.$hauteurVignette.'" controls loop data-src="core/php/downloadFile.php?pathfile=#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="core/php/downloadFile.php?pathfile=#urlFile#">Your browser does not support the video tag.</video>';
-                            $replace['#urlFile#']=urlencode($dir.self::getMedia($temp[$media_type], $replace['#id#'], $temp['id'].'-'.blink_camera::getDateJeedomTimezone($temp['created_at'])));
-                        } else {
-                            //On affiche la vignette de la derniere video
-                            $media_type='thumbnail';
-                            $urlLine ='  <img src="#urlFile#" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="#id#"/>';
-                            $replace['#urlFile#']=self::getMedia($temp[$media_type], $replace['#id#'], $temp['id'].'-'.blink_camera::getDateJeedomTimezone($temp['created_at']));
-                        }
-                    }
-                }
-                $replace['#urlLine#']=template_replace($replace, $urlLine);
-            }
-            $replace['#limite_nb_video#']="";
-            $nbMax= (int) config::byKey('nb_max_video', 'blink_camera');
-            if ($nbMax > 0) {
-                $replace['#limite_nb_video#']="- ".$nbMax." dernières vidéos";
-            }
-            //blink_camera::logdebug('toHtml() REPLACE VALUES: '.print_r($replace,true));
-            if ($this->isConfigured()) {
-                if (!$_fluxOnly) {
-                    return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera', 'blink_camera')));
-                } else {
-                    return template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_flux_only', 'blink_camera'));
-                }
-            } else {
-                return $this->postToHtml($_version, template_replace($replace, getTemplate('core', jeedom::versionAlias($version), 'blink_camera_not_config', 'blink_camera')));
-            }
-        } else {
-            return parent::toHtml($_version);
-        }
+        // L'affichage des vignettes est géré dans lastEventDate()
+        return parent::toHtml($_version);
     }
 
     /*
@@ -1671,18 +1602,10 @@ class blink_camera extends eqLogic
      */
     public static function postConfig_param1($value)
     {
-        //config::save('token', '', blink_camera);
-        //config::save('account', '', blink_camera);
-        //onfig::save('region', '', blink_camera);
-        //self::getToken(true);
         self::postConfigOverall($value);
     }
     public static function postConfig_param2($value)
     {
-        //config::save('token', '', blink_camera);
-        //config::save('account', '', blink_camera);
-        //config::save('region', '', blink_camera);
-        //self::getToken(true);
         self::postConfigOverall($value);
     }
     public static function postConfig_blink_dashboard_content_type($value)
@@ -1700,10 +1623,6 @@ class blink_camera extends eqLogic
         foreach ($eqLogics as $blink_camera) {
             if ($blink_camera->getIsEnable() == 1) {
                 $blink_camera->emptyCacheWidget();
-                /*$cmd = $blink_camera->getCmd(null, 'refresh');
-                if (is_object($cmd)) {
-                    $cmd->execCmd();
-				}*/
             }
         }
     }
@@ -1721,72 +1640,10 @@ class blink_cameraCmd extends cmd
 
     /*     * *********************Methode d'instance************************* */
     public function toHtml($_version = 'dashboard', $_options = '', $_cmdColor = null) {
-        //blink_camera::logdebug('cmd:'.print_r($this->getTemplate(),true));
-        if ($this->getLogicalId()==='thumbnailOFF') {
-            $bl_cam=$this->getEqLogic();
-            $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
-            $hauteurVignette=720*$facteur;
-            $largeurVignette=1280*$facteur;
-            //$urlLine ='  <img src="#urlFile#" class="vignette" />';
-            $urlLine ='  <img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$bl_cam->getId().'"/>';
-           
-            $urlFile=blink_camera::ERROR_IMG;
+        
+        // L'affichage des vignettes est géré dans lastEventDate()
 
-            if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
-                if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="1") {
-                    // On affiche la vignette de la caméra
-                    $urlFile=$bl_cam->getCameraThumbnail();
-                } else {
-                    $temp=$bl_cam->getLastEvent(false);
-                    if (isset($temp) && isset($temp['created_at'])) {
-                        if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="3") {
-                            //On affiche la video
-                            $dir= dirname(__FILE__).'/../../../../';
-                            $media_type='media';
-                            $urlLine ='<video class="displayVideo vignette" height="'.$hauteurVignette.'"  data-eqLogic_id="'.$bl_cam->getId().'" controls loop data-src="core/php/downloadFile.php?pathfile=#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="core/php/downloadFile.php?pathfile=#urlFile#">Your browser does not support the video tag.</video>';
-                            $urlFile=urlencode($dir.blink_camera::getMedia($temp[$media_type], $bl_cam->getId(), $temp['id'].'-'.blink_camera::getDateJeedomTimezone($temp['created_at'])));
-                        } else {
-                            //On affiche la vignette de la derniere video
-                            $media_type='thumbnail';
-                            $urlFile=blink_camera::getMedia($temp[$media_type], $bl_cam->getId(), blink_camera::getDateJeedomTimezone($temp['created_at']));
-                        }
-                    }
-                }
-            } else {
-                $result='<span class="cmd reportModeHidden cmd-widget ui-sortable-handle" style="display: inline !important;margin-right: 2px;" data-type="'.$this->getType().'" data-subtype="'.$this->getSubType().'" data-cmd_id="'.$this->getId().'" data-cmd_uid="'.'cmd' . $this->getId() . eqLogic::UIDDELIMITER . mt_rand() . eqLogic::UIDDELIMITER.'" data-version="'.$_version.'" data-eqLogic_id="'.$bl_cam->getId().'">';
-                $result.='Unable to connect to Blink account';
-                $result.='</span>';
-                return  $result;
-            }
-            $replace['#urlFile#']=$urlFile;
-            $replace['#id#']=$this->getId();
-            $result='<span class="cmd reportModeHidden cmd-widget ui-sortable-handle" style="display: inline !important;margin-right: 2px;" data-type="'.$this->getType().'" data-subtype="'.$this->getSubType().'" data-cmd_id="'.$this->getId().'" data-cmd_uid="'.'cmd' . $this->getId() . eqLogic::UIDDELIMITER . mt_rand() . eqLogic::UIDDELIMITER.'" data-version="'.$_version.'" data-eqLogic_id="'.$bl_cam->getId().'">';
-            $result.=$urlLine;
-            $result.='</span>';
-            $result.="<script>";
-            $result.="$('.eqLogic-widget.eqLogic[data-eqLogic_id=".$bl_cam->getId()."]').css('min-height','".$hauteurVignette."px');";
-            $result.="$('.eqLogic-widget.eqLogic[data-eqLogic_id=".$bl_cam->getId()."]').css('min-width','".$largeurVignette."px');";
-            $result.="jeedom.cmd.update['#id#'] = function(_options) {";
-            $result.="var cmd = $('.cmd[data-cmd_id=#id#]')";
-            $result.="cmd.attr('title','Date de valeur : '+_options.valueDate+'<br/>Date de collecte : '+_options.collectDate)";
-                $result.="cmd.find('.state').empty().append(_options.display_value)";
-                $result.="if(_options.alertLevel){";
-                    $result.="if(_options.alertLevel == 'warning'){";
-                        $result.="cmd.addClass('label label-warning')";
-                        $result.="cmd.attr('data-alertlevel','warning');";
-                        $result.="}else if(_options.alertLevel == 'danger'){";
-                            $result.="cmd.addClass('label label-danger')";
-                            $result.="cmd.attr('data-alertlevel','danger');";
-				            $result.="}else{";
-					            $result.="cmd.removeClass('label label-warning label-danger')";
-					            $result.="cmd.attr('data-alertlevel','none');";
-                                $result.="}";
-                                $result.="}";
-            $result.="}";
-            $result.="jeedom.cmd.update['#id#']({display_value:'#state#',valueDate:'#valueDate#',collectDate:'#collectDate#',alertLevel:'#alertLevel#'})";
-	        $result.="</script>";
-            return template_replace($replace, $result);
-        } else if ($this->getLogicalId()==='history') {
+        if ($this->getLogicalId()==='history') {
             $bl_cam=$this->getEqLogic();
             if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
                 //blink_camera::logdebug('toHtml history : '.print_r(parent::toHtml($_version,$_options,$_cmdColor),true));
@@ -1806,10 +1663,6 @@ class blink_cameraCmd extends cmd
             $bl_cam=$this->getEqLogic();
             if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
                 $result= parent::toHtml($_version, $_options, $_cmdColor);
-                /*$cmdValue =$this->execCmd();
-                $result.='<span class=\'btn btn-sm\'>';
-                $result.='<a class=\'state\' href=\''.$cmdValue.'\' target=\'new\'>Ouvrir dans un nouvel onglet</a>';
-                $result.='</span>';*/
                 return $result;
             } else {
                 return "";
