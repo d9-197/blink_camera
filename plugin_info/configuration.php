@@ -99,11 +99,17 @@ $("#bt_savePluginConfig").on('click', function (event) {
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Contenu de la vignette}}</label>
             <div class="col-lg-3">
-                <select  class="configKey form-control" data-l1key="blink_dashboard_content_type">
+                <select  id="thumb_type_select" class="configKey form-control" data-l1key="blink_dashboard_content_type">
                     <option value="1">{{Vignette de la caméra}}</option>
                     <option value="2">{{Vignette de la dernière vidéo}}</option>
                     <option value="3">{{Dernière vidéo}}</option>
                 </select>
+            </div>
+        </div>
+        <div class="form-group" id="fallback_thumb">
+            <label class="col-lg-5 control-label">{{Afficher la vignette de caméra s'il n'y a pas de vidéo ?}}</label>
+            <div class="col-lg-1">
+                <input  type="checkbox"class="configKey form-control" data-l1key="fallback_to_thumbnail"/>
             </div>
         </div>
         <div class="form-group">
@@ -238,6 +244,14 @@ $("#bt_savePluginConfig").on('click', function (event) {
     $('#bt_reinit_blink').on('click', function() {
             reinitConfig();
 
+    })
+    
+    $('#thumb_type_select').on('change', function() {
+        if ($('#thumb_type_select').val()==2 || $('#thumb_type_select').val()==3) {
+            $(fallback_thumb).show();
+        } else {
+            $(fallback_thumb).hide();
+        }
     })
     checkConnexionBlink();
     </script>
