@@ -809,7 +809,9 @@ class blink_camera extends eqLogic
                         $path=$this->getMedia($urlMedia, $this->getId(), $filename);
                         //blink_camera::logdebug( 'blink_camera->forceCleanup() download file: '. $filename);
                         $filenameThumb=str_replace(".mp4",".jpg",$filename);
-                        $path=$this->getMedia($fileCloudThumb[$filenameThumb], $this->getId(), $filenameThumb);                        
+                        // Fix du 29 03 2022 : 
+                        //$path=$this->getMedia($fileCloudThumb[$filenameThumb], $this->getId(), $filenameThumb);                        
+                        $path=$this->getMedia($fileCloudThumb[$filenameThumb], $this->getId(), $filenameThumb,"jpg");                        
                         //blink_camera::logdebug( 'blink_camera->forceCleanup() download file: '. $filenameThumb);
                     }
                 }
