@@ -809,7 +809,9 @@ class blink_camera extends eqLogic
                         $path=$this->getMedia($urlMedia, $this->getId(), $filename);
                         //blink_camera::logdebug( 'blink_camera->forceCleanup() download file: '. $filename);
                         $filenameThumb=str_replace(".mp4",".jpg",$filename);
-                        $path=$this->getMedia($fileCloudThumb[$filenameThumb], $this->getId(), $filenameThumb);                        
+                        // Fix du 29 03 2022 : 
+                        //$path=$this->getMedia($fileCloudThumb[$filenameThumb], $this->getId(), $filenameThumb);                        
+                        $path=$this->getMedia($fileCloudThumb[$filenameThumb], $this->getId(), $filenameThumb,"jpg");                        
                         //blink_camera::logdebug( 'blink_camera->forceCleanup() download file: '. $filenameThumb);
                     }
                 }
@@ -903,7 +905,7 @@ class blink_camera extends eqLogic
                     if (isset($new) && $new!="" && ($new>$previous || $ignorePrevious)) {
                         //blink_camera::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
                         $this->checkAndUpdateCmd('last_event', $new);
-                        $pathThumb=blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at']));
+                        $pathThumb=blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at']),'jpg');
                         $this->checkAndUpdateCmd('thumb_path',$pathThumb);
                         $urlThumb=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",$pathThumb);
                         $this->checkAndUpdateCmd('thumb_url',$urlThumb);
