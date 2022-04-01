@@ -1,4 +1,9 @@
-> 2021-02-10
+> 2022-02-17
+  + V2.1.0
+  + Change thumbnail display : thumbnail of the camera can be display if no video is available (not for Blink Mini camera).
+  + Fix the issue of displaying messages in the configuration view (since Jeedom v4.2)
+  
+  > 2021-02-10
   + V2.0.1
   + Fix issue with new login API
   + **Authentication with pin code send by SMS has not yet been tested. So it may not work**

@@ -1,3 +1,8 @@
+> 2022-02-17
+  + V2.1.0
+  + Modification de l'affichage des vignettes : possibilité d'afficher de la vignette de la caméra s'il n'y a pas de vidéo (pas disponible pour les caméra Blink Mini).
+  + Correction de l'affichage des messages dans la partie configuration suite à l'arrivée de la version 4.2 de Jeedom
+
 > 2021-02-10
   + V2.0.1
   + Corrections suite aux modifications des API de connexion Blink
