@@ -884,20 +884,49 @@ class blink_camera extends eqLogic
     {
         if ($this->isConfigured()) {
             //blink_camera::logdebug('blink_camera->getLastEventDate() START');
-            $event = $this->getLastEvent(false);
+			$event = $this->getLastEvent(false);
+            $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
+            $hauteurVignette=720*$facteur;
+            $largeurVignette=1280*$facteur;
+            $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
+            $urlFile=blink_camera::ERROR_IMG;
             if (!isset($event)) {
                 $this->checkAndUpdateCmd('last_event', "-");
                 $this->checkAndUpdateCmd('thumb_path',"-");
                 $this->checkAndUpdateCmd('thumb_url',"-");
                 $this->checkAndUpdateCmd('clip_path',"-");
                 $this->checkAndUpdateCmd('clip_url',"-");
-            } else {
-                $infoCmd=$this->getCmd(null, 'last_event');
-                if (is_object($infoCmd) && isset($event)) {
-                    $previous=$infoCmd->execCmd();
-                    $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $event['created_at']);
-                    if (getTZoffsetMin()<0) {
-                        $dtim=date_sub($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
+                $urlLine ='<img src="#urlFile#"  height="'.($hauteurVignette/2).'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
+                $replace['#urlFile#']=blink_camera::getNoEventImg();
+//                $replace['#urlFile#']=$this->getCameraThumbnail();
+                $this->checkAndUpdateCmd('thumbnail',template_replace($replace, $urlLine));
+            }
+            $infoCmd=$this->getCmd(null, 'last_event');
+            if (is_object($infoCmd)) {
+                $previous=$infoCmd->execCmd();
+                $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $event['created_at']);
+                if (getTZoffsetMin()<0) {
+                    $dtim=date_sub($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
+                } else {
+                    $dtim=date_add($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
+                }
+                $new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
+                if (isset($new) && $new!="" && ($new>$previous || $ignorePrevious)) {
+                    //blink_camera::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
+                    $this->checkAndUpdateCmd('last_event', $new);
+                    $pathThumb=blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at']));
+                    $this->checkAndUpdateCmd('thumb_path',$pathThumb);
+                    $urlThumb=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",$pathThumb);
+                    $this->checkAndUpdateCmd('thumb_url',$urlThumb);
+                    //$this->logdebug("ROOT: ".(!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/');
+                    $pathLastVideo=blink_camera::getMedia($event['media'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at']));
+                    $this->checkAndUpdateCmd('clip_path',$pathLastVideo);
+                    $urlLastVideo=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",$pathLastVideo);
+                    $this->checkAndUpdateCmd('clip_url',$urlLastVideo);
+                    
+                    if (config::byKey('blink_dashboard_content_type', 'blink_camera')==="1") {
+                        // On affiche la vignette de la caméra
+                        $urlFile=$this->getCameraThumbnail();
                     } else {
                         $dtim=date_add($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
                     }
