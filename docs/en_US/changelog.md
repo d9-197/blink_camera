@@ -1,3 +1,8 @@
+> 2022-04-06
+  + V2.2.0
+  + Fix camera thumbnail display
+  + security patch
+
 > 2022-02-17
   + V2.1.0
   + Change thumbnail display : thumbnail of the camera can be display if no video is available (not for Blink Mini camera).
