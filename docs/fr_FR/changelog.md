@@ -1,3 +1,8 @@
+> 2022-04-06
+  + V2.2.0
+  + Correction de l'affichage des "vignettes de la caméra"
+  + Patch de sécurité
+
 > 2022-02-17
   + V2.1.0
   + Modification de l'affichage des vignettes : possibilité d'afficher de la vignette de la caméra s'il n'y a pas de vidéo (pas disponible pour les caméra Blink Mini).
