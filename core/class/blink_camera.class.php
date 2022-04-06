@@ -660,14 +660,30 @@ class blink_camera extends eqLogic
 	}
 
 	public function getCameraThumbnail() {
-        $datas=blink_camera::getHomescreenData();
-        $camera_id = $this->getConfiguration("camera_id");
-        foreach ($datas['cameras'] as $device) {
-            if ("".$device['id']==="".$camera_id) {
-				//blink_camera::logdebug('devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
-                $path=$this->getMedia($device['thumbnail'].'.jpg', $this->getId(),"thumbnail","jpg");
-            }
-        }
+		if ($this->getBlinkDeviceType()!=="owl") {
+	      	$lastThumbnailTime = $this->getConfiguration("last_thumbnail_time");
+	      	$newtime=time();
+	      	if ($newtime-$lastThumbnailTime>5*60) {
+		        $datas=blink_camera::getHomescreenData();
+	    	    $camera_id = $this->getConfiguration("camera_id");
+	        	foreach ($datas['cameras'] as $device) {
+              		if ("".$device['id']==="".$camera_id) {
+	                  	//blink_camera::logdebug('devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
+	                  	$path=$this->getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail","jpg",true);
+              		}
+	        	}
+          		$this->setConfiguration("last_thumbnail_time",$newtime);
+          		if (isset($path) && $path <> "") {
+            		$path=$path."?".$this->generateRandomString();
+          		}
+          		#blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
+          		$this->setConfiguration("last_thumbnail_url",$path);
+          		$this->save();
+			} else {
+          		$path= $this->getConfiguration("last_thumbnail_url");
+	      		#blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- not need to refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
+        	}
+		}
 		return $path;
 	}
 
@@ -880,10 +896,20 @@ class blink_camera extends eqLogic
         return json_decode($jsonstr, true);
     }
 
+  function generateRandomString($length = 10) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+	}
+  
     public function getLastEventDate($ignorePrevious=false)
     {
         if ($this->isConfigured()) {
-            //blink_camera::logdebug('blink_camera->getLastEventDate() START');
+            #blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' START');
             $event = $this->getLastEvent(false);
             if (!isset($event)) {
                 $this->checkAndUpdateCmd('last_event', "-");
@@ -953,9 +979,9 @@ class blink_camera extends eqLogic
         }
 	}
 	public function refreshCameraInfos() {
-		if ($this->isConfigured()) {
+		if ($this->isConfigured()&& $this->isConnected()) {
+            $this->getCameraThumbnail();
             $this->emptyCacheWidget();
-            //$urlFile=$this->getCameraThumbnail();
             if ($this->getBlinkDeviceType()!=="owl") {
                 $datas=$this->getCameraInfo();
                 if (!$datas['message']) {
