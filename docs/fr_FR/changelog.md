@@ -1,3 +1,11 @@
+> 2022-04-11
+  + **BETA V2.3.0**
+  + Ajout de l'action "Prendre une photo"
+  + **Sécurité** - Ajout dans la configuration du plugin de _"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?"_
+    - Si la case est cochée, les URLs des vidéos (et images) ne pourront être ouvertes que si l'utilisateur est déjà connecté à Jeedom
+    - Si la case n'est pas cochée, les urls sont librement accessibles
+
+
 > 2022-04-06
   + V2.2.0
   + Correction de l'affichage des "vignettes de la caméra"

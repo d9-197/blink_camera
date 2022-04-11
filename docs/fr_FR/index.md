@@ -11,20 +11,30 @@ Les informations liées à la caméra sont également disponibles :
 * Puissance du wifi,
 * Voltage des piles.
 
+>**Dans le plugin, les caméras Blink Mini n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini**
+
 
 # Configuration du plugin
 
 Dans l'écran de configuration du plugin les options suivantes sont disponibles :
 
 * Compte Blink
-  + Zone permettant de saisir l'email et le mot de passe associés à votre compte Blink
+  + Zone permettant de saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisi du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
+
+* Sécurité
+  + _"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?"_
+    - Si la case est cochée, les URLs des vidéos (et images) ne pourront être ouvertes que si l'utilisateur est déjà connecté à Jeedom
+    - Si la case n'est pas cochée, les urls sont librement accessibles
+
+  + Adresse de Jeedom à utiliser pour les URLs : permet de choisir qu'elle URL de Jeedom sera utilisée dans les infos "URL dernière vidéo" et "URL vignette".
+    *Ces URL correspondent à celles que vous avez définies dans la configuration de votre système Jeedom : Menu "Réglages / Système / Configuration" puis onglet "Réseaux" : accès interne ou accès externe.*
+
+>**Il est conseillé de ne choisir "Accès externe" que si vous avez coché "Bloquer l'accès aux URLs..."**
 
 * Widget
   + Contenu de la vignette : permet de choisir ce qui est affiché dans le widget
   + Taille de la vignette : permet de définir la réduction à appliquer (en pourcentage de la taille initiale).
-  + Adresse de Jeedom à utiliser pour les URL : permet de choisir qu'elle URL de Jeedom sera utilisée dans les infos "URL dernière vidéo" et "URL vignette".
 
-    *Ces URL correspondent à celles que vous avez défini dans la configuration de votre système Jeedom : Menu "Réglages / Système / Configuration" puis onglet "Réseaux" : accès interne ou accès externe.*
 
 * Vue historique
   + Cette vue est accessible depuis le widget
@@ -63,7 +73,7 @@ La fenêtre de configuration de l'équipement s'ouvre ensuite.
 
 Les options standard des équipements Jeedom sont en haut de l'écran.
 
-Si vous avez correctement configuré votre compte Blink (voir configuration du plugin), 3 autres options sont diposnibles dans la partie basse de l'écran :
+Si vous avez correctement configuré votre compte Blink (voir configuration du plugin), 2 autres options sont diposnibles dans la partie basse de l'écran :
 - Système : Correspond au système créé dans votre application Blink.
 - Caméra : vous permet de sélectionner la caméra à utiliser avec cet équipement
 
@@ -76,6 +86,8 @@ Si vous avez correctement configuré votre compte Blink (voir configuration du p
 Les commandes sont automatiquement créées lors de la création de l'équipement.
 
 Des icônes sont associées aux actions, vous pouvez les modifier de manière classique dans Jeedom.
+
+Les cases à cocher "Afficher" vous permettent de choisir les informations ou commandes qui seront visibles sur le widget.
 
 ![Onglet commandes](..\assets\images\cfg_commands.png "Commandes")
 

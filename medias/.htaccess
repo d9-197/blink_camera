@@ -1,0 +1,10 @@
+# Right on file
+
+Order Allow,Deny
+
+# Allow all :
+
+<FilesMatch ".*\.(jpeg|jpg|png|mp4)$">
+    Order Allow,Deny
+    DEny from all
+</FilesMatch>

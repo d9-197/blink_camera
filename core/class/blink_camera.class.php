@@ -37,9 +37,9 @@ class blink_camera extends eqLogic
     const FORMAT_DATETIME_OUT="Y-m-d_His" ;//2019-07-15T18:40:44+00:00
     const ERROR_IMG="/plugins/blink_camera/img/error.png";
     const NO_EVENT_IMG="/plugins/blink_camera/img/no_event.png";
+    const GET_RESOURCE="/plugins/blink_camera/core/php/getResource.php?file=";
     
-    //public static $_widgetPossibility = array('custom' => true, 'custom::layout' => true);
-	public static $_widgetPossibility = array('custom' => array(
+    public static $_widgetPossibility = array('custom' => array(
         'visibility' => true,
         'displayName' => true,
         'displayObjectName' => true,
@@ -124,6 +124,9 @@ class blink_camera extends eqLogic
         }
     }
 
+    public static function isOpenMediasAccess() {
+        return !config::byKey('medias_security', 'blink_camera');
+    }
     public static function queryGet(string $url) {
         $_tokenBlink=config::byKey('token', 'blink_camera');
         $_accountBlink=config::byKey('account', 'blink_camera');
@@ -659,11 +662,11 @@ class blink_camera extends eqLogic
         }
 	}
 
-	public function getCameraThumbnail() {
+	public function getCameraThumbnail($forceDownload=false) {
 		if ($this->getBlinkDeviceType()!=="owl") {
 	      	$lastThumbnailTime = $this->getConfiguration("last_thumbnail_time");
 	      	$newtime=time();
-	      	if ($newtime-$lastThumbnailTime>5*60) {
+	      	if ($forceDownload || $newtime-$lastThumbnailTime>5*60) {
 		        $datas=blink_camera::getHomescreenData();
 	    	    $camera_id = $this->getConfiguration("camera_id");
 	        	foreach ($datas['cameras'] as $device) {
@@ -674,7 +677,7 @@ class blink_camera extends eqLogic
 	        	}
           		$this->setConfiguration("last_thumbnail_time",$newtime);
           		if (isset($path) && $path <> "") {
-            		$path=$path."?".$this->generateRandomString();
+            		$path=$path."&".$this->generateRandomString();
           		}
           		#blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
           		$this->setConfiguration("last_thumbnail_url",$path);
@@ -858,7 +861,7 @@ class blink_camera extends eqLogic
         self::getMedia($temp['media'], $this->getId(), 'last','mp4');
         
 		// récup thumbnail de la caméra
-		$this->getCameraThumbnail();
+		$this->getCameraThumbnail(true);
     }
 
     public function getLastEvent($include_deleted=false)
@@ -933,11 +936,11 @@ class blink_camera extends eqLogic
                         $this->checkAndUpdateCmd('last_event', $new);
                         $pathThumb=blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at']),'jpg');
                         $this->checkAndUpdateCmd('thumb_path',$pathThumb);
-                        $urlThumb=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",$pathThumb);
+                        $urlThumb=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",blink_camera::GET_RESOURCE.$pathThumb);
                         $this->checkAndUpdateCmd('thumb_url',$urlThumb);
                         $pathLastVideo=blink_camera::getMedia($event['media'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at']));
                         $this->checkAndUpdateCmd('clip_path',$pathLastVideo);
-                        $urlLastVideo=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",$pathLastVideo);
+                        $urlLastVideo=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",blink_camera::GET_RESOURCE.$pathLastVideo);
                         $this->checkAndUpdateCmd('clip_url',$urlLastVideo);
                     }
 
@@ -950,20 +953,20 @@ class blink_camera extends eqLogic
             $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
             $config_thumb=config::byKey('blink_dashboard_content_type', 'blink_camera');
             
-            if ($config_thumb==="1") {
+            if ($config_thumb==="1" && $this->getBlinkDeviceType()!=="owl") {
                 // On affiche la vignette de la caméra
                 $urlFile=$this->getCameraThumbnail();
             } else if ($config_thumb==="3") {
-                $clipUrlCmd=$this->getCmd(null, 'clip_url');
+                $clipUrlCmd=$this->getCmd(null, 'clip_path');
                 $urlFile=$clipUrlCmd->execCmd();
                 //On affiche la video
                 $urlLine ='<video class="displayVideo vignette" height="'.$hauteurVignette.'" controls loop data-src="#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="#urlFile#">Your browser does not support the video tag.</video>';
             } else  {
-                $thumbUrlCmd=$this->getCmd(null, 'thumb_url');
+                $thumbUrlCmd=$this->getCmd(null, 'thumb_path');
                 $urlFile=$thumbUrlCmd->execCmd();
                 //On affiche la vignette de la derniere video
             }                           
-            if ($urlFile ==="-" && $config_thumb !== 1) {
+            if (($urlFile ==="-" || $urlFile ==="") && $config_thumb !== 1) {
                 $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
                 if ((boolean) config::byKey('fallback_to_thumbnail', 'blink_camera')) {
                     $urlFile=$this->getCameraThumbnail();
@@ -971,8 +974,11 @@ class blink_camera extends eqLogic
                     $urlFile=blink_camera::getNoEventImg();
                 }
             }
-            if (!isset($urlFile)) {
+            if (!isset($urlFile) || $urlFile ==="") {
                 $urlFile=blink_camera::getNoEventImg();
+            }
+            if ($urlFile!==blink_camera::getNoEventImg()) {
+                $urlFile=blink_camera::GET_RESOURCE.$urlFile;
             }
             $replace['#urlFile#']=$urlFile;
             $this->checkAndUpdateCmd('thumbnail',template_replace($replace, $urlLine));
@@ -1227,6 +1233,14 @@ class blink_camera extends eqLogic
     {
         //return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($longueur/strlen($x)) )),1,$longueur);
         return substr(str_shuffle(str_repeat($x='0123456789', ceil($longueur/strlen($x)) )),1,$longueur);
+    }
+
+  	public static function backupExclude() {
+        $pathToExclude= array();
+        $pathToExclude[]="medias";
+        $pathToExclude[]="test";
+        $pathToExclude[]="../afficheur";
+        return $pathToExclude;
     }
     public function preInsert()
     {
@@ -1547,6 +1561,21 @@ class blink_camera extends eqLogic
             $newClip->save();
         }
 
+        $newThumbnail = $this->getCmd(null, 'new_thumbnail');
+        if (!is_object($newThumbnail)) {
+            blink_camera::loginfo( 'Create new action : new_thumbnail');
+            $newThumbnail = new blink_cameraCmd();
+            $newThumbnail->setName(__('Prendre une photo', __FILE__));
+            $newThumbnail->setEqLogic_id($this->getId());
+            $newThumbnail->setLogicalId('new_thumbnail');
+            $newThumbnail->setType('action');
+            $newThumbnail->setSubType('other');
+            $newThumbnail->setDisplay('icon','<i class="fa fa-camera"></i>'); 
+            $newThumbnail->useIconAndName();
+            //$newClip->setOrder(106);
+            $newThumbnail->save();
+        }
+
 		$force_download = $this->getCmd(null, 'force_download');
         if (!is_object($force_download)) {
             blink_camera::loginfo( 'Create new action : force_download');
@@ -1584,7 +1613,6 @@ class blink_camera extends eqLogic
             $unique_id=blink_camera::genererIdAleatoire(16);
             config::save('unique_id', $unique_id, blink_camera);
         }
-
 
         if (blink_camera::isConnected()) {
             $this::refreshCameraInfos();
@@ -1753,7 +1781,17 @@ class blink_cameraCmd extends cmd
                 $eqlogic->getLastEventDate();
                 $eqlogic->refreshCameraInfos();
 				break;
-	
+
+            case 'new_thumbnail':
+                if ($eqlogic->getBlinkDeviceType()==="owl") {
+                    $eqlogic->requestNewMediaMini("thumbnail");
+                }else {
+                    $eqlogic->requestNewMediaCamera("thumbnail");
+                }
+                $eqlogic->getLastEventDate();
+                $eqlogic->refreshCameraInfos();
+                break;                
+                
             case 'arm_network':
                 $eqlogic->networkArm();
                 break;
