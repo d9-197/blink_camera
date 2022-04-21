@@ -1,14 +1,22 @@
 # Description
 
 Plugin dédié aux caméras Blink.
-Il permet d'afficher les vidéos des différentes caméras, d'armer/désarmer la détection de mouvement d'un système ou d'une caméra.
+
+Il permet d'afficher les vidéos des différentes caméras.
+
+Les actions suivantes sont disponibles (en fonction du modèle de caméra):
+- d'armer/désarmer la détection de mouvement d'un système
+- d'armer/désarmer la détection de mouvementd'une caméra.
+- Prendre une vidéo
+- Prendre une photo (mise à jour de la vignette de la caméra)
+- Afficher l'historique des dernières vidéos d'une caméra (avec possibilité de télécharger les vidéos ou de les supprimer)
 
 Les informations liées à la caméra sont également disponibles :
-
-* Température,
 * Date du dernier évenement,
 * URL et chemin de la dernière vidéo (et de sa vignette),
+* URL et chemin de la vignette de la caméra (issue de "Prendre une photo")
 * Puissance du wifi,
+* Température,
 * Voltage des piles.
 
 >**Dans le plugin, les caméras Blink Mini n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini**

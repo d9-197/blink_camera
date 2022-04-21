@@ -1,16 +1,23 @@
 # Description
 
 Plugin dedicated to Blink cameras.
-It is used to display the videos of the various cameras, to arm / disarm the motion detection of a system or a camera.
 
-Camera related information is also available:
+It allows you to display videos from different cameras.
 
-* Temperature,
-* Date of last event,
+The following actions are available (depending on the camera model):
+- to arm/disarm the motion detection of a system
+- to arm/disarm the motion detection of a camera.
+- Take a video
+- Take photo (updated camera thumbnail)
+- View a camera's latest video history (with option to download videos or delete them)
+
+Camera information is also available:
+* Date of the last event,
 * URL and path of the last video (and its thumbnail),
-* Wifi power,
+* Camera thumbnail URL and path (from "Take a photo")
+* wifi power,
+* Temperature,
 * Battery voltage.
-
 >**In the plugin, Blink Mini cameras do not have the same capabilities as other Blink XT, Outdoor cameras, etc.<br> For example, camera thumbnails are not implemented for Mini**
 
 # Configuration of the plugin
