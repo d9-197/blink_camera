@@ -21,6 +21,7 @@
         " Caméra ": "Camera",
         "Nom": "Name",
         "Liste de commandes": "List of commands",
+        "Recharger la configuration": "Reload configuration",
         "Paramètres": "Settings",
         "Options": "Options",
         "Actions": "Actions",
@@ -49,7 +50,14 @@
         "Interne": "Internal",
         "Externe": "External",
         "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?": "The page must be reloaded to reflect the changes. Would you like to reload the page now?",
-        "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Show camera thumbnail if no video available?"
+        "Connexion à votre compte Blink OK":"Blink account OK",
+        "Code PIN de vérification":"Verification PIN",
+        "Connexion à votre compte Blink OK mais un code de vérification est nécessaire":"Blink account OK but a pin code is requiered",
+        "Erreur de connexion à votre compte Blink":"Error during Blink account connection",
+        "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Show camera thumbnail if no video available?",
+        "Sauvegarder et tester la connexion Blink":"Save and check Blink connection",
+        "Sécurité": "Security",
+        "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Block access to video and image URLs without being authenticated in Jeedom?"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
@@ -74,7 +82,12 @@
         "Désarmer la caméra": "Disarm the camera",
         "Historique": "History",
         "Prendre une vidéo": "Take a video",
-        "Forcer le téléchargement": "Force download"
+        "Forcer le téléchargement": "Force download",
+        "Prendre une photo": "Take a picture",
+        "URL dernière vidéo": "Last video URL",
+        "URL vignette": "Thumbnail URL",
+        "URL vignette caméra":"Camera thumbnail URL",
+        "Chemin vignette caméra":"Camera thumbnail path"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
