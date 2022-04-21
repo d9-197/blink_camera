@@ -664,27 +664,31 @@ class blink_camera extends eqLogic
 
 	public function getCameraThumbnail($forceDownload=false) {
 		if ($this->getBlinkDeviceType()!=="owl") {
-	      	$lastThumbnailTime = $this->getConfiguration("last_thumbnail_time");
+	      	$lastThumbnailTime = $this->getConfiguration("last_camera_thumb_time");
 	      	$newtime=time();
-	      	if ($forceDownload || $newtime-$lastThumbnailTime>5*60) {
+	      	if ($forceDownload || ($newtime-$lastThumbnailTime)>5*60000) {
 		        $datas=blink_camera::getHomescreenData();
 	    	    $camera_id = $this->getConfiguration("camera_id");
+                blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
 	        	foreach ($datas['cameras'] as $device) {
               		if ("".$device['id']==="".$camera_id) {
 	                  	//blink_camera::logdebug('devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
 	                  	$path=$this->getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail","jpg",true);
               		}
 	        	}
-          		$this->setConfiguration("last_thumbnail_time",$newtime);
           		if (isset($path) && $path <> "") {
-            		$path=$path."&".$this->generateRandomString();
+            		$pathRandom=$path."&".$this->generateRandomString();
           		}
-          		#blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
-          		$this->setConfiguration("last_thumbnail_url",$path);
-          		$this->save();
+          		$this->setConfiguration("last_camera_thumb_time",$newtime);
+          		$this->setConfiguration("camera_thumb_url",$pathRandom);
+                $this->checkAndUpdateCmd('camera_thumb_url',$pathRandom);
+                $this->checkAndUpdateCmd('camera_thumb_path',$path);
+                $path=$pathRandom;
+          		//$this->save();
+                //$this->clearWidgetCache();
 			} else {
-          		$path= $this->getConfiguration("last_thumbnail_url");
-	      		#blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- not need to refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
+          		$path= $this->getConfiguration("camera_thumb_url");
+	      		blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- not need to refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
         	}
 		}
 		return $path;
@@ -912,7 +916,7 @@ class blink_camera extends eqLogic
     public function getLastEventDate($ignorePrevious=false)
     {
         if ($this->isConfigured()) {
-            #blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' START');
+            blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' START');
             $event = $this->getLastEvent(false);
             if (!isset($event)) {
                 $this->checkAndUpdateCmd('last_event', "-");
@@ -987,7 +991,7 @@ class blink_camera extends eqLogic
 	public function refreshCameraInfos() {
 		if ($this->isConfigured()&& $this->isConnected()) {
             $this->getCameraThumbnail();
-            $this->emptyCacheWidget();
+            //$this->emptyCacheWidget();
             if ($this->getBlinkDeviceType()!=="owl") {
                 $datas=$this->getCameraInfo();
                 if (!$datas['message']) {
@@ -1253,8 +1257,8 @@ class blink_camera extends eqLogic
 
     public function preSave()
     {
-        $this->setDisplay("width", "400px");
-        $this->setDisplay("showNameOndashboard", 0);
+        //$this->setDisplay("width", "400px");
+        //$this->setDisplay("showNameOndashboard", 0);
     }
 
     public function postSave()
@@ -1390,7 +1394,7 @@ class blink_camera extends eqLogic
             $info = new blink_cameraCmd();
             $info->setName(__('Chemin vidéo', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
-            //$info->setIsVisible(true);
+            $info->setIsVisible(0);
             $info->setTemplate('dashboard', 'default');
             $info->setLogicalId('clip_path');
             $info->setEqLogic_id($this->getId());
@@ -1405,9 +1409,24 @@ class blink_camera extends eqLogic
             $info = new blink_cameraCmd();
             $info->setName(__('Chemin vignette', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
-            //$info->setIsVisible(true);
+            $info->setIsVisible(0);
             $info->setTemplate('dashboard', 'default');
             $info->setLogicalId('thumb_path');
+            $info->setEqLogic_id($this->getId());
+            $info->setType('info');
+            $info->setSubType('string');
+            $info->setOrder(9);
+            $info->save();
+        }
+        $info = $this->getCmd(null, 'camera_thumb_path');
+        if (!is_object($info)) {
+            blink_camera::loginfo( 'Create new information : camera_thumb_path');
+            $info = new blink_cameraCmd();
+            $info->setName(__('Chemin vignette caméra', __FILE__));
+            $info->setDisplay("showNameOndashboard", 1);
+            $info->setIsVisible(0);
+            $info->setTemplate('dashboard', 'default');
+            $info->setLogicalId('camera_thumb_path');
             $info->setEqLogic_id($this->getId());
             $info->setType('info');
             $info->setSubType('string');
@@ -1420,9 +1439,24 @@ class blink_camera extends eqLogic
             $info = new blink_cameraCmd();
             $info->setName(__('URL vignette', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
-            //$info->setIsVisible(false);
+            $info->setIsVisible(0);
             $info->setTemplate('dashboard', 'default');
             $info->setLogicalId('thumb_url');
+            $info->setEqLogic_id($this->getId());
+            $info->setType('info');
+            $info->setSubType('string');
+            $info->setOrder(10);
+            $info->save();
+        }
+        $info = $this->getCmd(null, 'camera_thumb_url');
+        if (!is_object($info)) {
+            blink_camera::loginfo( 'Create new information : camera_thumb_url');
+            $info = new blink_cameraCmd();
+            $info->setName(__('URL vignette caméra', __FILE__));
+            $info->setDisplay("showNameOndashboard", 1);
+            $info->setIsVisible(0);
+            $info->setTemplate('dashboard', 'default');
+            $info->setLogicalId('camera_thumb_url');
             $info->setEqLogic_id($this->getId());
             $info->setType('info');
             $info->setSubType('string');
@@ -1435,7 +1469,7 @@ class blink_camera extends eqLogic
             $info = new blink_cameraCmd();
             $info->setName(__('URL dernière vidéo', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
-            //$info->setIsVisible(false);
+            $info->setIsVisible(0);
             $info->setTemplate('dashboard', 'default');
             $info->setLogicalId('clip_url');
             $info->setEqLogic_id($this->getId());
@@ -1444,23 +1478,23 @@ class blink_camera extends eqLogic
             $info->setOrder(11);
             $info->save();
         }
-            $battery = $this->getCmd(null, 'battery');
-            if (!is_object($battery)) {
-                blink_camera::loginfo( 'Create new information : battery');
-                $battery = new blink_cameraCmd();
-                $battery->setName(__('Pile (pourcentage)', __FILE__));
-                $battery->setTemplate('dashboard', 'badge');
-                $battery->setDisplay("showNameOndashboard", 1);
-                $battery->setConfiguration('historizeRound',"2");
-                $battery->setUnite('%');
-                $battery->setIsVisible(true);
-                $battery->setLogicalId('battery');
-                $battery->setEqLogic_id($this->getId());
-                $battery->setType('info');
-                $battery->setSubType('numeric');
-                $battery->setOrder(12);
-                $battery->save();
-            }
+        $battery = $this->getCmd(null, 'battery');
+        if (!is_object($battery)) {
+            blink_camera::loginfo( 'Create new information : battery');
+            $battery = new blink_cameraCmd();
+            $battery->setName(__('Pile (pourcentage)', __FILE__));
+            $battery->setTemplate('dashboard', 'badge');
+            $battery->setDisplay("showNameOndashboard", 1);
+            $battery->setConfiguration('historizeRound',"2");
+            $battery->setUnite('%');
+            $battery->setIsVisible(true);
+            $battery->setLogicalId('battery');
+            $battery->setEqLogic_id($this->getId());
+            $battery->setType('info');
+            $battery->setSubType('numeric');
+            $battery->setOrder(12);
+            $battery->save();
+        }
         $refresh = $this->getCmd(null, 'refresh');
         if (!is_object($refresh)) {
             blink_camera::loginfo( 'Create new action : refresh');
@@ -1613,12 +1647,13 @@ class blink_camera extends eqLogic
             $unique_id=blink_camera::genererIdAleatoire(16);
             config::save('unique_id', $unique_id, blink_camera);
         }
-
+/*
         if (blink_camera::isConnected()) {
             $this::refreshCameraInfos();
             $this::getLastEventDate();
-            $this::emptyCacheWidget();
+            //$this::emptyCacheWidget();
         }
+    */
     }
 
     public function preUpdate()
@@ -1679,12 +1714,14 @@ class blink_camera extends eqLogic
 
     public static function postConfigOverall($value)
     {
+        /*
         $eqLogics = self::byType('blink_camera', true);
         foreach ($eqLogics as $blink_camera) {
             if ($blink_camera->getIsEnable() == 1) {
                 $blink_camera->emptyCacheWidget();
             }
         }
+        */
     }
 
 }
