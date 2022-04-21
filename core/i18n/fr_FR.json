@@ -21,6 +21,7 @@
         " Caméra ": " Caméra ",
         "Nom": "Nom",
         "Liste de commandes": "Liste de commandes",
+        "Recharger la configuration": "Reload configuration",
         "Paramètres": "Paramètres",
         "Options": "Options",
         "Actions": "Actions",
@@ -49,7 +50,14 @@
         "Interne": "Interne",
         "Externe": "Externe",
         "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?": "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?",
-        "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Afficher la vignette de caméra s'il n'y a pas de vidéo ?"
+        "Connexion à votre compte Blink OK":"Connexion à votre compte Blink OK",
+        "Code PIN de vérification":"Code PIN de vérification",
+        "Connexion à votre compte Blink OK mais un code de vérification est nécessaire":"Connexion à votre compte Blink OK mais un code de vérification est nécessaire",
+        "Erreur de connexion à votre compte Blink":"Erreur de connexion à votre compte Blink",
+        "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Afficher la vignette de caméra s'il n'y a pas de vidéo ?",
+        "Sauvegarder et tester la connexion Blink":"Sauvegarder et tester la connexion Blink",
+        "Sécurité": "Sécurité",
+        "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Rechercher"
@@ -74,7 +82,13 @@
         "Désarmer la caméra": "Désarmer la caméra",
         "Historique": "Historique",
         "Prendre une vidéo": "Prendre une vidéo",
-        "Forcer le téléchargement": "Forcer le téléchargement"
+        "Forcer le téléchargement": "Forcer le téléchargement",
+        "Prendre une photo": "Prendre une photo",
+        "URL dernière vidéo": "URL dernière vidéo",
+        "URL vignette": "URL vignette",
+        "URL vignette caméra":"URL vignette caméra",
+        "Chemin vignette caméra":"Chemin vignette caméra"
+
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",

@@ -23,29 +23,6 @@ if (!isConnect()) {
 }
 ?>
 <form class="form-horizontal">
-<script>
-// page reload is needed
-/*
-$("#bt_savePluginConfig").unbind('click');
-$("#bt_savePluginConfig").on('click', function (event) {
-    savePluginConfig();
-    bootbox.confirm('{{La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?}}', function (result) {
-        if (result) {
-            loadPage(document.location.href);
-        }
-    });
-    return false;
-});
-*/
-
-</script>
-
-
-<!--div style='color:red'><b>ATTENTION :</b></div-->
-
-<!--div style='color:red'><b>Blink annonce pour le 11 mai 2020 la fin du support des connexions par des outils autres que IFTTT ou leur application officielle.</b></div-->
-
-<!--div style='color:red'><b>A partir de cette date, le plugin risque donc de ne plus être utilisable dans Jeedom.</b></div-->
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
         <div class="form-group">
@@ -95,7 +72,14 @@ $("#bt_savePluginConfig").on('click', function (event) {
                 </select>
             </div>
         </div>
-        <h4 class="icon_blue"><i class="jeedomapp jeedomapp-visible"></i> {{Widget}}</h4>
+        <h4 class="icon_blue"><i class="fa fa-lock"></i> {{Sécurité}}</h4>
+        <div class="form-group" id="medias_security">
+            <label class="col-lg-5 control-label">{{Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?}}</label>
+            <div class="col-lg-1">
+                <input  type="checkbox"class="configKey form-control" data-l1key="medias_security"/>
+            </div>
+        </div>
+        <h4 class="icon_blue"><i class="fa fa-eye"></i> {{Widget}}</h4>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Contenu de la vignette}}</label>
             <div class="col-lg-3">
