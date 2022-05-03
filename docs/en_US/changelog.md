@@ -1,5 +1,5 @@
-> 2022-04-21
-  + V2.3.0
+> 2022-05-03
+  + **V2.3.0**
   + Add action "Take a picture"
   + **Sécurité** - Addition in the configuration of the plugin of _"Block access to URLs of videos and images without being authenticated in Jeedom?"_
     - If the box is checked, the URLs of the videos (and images) can only be opened if the user is already connected to Jeedom
