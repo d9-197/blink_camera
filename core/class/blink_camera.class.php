@@ -961,7 +961,9 @@ class blink_camera extends eqLogic
             
             if ($config_thumb==="1" && $this->getBlinkDeviceType()!=="owl") {
                 // On affiche la vignette de la caméra
-                $urlFile=$this->getCameraThumbnail();
+                $this->getCameraThumbnail();
+              	$thumbUrlCmd=$this->getCmd(null, 'camera_thumb_path');
+          	  	$urlFile=$thumbUrlCmd->execCmd();
             } else if ($config_thumb==="3") {
                 $clipUrlCmd=$this->getCmd(null, 'clip_path');
                 $urlFile=$clipUrlCmd->execCmd();
@@ -975,7 +977,9 @@ class blink_camera extends eqLogic
             if (($urlFile ==="-" || $urlFile ==="") && $config_thumb !== 1) {
                 $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
                 if ((boolean) config::byKey('fallback_to_thumbnail', 'blink_camera')) {
-                    $urlFile=$this->getCameraThumbnail();
+                    $this->getCameraThumbnail();
+                   	$thumbUrlCmd=$this->getCmd(null, 'camera_thumb_path');
+              	  	$urlFile=$thumbUrlCmd->execCmd();
                 } else {
                     $urlFile=blink_camera::getNoEventImg();
                 }
