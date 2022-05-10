@@ -13,7 +13,7 @@ if (!isConnect() && !blink_camera::isOpenMediasAccess()) {
 $file=init('file');
 $file_root="/plugins/blink_camera/medias/";
 if (substr($file,0,strlen($file_root))!==$file_root || strpos($file, '..') !== false) {
-	blink_camera::logerror('blink_camera getResource.php - Access attempt denied: '.$file);
+	#blink_camera::logerror('blink_camera getResource.php - Access attempt denied: '.$file);
 	header("Statut: 404 Page non trouvée");
 	header('HTTP/1.0 404 Not Found');
 	$_SERVER['REDIRECT_STATUS'] = 404;
