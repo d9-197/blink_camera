@@ -227,10 +227,10 @@ class blink_camera extends eqLogic
             blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Réponse:'.print_r($jsonrep,true));
             if ($jsonrep['valid']==1) {
                 blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Vérification OK');
-                config::save('verif', 'true', blink_camera);
+                config::save('verif', 'true', 'blink_camera');
                 return 0;
             } else {
-                config::save('verif', 'false', blink_camera);
+                config::save('verif', 'false', 'blink_camera');
                 //blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Vérification KO');
                 return 1;
             }
@@ -277,7 +277,7 @@ class blink_camera extends eqLogic
         if ($_tokenBlink!=="" && $_accountBlink!=="" && $_regionBlink!=="" && $_verif=="true") {
             return true;
         } else {
-            blink_camera::logwarn("isConnected() - FALSE");
+            //blink_camera::logwarn("isConnected() - FALSE");
         } ;
     }
     public static function getToken(bool $forceReinit=false )
@@ -321,9 +321,9 @@ class blink_camera extends eqLogic
                 return true;
             }
         } else {
-            config::save('token', '', blink_camera);
-            config::save('account', '', blink_camera);
-            config::save('region', '', blink_camera);
+            config::save('token', '', 'blink_camera');
+            config::save('account', '', 'blink_camera');
+            config::save('region', '', 'blink_camera');
             $_tokenBlink='';
             $_accountBlink='';
             $_regionBlink='';
@@ -339,8 +339,8 @@ class blink_camera extends eqLogic
         $_regionBlink=config::byKey('region', 'blink_camera');
         if ($_tokenBlink=="" && $_accountBlink=="" && $_regionBlink=="") {
             //blink_camera::logdebug('getToken() - Nouveau TOKEN');
-            config::save('param1_prev', $email, blink_camera);
-            config::save('param2_prev', $pwd, blink_camera);
+            config::save('param1_prev', $email, 'blink_camera');
+            config::save('param2_prev', $pwd, 'blink_camera');
             $notification_key=config::byKey('notification_key', 'blink_camera');
             $unique_id=config::byKey('notification_key', 'blink_camera');
             $_verifBlink=config::byKey('verif', 'blink_camera');
@@ -355,8 +355,8 @@ class blink_camera extends eqLogic
                     $response=$e->getResponse();
                     $code=$response->getStatusCode();
                     if ($code===401) {
-                        config::save('token', 'BAD_TOKEN', blink_camera);
-                        config::save('verif', 'false', blink_camera);
+                        config::save('token', 'BAD_TOKEN', 'blink_camera');
+                        config::save('verif', 'false', 'blink_camera');
                         blink_camera::logdebug('Invalid credentials used for Blink Camera.');
                         //blink_camera::logdebug(print_r($response,true));
 
@@ -379,10 +379,10 @@ class blink_camera extends eqLogic
             if ($_verifBlink=="false") {
                 blink_camera::loginfo("Verification required with email code");
             }
-            config::save('token', $_tokenBlink, blink_camera);
-            config::save('account', $_accountBlink, blink_camera);
-            config::save('region', $_regionBlink, blink_camera);
-            config::save('client', $_clientIdBlink, blink_camera);
+            config::save('token', $_tokenBlink, 'blink_camera');
+            config::save('account', $_accountBlink, 'blink_camera');
+            config::save('region', $_regionBlink,'blink_camera');
+            config::save('client', $_clientIdBlink, 'blink_camera');
             $date = date_create();
             $tstamp2=date_timestamp_get($date);
             //blink_camera::logdebug('getToken()-4 END : '.($tstamp2-$tstamp1).' ms');
@@ -1647,11 +1647,11 @@ class blink_camera extends eqLogic
         //$unique_id="";    
         if (!isset($notification_key) || $notification_key==="" || strlen($notification_key) <> 152) {
             $notification_key=blink_camera::genererIdAleatoire(152);
-            config::save('notification_key', $notification_key, blink_camera);
+            config::save('notification_key', $notification_key, 'blink_camera');
         }
         if (!isset($unique_id) || $unique_id==="" || strlen($unique_id) <> 16) {
             $unique_id=blink_camera::genererIdAleatoire(16);
-            config::save('unique_id', $unique_id, blink_camera);
+            config::save('unique_id', $unique_id, 'blink_camera');
         }
 /*
         if (blink_camera::isConnected()) {
