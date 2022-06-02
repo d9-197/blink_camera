@@ -1,7 +1,11 @@
+> 2022-06-02
+  + V2.3.1
+  + Security fix
+  
 > 2022-05-03
-  + **V2.3.0**
+  + V2.3.0
   + Add action "Take a picture"
-  + **Sécurité** - Addition in the configuration of the plugin of _"Block access to URLs of videos and images without being authenticated in Jeedom?"_
+  + Sécurité - Addition in the configuration of the plugin of _"Block access to URLs of videos and images without being authenticated in Jeedom?"_
     - If the box is checked, the URLs of the videos (and images) can only be opened if the user is already connected to Jeedom
     - If the box is not checked, the urls are freely accessible
 
@@ -18,7 +22,7 @@
   > 2021-02-10
   + V2.0.1
   + Fix issue with new login API
-  + **Authentication with pin code send by SMS has not yet been tested. So it may not work**
+  + Authentication with pin code send by SMS has not yet been tested. So it may not work
 
 > 2020-08-26
   + V2.0.0
