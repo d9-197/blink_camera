@@ -1,3 +1,7 @@
+> 2022-06-28
+  + V2.3.2
+  + Modification de la récupération des valeurs de température
+
 > 2022-06-02
   + V2.3.1
   + Correctif de sécurité
