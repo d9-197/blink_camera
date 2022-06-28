@@ -668,10 +668,10 @@ class blink_camera extends eqLogic
 	      	$newtime=time();
 	      	if ($forceDownload || ($newtime-$lastThumbnailTime)>5*60000) {
 		        $datas=blink_camera::getHomescreenData();
-                /*if ($this->getId()=="459") {
-                    blink_camera::logdebug('getHomescreenData - responce: '.print_r($datas, true));
-                }*/
-	    	    $camera_id = $this->getConfiguration("camera_id");
+                
+                //blink_camera::logdebug('getHomescreenData - responce: '.print_r($datas, true));
+                
+                $camera_id = $this->getConfiguration("camera_id");
                 //blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
 	        	foreach ($datas['cameras'] as $device) {
               		if ("".$device['id']==="".$camera_id) {
@@ -1001,15 +1001,18 @@ class blink_camera extends eqLogic
             if ($this->getBlinkDeviceType()!=="owl") {
                 $datas=$this->getCameraInfo();
                 if (!$datas['message']) {
-                    // MAJ Température 
+                   /* // MAJ Température 
                     $tempe=(float) $datas['camera_status']['temperature'];
+                    blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
                     $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
                     if ($blink_tempUnit==="C") {
                         $tempe =($tempe - 32) / 1.8;
                     }
-                    
+                    //blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
+                   
                     $this->checkAndUpdateCmd('temperature', $tempe);
                     $this->setConfiguration('camera_temperature',$tempe);
+                    */
                     // MAJ Power 
                     $power=(float) $datas['camera_status']['battery_voltage'];
                     $this->checkAndUpdateCmd('power', ($power/100));
@@ -1053,6 +1056,15 @@ class blink_camera extends eqLogic
                         $this->setConfiguration('camera_type',$camera['type']);
                         $this->setConfiguration('camera_name',$camera['name']);
                         $this->setConfiguration('camera_battery_status',$camera['battery']);
+                        $signal=$camera['signals'];
+                        $tempe=(float) $signal['temp'];
+                        //blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
+                        $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
+                        if ($blink_tempUnit==="C") {
+                            $tempe =($tempe - 32) / 1.8;
+                        }
+                        $this->checkAndUpdateCmd('temperature', $tempe);
+                        $this->setConfiguration('camera_temperature',$tempe);
                         break;
                     }
                 }
