@@ -51,6 +51,14 @@ class blink_camera extends eqLogic
         'layout' => true
     ));
 
+    public static function logdebugBlinkAPI($message) {
+        if (!config::byKeys('log::level::blink_camera_api')) {
+            config::save('log::level::blink_camera_api', '{"100":"0","200":"1","300":"0","400":"0","1000":"0","default":"0"}');
+        }
+        log::add('blink_camera_api','info',$message);
+        return;
+    }
+
     public static function logdebug($message) {
         log::add('blink_camera','debug',$message);
         return;
@@ -133,6 +141,7 @@ class blink_camera extends eqLogic
         $_regionBlink=config::byKey('region', 'blink_camera');
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
+            blink_camera::logdebugBlinkAPI("CALL[queryGet]: ".$url);
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
             $r = $client->request('GET', $url, [
                 //['http_errors' => false],
@@ -144,6 +153,7 @@ class blink_camera extends eqLogic
                     ]
             ]);
             $jsonrep= json_decode($r->getBody(), true);
+            blink_camera::logdebugBlinkAPI(print_r($jsonrep,true));
         }    
         return $jsonrep;
     }
@@ -153,6 +163,7 @@ class blink_camera extends eqLogic
         $_regionBlink=config::byKey('region', 'blink_camera');
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
+            blink_camera::logdebugBlinkAPI("CALL[queryGetMedia]: ".$url);
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
             $r = $client->request('GET', $url, [
                 'sink' => $file_path,
@@ -166,13 +177,14 @@ class blink_camera extends eqLogic
                     ]
             ]);
             $jsonrep= json_decode($r->getBody(), true);
+            blink_camera::logdebugBlinkAPI(print_r($jsonrep,true));
         }    
         return $jsonrep;
     }
     
     public static function queryPostLogin(string $url, string $datas) {
         //blink_camera::logdebug('queryPostLogin(url='.$url.',datas='.$datas.') START');
-        
+        blink_camera::logdebugBlinkAPI("CALL[queryPostLogin]: ".$url);
         $jsonrep=null;
         $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.prod.immedia-semi.com/'. $url]);
         $r = $client->request('POST', 'login', [
@@ -187,6 +199,7 @@ class blink_camera extends eqLogic
             'json' => json_decode($datas)
         ]);
         $jsonrep= json_decode($r->getBody(), true);
+        blink_camera::logdebugBlinkAPI(print_r($jsonrep,true));
         /*blink_camera::logdebug('#######################################');
         blink_camera::logdebug('            queryPostLogin');        
         blink_camera::logdebug(print_r($jsonrep,true));
@@ -203,11 +216,9 @@ class blink_camera extends eqLogic
         $_tokenBlink=config::byKey('token', 'blink_camera');
 
         $url='https://rest-'.$_regionBlink.'.immedia-semi.com/api/v4/account/'.$account_id.'/client/'.$client_id.'/pin/verify';
+        blink_camera::logdebugBlinkAPI("CALL[queryPostPinVerify]: ".$url);
         $datas="{\"pin\":".$pin."}";
         try {
-           //blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') debut try');
-           //blink_camera::logdebug('queryPostPinVerify url:'.$url);
-            //blink_camera::logdebug('queryPostPinVerify datas:'.$datas);
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $url]);
             $r = $client->request('POST',$url,  [
                 //['http_errors' => false],
@@ -219,12 +230,8 @@ class blink_camera extends eqLogic
                 'json' => json_decode($datas)
             ]);
             $jsonrep= json_decode($r->getBody(), true);
-            /*blink_camera::logdebug('#######################################');
-            blink_camera::logdebug('            queryPostPinVerify');        
-            blink_camera::logdebug(print_r($jsonrep,true));
-            blink_camera::logdebug('#######################################');
-    		*/
-            blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Réponse:'.print_r($jsonrep,true));
+            blink_camera::logdebugBlinkAPI(print_r($jsonrep,true));
+
             if ($jsonrep['valid']==1) {
                 blink_camera::logdebug('queryPostPinVerify(pin='.$pin.') Vérification OK');
                 config::save('verif', 'true', 'blink_camera');
@@ -246,6 +253,7 @@ class blink_camera extends eqLogic
         //blink_camera::logdebug('queryPost datas:'.$datas);
         $_regionBlink=config::byKey('region', 'blink_camera');
         $_tokenBlink=config::byKey('token', 'blink_camera');
+        blink_camera::logdebugBlinkAPI("CALL[queryPost]: ".$url);
         try {
             $baseuri='https://rest.'.$_regionBlink.'.immedia-semi.com';
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $baseuri]);
@@ -258,13 +266,47 @@ class blink_camera extends eqLogic
                 ],
                 'json' => json_decode($datas)
             ]);
-            return json_decode($r->getBody(), true);
+            $jsonrep= json_decode($r->getBody(), true);
+            blink_camera::logdebugBlinkAPI(print_r($jsonrep,true));
+            return $jsonrep;
+
         }  catch (Exception $e) {
             blink_camera::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
             blink_camera::logdebug('ERROR:'.print_r($e->getMessage(), true));
         }
         return "{}";
     }
+    public  function queryPostLiveview() {
+        $network_id=$this->getConfiguration("network_id");
+        $camera_id=$this->getConfiguration("camera_id");
+        $datas='{"intent":"liveview","motion_event_start_time":""}';
+        $_accountBlink=config::byKey('account', 'blink_camera');
+        $_regionBlink=config::byKey('region', 'blink_camera');
+        $_tokenBlink=config::byKey('token', 'blink_camera');
+        $url="api/v5/accounts/".$_accountBlink."/networks/".$network_id."/cameras/".$camera_id."/liveview";
+        blink_camera::logdebug('queryPostLiveview(url='.$url.') START');
+        blink_camera::logdebug('queryPostLiveview datas:'.$datas);
+        try {
+            $baseuri='https://rest.'.$_regionBlink.'.immedia-semi.com';
+            $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $baseuri]);
+            $r = $client->request('POST',$baseuri.'/'.$url,  [
+                //['http_errors' => false],
+                ['timeout' => 1],
+                'headers' => [
+                    'TOKEN_AUTH'=> ''.$_tokenBlink,
+                    'User-Agent' =>  blink_camera::BLINK_DEFAULT_USER_AGENT
+                ],
+                'json' => json_decode($datas)
+            ]);
+            return json_decode($r->getBody());
+        }  catch (Exception $e) {
+            blink_camera::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
+            blink_camera::logdebug('ERROR:'.print_r($e->getMessage(), true));
+        }
+        return "";
+    }
+    
+
     public static function isConnected() {
         $_tokenBlink=config::byKey('token', 'blink_camera');
         //blink_camera::logdebug('isConnected Token : '.$_tokenBlink);
@@ -304,6 +346,7 @@ class blink_camera extends eqLogic
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
                 $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
                 try {
+                    blink_camera::logdebugBlinkAPI("CALL[queryToken] -->");
                     $jsonrep=blink_camera::queryGet($url);
                 }
                 catch (TransferException $e) {
@@ -338,6 +381,7 @@ class blink_camera extends eqLogic
         $_accountBlink=config::byKey('account', 'blink_camera');
         $_regionBlink=config::byKey('region', 'blink_camera');
         if ($_tokenBlink=="" && $_accountBlink=="" && $_regionBlink=="") {
+            
             //blink_camera::logdebug('getToken() - Nouveau TOKEN');
             config::save('param1_prev', $email, 'blink_camera');
             config::save('param2_prev', $pwd, 'blink_camera');
@@ -606,6 +650,7 @@ class blink_camera extends eqLogic
             $_accountBlink=config::byKey('account', 'blink_camera');
             $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
             try {
+                blink_camera::logdebugBlinkAPI("CALL[getHomescreenData] -->");
                 $jsonrep=blink_camera::queryGet($url);
             }
             catch (TransferException $e) {
@@ -633,6 +678,12 @@ class blink_camera extends eqLogic
                 $valeur=$device['type'];
             }
         }
+        foreach ($datas['doorbell_buttons'] as $device) {
+            if ("".$device['id']==="".$camera_id) {
+                $valeur=$device['type'];
+            }
+        }
+        
         //blink_camera::logdebug('TYPE DEVICE='.$valeur);
 		return $valeur;
     }
@@ -1084,6 +1135,32 @@ class blink_camera extends eqLogic
                         //$this->setConfiguration('camera_battery_status',$camera['battery']);
                         break;
                     }
+                }
+                foreach($datas['doorbell_buttons'] as $camera) {
+                    blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - doorbell_buttons - '.print_r($camera,true));
+                    /*if ($camera['id']==$this->getConfiguration('camera_id')) {
+                        if ($camera['enabled']===true) {
+                            $this->checkAndUpdateCmd('arm_status_camera', 1);
+                            $this->setConfiguration('camera_status',true);
+                        } else 
+                        {
+                            $this->checkAndUpdateCmd('arm_status_camera', 0);
+                            $this->setConfiguration('camera_status',false);
+                        }
+                        $this->setConfiguration('camera_type',$camera['type']);
+                        $this->setConfiguration('camera_name',$camera['name']);
+                        $this->setConfiguration('camera_battery_status',$camera['battery']);
+                        $signal=$camera['signals'];
+                        $tempe=(float) $signal['temp'];
+                        //blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
+                        $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
+                        if ($blink_tempUnit==="C") {
+                            $tempe =($tempe - 32) / 1.8;
+                        }
+                        $this->checkAndUpdateCmd('temperature', $tempe);
+                        $this->setConfiguration('camera_temperature',$tempe);
+                        break;
+                    }*/
                 }
                 foreach($datas['networks'] as $network) {
                     if ($network['id']==$this->getConfiguration('network_id')) {
@@ -1770,14 +1847,6 @@ class blink_cameraCmd extends cmd
                 $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'\').dialog(\'open\');});';
                 $result.="</script>";
 
-                return $result;
-            } else {
-                return "";
-            }
-        } else if ($this->getLogicalId()==='thumb_url' || $this->getLogicalId()==='clip_url') {
-            $bl_cam=$this->getEqLogic();
-            if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
-                $result= parent::toHtml($_version, $_options, $_cmdColor);
                 return $result;
             } else {
                 return "";
