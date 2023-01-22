@@ -713,11 +713,12 @@ class blink_camera extends eqLogic
 	public function getCameraInfo() {
         $jsonrep=json_decode('{"message":erreur"}',true);
         if (self::isConnected() && $this->isConfigured()) {
+
             $url='/network/'.$this->getConfiguration('network_id').'/camera/'.$this->getConfiguration('camera_id');
             try {
                $jsonrep=blink_camera::queryGet($url);
             } catch (TransferException $e) {
-                blink_camera::logdebug('getCameraInfo - An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                blink_camera::logdebug('getCameraInfo (type device='.$this->getBlinkDeviceType().')- An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                 return $jsonrep;
             }
             //blink_camera::logdebug('getCameraInfo  '.$url. ' - response:'.print_r($jsonrep, true));
@@ -1069,7 +1070,7 @@ class blink_camera extends eqLogic
 		if ($this->isConfigured()&& $this->isConnected()) {
             $this->getCameraThumbnail();
             //$this->emptyCacheWidget();
-            if ($this->getBlinkDeviceType()!=="owl") {
+            if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
                 $datas=$this->getCameraInfo();
                 if (!$datas['message']) {
                    /* // MAJ Température 
@@ -1170,15 +1171,18 @@ class blink_camera extends eqLogic
                         $this->setConfiguration('camera_type',$camera['type']);
                         $this->setConfiguration('camera_name',$camera['name']);
                         $this->setConfiguration('camera_battery_status',$camera['battery']);
-                        /*$signal=$camera['signals'];
-                        $tempe=(float) $signal['temp'];
-                        //blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
-                        $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
-                        if ($blink_tempUnit==="C") {
-                            $tempe =($tempe - 32) / 1.8;
-                        }
-                        $this->checkAndUpdateCmd('temperature', $tempe);
-                        $this->setConfiguration('camera_temperature',$tempe);*/
+                        $signal=$camera['signals'];
+                        $batteryLevel=(float) $signal['battery'];
+
+                        $battery=100*$batteryLevel/5;
+                        $this->checkAndUpdateCmd('battery', $battery);
+                        $this->setConfiguration('battery',$battery);
+                        $this->batteryStatus($battery);
+    
+                        // MAJ WIFI
+                        $wifi=100*(float) $signal['wifi']/5;
+                        $this->checkAndUpdateCmd('wifi_strength', $wifi);
+                        $this->setConfiguration('camera_wifi',$wifi);
                         break;
                     }
                 }
