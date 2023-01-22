@@ -141,7 +141,7 @@ class blink_camera extends eqLogic
         $_regionBlink=config::byKey('region', 'blink_camera');
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
-            blink_camera::logdebugBlinkAPI("CALL[queryGet]: ".$url);
+            //blink_camera::logdebugBlinkAPI("CALL[queryGet]: ".$url);
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
             $r = $client->request('GET', $url, [
                 //['http_errors' => false],
@@ -153,7 +153,7 @@ class blink_camera extends eqLogic
                     ]
             ]);
             $jsonrep= json_decode($r->getBody(), true);
-            blink_camera::logdebugBlinkAPI(print_r($jsonrep,true));
+            //blink_camera::logdebugBlinkAPI(print_r($jsonrep,true));
         }    
         return $jsonrep;
     }
@@ -800,7 +800,7 @@ class blink_camera extends eqLogic
     }
     public function requestNewMediaDoorbell($type="clip")
     {
-        return $this->requestNewMedia($type,"doorbell");
+        return $this->requestNewMedia($type,"doorbells");
     }
     public function requestNewMediaMini($type="clip")
     {
@@ -814,6 +814,9 @@ class blink_camera extends eqLogic
                     if ($typeDevice==='owl') {
                         // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
                         $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/owls/'.$this->getConfiguration('camera_id').'/'.$type;
+                    } else if ($typeDevice==='doorbells')  {
+                        // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
+                        $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/doorbells/'.$this->getConfiguration('camera_id').'/'.$type;
                     } else  {
                         $url='/network/'.$this->getConfiguration('network_id').'/'.$typeDevice.'/'.$this->getConfiguration('camera_id').'/'.$type;
                     }
@@ -1760,10 +1763,10 @@ class blink_camera extends eqLogic
         if ($typeDevice=="lotus") {
             $wifi_strength->setUnite('%');
             $power->remove();
-            $newThumbnail->remove();
-            $newClip->remove();
+            //$newThumbnail->remove();
+            //$newClip->remove();
             $arm_camera->remove();
-            $arm_status_camera->remove();
+            //$arm_status_camera->remove();
             $disarm_camera->remove();
             $temperature->remove();
         }
