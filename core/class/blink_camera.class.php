@@ -742,7 +742,14 @@ class blink_camera extends eqLogic
 	                  	$path=$this->getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail","jpg",true);
               		}
 	        	}
-            		$pathRandom=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",blink_camera::GET_RESOURCE.$path."&".$this->generateRandomString());
+                foreach ($datas['doorbells'] as $device) {
+                    if ("".$device['id']==="".$camera_id) {
+                        //blink_camera::logdebug('devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
+                        $path=$this->getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail","jpg",true);
+                    }
+                }
+
+           		$pathRandom=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",blink_camera::GET_RESOURCE.$path."&".$this->generateRandomString());
           		if (isset($path) && $path <> "") {
           		}
           		$this->setConfiguration("last_camera_thumb_time",$newtime);
@@ -804,6 +811,7 @@ class blink_camera extends eqLogic
                     } else {
                         $url='/network/'.$this->getConfiguration('network_id').'/camera/'.$this->getConfiguration('camera_id').'/'.$type;
                     }
+                    blink_camera::logdebugBlinkAPI("CALL[requestNewMedia]: --> ");
                 try {
                     $jsonrep=blink_camera::queryPost($url);
                 } catch (TransferException $e) {
@@ -1061,7 +1069,7 @@ class blink_camera extends eqLogic
 		if ($this->isConfigured()&& $this->isConnected()) {
             $this->getCameraThumbnail();
             //$this->emptyCacheWidget();
-            if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
+            if ($this->getBlinkDeviceType()!=="owl") {
                 $datas=$this->getCameraInfo();
                 if (!$datas['message']) {
                    /* // MAJ Température 
@@ -1740,7 +1748,7 @@ class blink_camera extends eqLogic
             $battery->remove();
             $temperature->remove();
         }
-        if ($typeDevice=="doorbells") {
+        if ($typeDevice=="lotus") {
             $temperature->remove();
         }
 
