@@ -1022,7 +1022,7 @@ class blink_camera extends eqLogic
             $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
             $config_thumb=config::byKey('blink_dashboard_content_type', 'blink_camera');
             
-            if ($config_thumb==="1" && $this->getBlinkDeviceType()!=="owl") {
+            if ($config_thumb==="1" && $this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
                 // On affiche la vignette de la caméra
                 $this->getCameraThumbnail();
               	$thumbUrlCmd=$this->getCmd(null, 'camera_thumb_path');
