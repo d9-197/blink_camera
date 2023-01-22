@@ -95,6 +95,11 @@ class blink_camera extends eqLogic
             if ($cam->getIsEnable() == 1  && $cam->getToken()) {
                 $last_event=$cam->getLastEvent(false);
                 if (isset($last_event)) { 
+                    $info = $cam->getCmd(null, 'source_last_event');
+                    if (is_object($info)) {
+                        blink_camera::logdebug('blink_camera->getLastEvent() init last event source '.$last_event['source']);
+                        $this->checkAndUpdateCmd('source_last_event', $last_event['source']);
+                    }
                    self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                 }
             }
@@ -148,7 +153,7 @@ class blink_camera extends eqLogic
         $_regionBlink=config::byKey('region', 'blink_camera');
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
-            //blink_camera::logdebugBlinkAPIRequest("CALL[queryGet]: ".$url);
+            blink_camera::logdebugBlinkAPIRequest("CALL[queryGet]: ".$url);
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
             $r = $client->request('GET', $url, [
                 //['http_errors' => false],
@@ -952,7 +957,11 @@ class blink_camera extends eqLogic
 
         $temp =$this->getLastEvent(false);
         self::getMedia($temp['media'], $this->getId(), 'last','mp4');
-        
+        $info = $this->getCmd(null, 'source_last_event');
+        if (is_object($info)) {
+            blink_camera::logdebug('blink_camera->getLastEvent() init last event source '.$temp['source']);
+            $this->checkAndUpdateCmd('source_last_event', $temp['source']);
+        }
 		// récup thumbnail de la caméra
 		$this->getCameraThumbnail(true);
     }
@@ -966,17 +975,8 @@ class blink_camera extends eqLogic
             foreach (json_decode($jsonvideo, true) as $event) {
                 if ($include_deleted || $event['deleted']===false) {
                     //blink_camera::logdebug('blink_camera->getLastEvent() '.$event['created_at']);
-                    if (!isset($last_event)) {
+                    if (!isset($last_event) || $last_event['created_at']<$event['created_at']) {
                         $last_event=$event;
-                        //blink_camera::logdebug('blink_camera->getLastEvent() init with first event'.$event['created_at']);
-                    }
-                    if ($last_event['created_at']<$event['created_at']) {
-                        //blink_camera::logdebug('blink_camera->getLastEvent() more early :'.$event['created_at']);
-                        $last_event=$event;
-                        //TODO : tester avec un break :
-                        //    si on part du principe que l'api REST restitue les event les plus recents en premier,
-                        //    on doit pouvoir sortir apres avoir trouve le premier "plus recent"
-
                     }
                 }
             }
@@ -1036,7 +1036,11 @@ class blink_camera extends eqLogic
                         $urlLastVideo=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",blink_camera::GET_RESOURCE.$pathLastVideo);
                         $this->checkAndUpdateCmd('clip_url',$urlLastVideo);
                     }
-
+                }
+                $info = $this->getCmd(null, 'source_last_event');
+                if (is_object($info) && isset($event)) {
+                    blink_camera::logdebug('blink_camera->getLastEvent() init last event source '.$event['source']);
+                    $this->checkAndUpdateCmd('source_last_event', $event['source']);
                 }
             }
             //Recalcul de la vignette à afficher
@@ -1776,6 +1780,22 @@ class blink_camera extends eqLogic
             //$arm_status_camera->remove();
             $disarm_camera->remove();
             $temperature->remove();
+            $info = $this->getCmd(null, 'source_last_event');
+            if (!is_object($info)) {
+                blink_camera::loginfo( 'Create new information : source_last_event');
+                $info = new blink_cameraCmd();
+                $info->setName(__('Source du dernier événement', __FILE__));
+                $info->setDisplay("showNameOndashboard", 1);
+                $info->setIsVisible(0);
+                $info->setTemplate('dashboard', 'default');
+                $info->setLogicalId('source_last_event');
+                $info->setEqLogic_id($this->getId());
+                $info->setType('info');
+                $info->setSubType('string');
+//                $info->setOrder(11);
+                $info->save();
+            }
+
         }
 
         $notification_key=config::byKey('notification_key', 'blink_camera');
