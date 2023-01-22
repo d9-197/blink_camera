@@ -50,7 +50,7 @@ if (!isConnect()) {
         <div id="verifdiv">
 
         <div class="form-group">
-            <label class="col-lg-9 control-label text-danger">{{Vous allez recevoir un email de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton "Envoyer".}}</label>
+            <label class="col-lg-9 control-label text-danger">{{Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton "Envoyer".}}</label>
         </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Code PIN de vérification}}</label>

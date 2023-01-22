@@ -34,6 +34,7 @@
         "Compte Blink": "Blink account",
         "Email": "E-mail",
         "Mot de passe": "Password",
+        "Envoyer": "Send",
         "Unité de température": "Temperature unit",
         "° C": "° C",
         "° F": "° F",
@@ -57,7 +58,8 @@
         "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Show camera thumbnail if no video available?",
         "Sauvegarder et tester la connexion Blink":"Save and check Blink connection",
         "Sécurité": "Security",
-        "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Block access to video and image URLs without being authenticated in Jeedom?"
+        "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Block access to video and image URLs without being authenticated in Jeedom?",
+        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"VousYou will received a SMS from Blink with a pin code, you must fill it here and clic  \"Send\"."
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
