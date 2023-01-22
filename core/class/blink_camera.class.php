@@ -519,6 +519,18 @@ class blink_camera extends eqLogic
                     }
                 }
             }
+            foreach ($jsonin['doorbells'] as $cams) {
+                if ($cams['network_id']==$currentnet) {
+                    if (!in_array($cams['id'], $cameras, true)) {
+                        if ($nbCam>0) {
+                            $jsonstr=$jsonstr.",";
+                        }
+                        $nbCam=$nbCam + 1;
+                        $cameras[]=$cams['id'];
+                        $jsonstr=$jsonstr."{\"device_id\":\"".$cams['id']."\",\"device_name\":\"".$cams['name']."\"}";
+                    }
+                }
+            }
             $jsonstr=$jsonstr."]}";
         }
         $jsonstr=$jsonstr."]}";
@@ -678,7 +690,7 @@ class blink_camera extends eqLogic
                 $valeur=$device['type'];
             }
         }
-        foreach ($datas['doorbell_buttons'] as $device) {
+        foreach ($datas['doorbells'] as $device) {
             if ("".$device['id']==="".$camera_id) {
                 $valeur=$device['type'];
             }
@@ -1136,9 +1148,9 @@ class blink_camera extends eqLogic
                         break;
                     }
                 }
-                foreach($datas['doorbell_buttons'] as $camera) {
-                    blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - doorbell_buttons - '.print_r($camera,true));
-                    /*if ($camera['id']==$this->getConfiguration('camera_id')) {
+                foreach($datas['doorbells'] as $camera) {
+                    blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - doorbells - '.print_r($camera,true));
+                    if ($camera['id']==$this->getConfiguration('camera_id')) {
                         if ($camera['enabled']===true) {
                             $this->checkAndUpdateCmd('arm_status_camera', 1);
                             $this->setConfiguration('camera_status',true);
@@ -1150,7 +1162,7 @@ class blink_camera extends eqLogic
                         $this->setConfiguration('camera_type',$camera['type']);
                         $this->setConfiguration('camera_name',$camera['name']);
                         $this->setConfiguration('camera_battery_status',$camera['battery']);
-                        $signal=$camera['signals'];
+                        /*$signal=$camera['signals'];
                         $tempe=(float) $signal['temp'];
                         //blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
                         $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
@@ -1158,9 +1170,9 @@ class blink_camera extends eqLogic
                             $tempe =($tempe - 32) / 1.8;
                         }
                         $this->checkAndUpdateCmd('temperature', $tempe);
-                        $this->setConfiguration('camera_temperature',$tempe);
+                        $this->setConfiguration('camera_temperature',$tempe);*/
                         break;
-                    }*/
+                    }
                 }
                 foreach($datas['networks'] as $network) {
                     if ($network['id']==$this->getConfiguration('network_id')) {
@@ -1726,6 +1738,9 @@ class blink_camera extends eqLogic
             $wifi_strength->remove();
             $power->remove();
             $battery->remove();
+            $temperature->remove();
+        }
+        if ($typeDevice=="doorbells") {
             $temperature->remove();
         }
 
