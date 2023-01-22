@@ -633,6 +633,7 @@ class blink_camera extends eqLogic
                             chmod($folderBase.$filename, 0775);
                         }
                         try {
+                            blink_camera::logdebugBlinkAPI("CALL[getMediaForce] -->");
                             blink_camera::queryGetMedia($urlMedia,$folderBase.$filename);
                             if (file_exists($folderBase.$filename)) {
                                 chmod($folderBase.$filename, 0775);
@@ -745,6 +746,7 @@ class blink_camera extends eqLogic
 	        	}
                 foreach ($datas['doorbells'] as $device) {
                     if ("".$device['id']==="".$camera_id) {
+                        blink_camera::logdebugBlinkAPI("CALL[getCameraThumbnail] (doorbells): --> ");
                         //blink_camera::logdebug('devices='.$camera_id.' vs '.print_r( $device['device_id'],true));
                         $path=$this->getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail","jpg",true);
                     }
@@ -796,7 +798,10 @@ class blink_camera extends eqLogic
     {
         return $this->requestNewMedia($type,"camera");
     }
-
+    public function requestNewMediaDoorbell($type="clip")
+    {
+        return $this->requestNewMedia($type,"doorbell");
+    }
     public function requestNewMediaMini($type="clip")
     {
         return $this->requestNewMedia($type,"owl");
@@ -809,8 +814,8 @@ class blink_camera extends eqLogic
                     if ($typeDevice==='owl') {
                         // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
                         $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/owls/'.$this->getConfiguration('camera_id').'/'.$type;
-                    } else {
-                        $url='/network/'.$this->getConfiguration('network_id').'/camera/'.$this->getConfiguration('camera_id').'/'.$type;
+                    } else  {
+                        $url='/network/'.$this->getConfiguration('network_id').'/'.$typeDevice.'/'.$this->getConfiguration('camera_id').'/'.$type;
                     }
                     blink_camera::logdebugBlinkAPI("CALL[requestNewMedia]: --> ");
                 try {
@@ -1926,7 +1931,9 @@ class blink_cameraCmd extends cmd
 			case 'new_clip':
                 if ($eqlogic->getBlinkDeviceType()==="owl") {
                     $eqlogic->requestNewMediaMini("clip");
-                }else {
+                } else if ($eqlogic->getBlinkDeviceType()==="lotus") {
+                    $eqlogic->requestNewMediaDoorbell("clip");
+                } else {
                     $eqlogic->requestNewMediaCamera("clip");
                 }
                 $eqlogic->getLastEventDate();
@@ -1936,7 +1943,9 @@ class blink_cameraCmd extends cmd
             case 'new_thumbnail':
                 if ($eqlogic->getBlinkDeviceType()==="owl") {
                     $eqlogic->requestNewMediaMini("thumbnail");
-                }else {
+                } else if ($eqlogic->getBlinkDeviceType()==="lotus") {
+                    $eqlogic->requestNewMediaDoorbell("thumbnail");
+                } else {
                     $eqlogic->requestNewMediaCamera("thumbnail");
                 }
                 $eqlogic->getLastEventDate();
