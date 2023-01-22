@@ -13,8 +13,8 @@
 	"hasDependency" : false,
 	"changelog" : "https://d9-197.github.io/blink_camera/#language#/changelog",
 	"documentation" : "https://d9-197.github.io/blink_camera/#language#",
-	"changelog_beta" : "https://d9-197.github.io/blink_camera/#language#/changelog",
-	"documentation_beta" : "https://d9-197.github.io/blink_camera/#language#",
+	"changelog_beta" : "https://d9-197.github.io/blink_camera/beta/#language#/changelog",
+	"documentation_beta" : "https://d9-197.github.io/blink_camera/beta/#language#",
 	"language" : ["fr_FR","en_US"],
 	"compatibility" : ["rpi","docker","diy","v4"]	
 }
