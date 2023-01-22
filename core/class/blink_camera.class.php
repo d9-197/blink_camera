@@ -1758,6 +1758,13 @@ class blink_camera extends eqLogic
             $temperature->remove();
         }
         if ($typeDevice=="lotus") {
+            $wifi_strength->setUnite('%');
+            $power->remove();
+            $newThumbnail->remove();
+            $newClip->remove();
+            $arm_camera->remove();
+            $arm_status_camera->remove();
+            $disarm_camera->remove();
             $temperature->remove();
         }
 
