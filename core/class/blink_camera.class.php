@@ -52,17 +52,17 @@ class blink_camera extends eqLogic
     ));
 
     public static function logdebugBlinkAPIRequest($message) {
-        if (!config::byKeys('log::level::blink_camera_api')) {
-            config::save('log::level::blink_camera_api', '{"100":"0","200":"1","300":"0","400":"0","1000":"0","default":"0"}');
-        }
-        log::add('blink_camera_api','debug',$message);
+        //if (!config::byKeys('log::level::blink_camera_api')) {
+            config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","default":"0"}');
+        //}
+        //log::add('blink_camera_api','debug',$message);
         return;
     }
     public static function logdebugBlinkAPIResponse($message) {
-        if (!config::byKeys('log::level::blink_camera_api')) {
-            config::save('log::level::blink_camera_api', '{"100":"0","200":"1","300":"0","400":"0","1000":"0","default":"0"}');
-        }
-       // log::add('blink_camera_api','debug',$message);
+        //if (!config::byKeys('log::level::blink_camera_api')) {
+            config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","default":"0"}');
+        //}
+        //log::add('blink_camera_api','debug',$message);
         return;
     }
 
@@ -97,7 +97,6 @@ class blink_camera extends eqLogic
                 if (isset($last_event)) { 
                     $info = $cam->getCmd(null, 'source_last_event');
                     if (is_object($info)) {
-                        blink_camera::logdebug('blink_camera->getLastEvent() init last event source '.$last_event['source']);
                         $this->checkAndUpdateCmd('source_last_event', $last_event['source']);
                     }
                    self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
@@ -581,6 +580,9 @@ class blink_camera extends eqLogic
                         $jsonstr=$jsonstr."false";
                     }
                     $jsonstr=$jsonstr.",\"id\":\"".$media['id']."\"";
+                    if (isset($media['source'])) {
+                        $jsonstr=$jsonstr.",\"source\":\"".$media['source']."\"";
+                    }
                     $jsonstr=$jsonstr.",\"device_id\":\"".$media['device_id']."\",\"device_name\":\"".$media['device_name']."\",\"media\":\"".$media['media']."\",\"thumbnail\":\"".$media['thumbnail']."\",\"created_at\":\"".$media['created_at']."\"}";
                 }
             }
@@ -959,7 +961,6 @@ class blink_camera extends eqLogic
         self::getMedia($temp['media'], $this->getId(), 'last','mp4');
         $info = $this->getCmd(null, 'source_last_event');
         if (is_object($info)) {
-            blink_camera::logdebug('blink_camera->getLastEvent() init last event source '.$temp['source']);
             $this->checkAndUpdateCmd('source_last_event', $temp['source']);
         }
 		// récup thumbnail de la caméra
@@ -1039,7 +1040,7 @@ class blink_camera extends eqLogic
                 }
                 $info = $this->getCmd(null, 'source_last_event');
                 if (is_object($info) && isset($event)) {
-                    blink_camera::logdebug('blink_camera->getLastEvent() init last event source '.$event['source']);
+                    //blink_camera::logdebug('blink_camera->getLastEvent() init last event source '.print_r($event,true) );
                     $this->checkAndUpdateCmd('source_last_event', $event['source']);
                 }
             }
@@ -1050,7 +1051,7 @@ class blink_camera extends eqLogic
             $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
             $config_thumb=config::byKey('blink_dashboard_content_type', 'blink_camera');
             
-            if ($config_thumb==="1" && $this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
+            if ($config_thumb==="1" && $this->getBlinkDeviceType()!=="owl") {
                 // On affiche la vignette de la caméra
                 $this->getCameraThumbnail();
               	$thumbUrlCmd=$this->getCmd(null, 'camera_thumb_path');
@@ -1773,6 +1774,7 @@ class blink_camera extends eqLogic
         }
         if ($typeDevice=="lotus") {
             $wifi_strength->setUnite('%');
+            $wifi_strength->save();
             $power->remove();
             //$newThumbnail->remove();
             //$newClip->remove();
