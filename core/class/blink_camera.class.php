@@ -1061,7 +1061,7 @@ class blink_camera extends eqLogic
 		if ($this->isConfigured()&& $this->isConnected()) {
             $this->getCameraThumbnail();
             //$this->emptyCacheWidget();
-            if ($this->getBlinkDeviceType()!=="owl") {
+            if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
                 $datas=$this->getCameraInfo();
                 if (!$datas['message']) {
                    /* // MAJ Température 
