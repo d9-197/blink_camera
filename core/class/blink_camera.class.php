@@ -97,7 +97,7 @@ class blink_camera extends eqLogic
                 if (isset($last_event)) { 
                     $info = $cam->getCmd(null, 'source_last_event');
                     if (is_object($info)) {
-                        $this->checkAndUpdateCmd('source_last_event', $last_event['source']);
+                        $cam->checkAndUpdateCmd('source_last_event', $last_event['source']);
                     }
                    self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                 }
