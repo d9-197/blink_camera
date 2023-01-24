@@ -17,6 +17,7 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 include_file('core', 'authentification', 'php');
+include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');
 if (!isConnect()) {
     include_file('desktop', '404', 'php');
     die();
@@ -218,7 +219,8 @@ if (!isConnect()) {
     });
     $('#bt_test_blink').on('click', function() {
             $('#div_test_blink_result').hideAlert();
-            savePluginConfig();
+            //savePluginConfig();
+			jeeFrontEnd.plugin.savePluginConfig();
             sleep(1000);
             checkConnexionBlink();
 
