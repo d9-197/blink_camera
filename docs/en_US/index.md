@@ -17,8 +17,10 @@ Camera information is also available:
 * Camera thumbnail URL and path (from "Take a photo")
 * wifi power,
 * Temperature,
-* Battery voltage.
->**In the plugin, Blink Mini cameras do not have the same capabilities as other Blink XT, Outdoor cameras, etc.<br> For example, camera thumbnails are not implemented for Mini**
+* Battery status,
+* [Doorbell only] Source of the last evebt ("pir" for IR detection, "button_press" pour the button)
+
+>**In the plugin, Blink Mini cameras and Doorbell do not have the same capabilities as other Blink XT, Outdoor cameras, etc.<br> For example, camera thumbnails are not implemented for Mini**
 
 # Configuration of the plugin
 

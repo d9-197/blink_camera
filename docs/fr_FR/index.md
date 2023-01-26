@@ -6,7 +6,7 @@ Il permet d'afficher les vidéos des différentes caméras.
 
 Les actions suivantes sont disponibles (en fonction du modèle de caméra):
 - d'armer/désarmer la détection de mouvement d'un système
-- d'armer/désarmer la détection de mouvementd'une caméra.
+- d'armer/désarmer la détection de mouvement d'une caméra.
 - Prendre une vidéo
 - Prendre une photo (mise à jour de la vignette de la caméra)
 - Afficher l'historique des dernières vidéos d'une caméra (avec possibilité de télécharger les vidéos ou de les supprimer)
@@ -17,9 +17,10 @@ Les informations liées à la caméra sont également disponibles :
 * URL et chemin de la vignette de la caméra (issue de "Prendre une photo")
 * Puissance du wifi,
 * Température,
-* Voltage des piles.
+* Etat des piles,
+* [Doorbell uniquement] Source du dernier évenement ("pir" pour la détection, "button_press" pour la sonette)
 
->**Dans le plugin, les caméras Blink Mini n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini**
+>**Dans le plugin, les caméras Blink Mini et les Doorbell n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini, il n'est pas possible d'activer/désactiver la détection d'un Doorbell**
 
 
 # Configuration du plugin
@@ -81,7 +82,7 @@ La fenêtre de configuration de l'équipement s'ouvre ensuite.
 
 Les options standard des équipements Jeedom sont en haut de l'écran.
 
-Si vous avez correctement configuré votre compte Blink (voir configuration du plugin), 2 autres options sont diposnibles dans la partie basse de l'écran :
+Si vous avez correctement configuré votre compte Blink (voir configuration du plugin), 2 autres options sont disponibles dans la partie basse de l'écran :
 - Système : Correspond au système créé dans votre application Blink.
 - Caméra : vous permet de sélectionner la caméra à utiliser avec cet équipement
 
