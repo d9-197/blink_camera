@@ -57,7 +57,8 @@
         "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Afficher la vignette de caméra s'il n'y a pas de vidéo ?",
         "Sauvegarder et tester la connexion Blink":"Sauvegarder et tester la connexion Blink",
         "Sécurité": "Sécurité",
-        "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?"
+        "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?",
+        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\"."
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Rechercher"
