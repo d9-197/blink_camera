@@ -1,3 +1,5 @@
+[&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
+
 > 2023-01-17
   + V2.4.0
   + Take into account (partially) of the Blink Doorbell

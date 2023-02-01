@@ -1,3 +1,5 @@
+[&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
+
 > 2022-06-28
   + V2.3.2
   + Modification de la récupération des valeurs de température
