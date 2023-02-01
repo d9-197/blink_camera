@@ -4,6 +4,8 @@ Plugin dédié aux caméras Blink.
 
 Il permet d'afficher les vidéos des différentes caméras.
 
+[&rarr; pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
+
 Les actions suivantes sont disponibles (en fonction du modèle de caméra):
 - d'armer/désarmer la détection de mouvement d'un système
 - d'armer/désarmer la détection de mouvement d'une caméra.

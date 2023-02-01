@@ -4,6 +4,8 @@ Plugin dedicated to Blink cameras.
 
 It allows you to display videos from different cameras.
 
+[&rarr; to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
+
 The following actions are available (depending on the camera model):
 - to arm/disarm the motion detection of a system
 - to arm/disarm the motion detection of a camera.
