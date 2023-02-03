@@ -168,6 +168,8 @@ class blink_camera extends eqLogic
         }    
         return $jsonrep;
     }
+
+    
     public static function queryGetMedia(string $url, string $file_path) {
         $_tokenBlink=config::byKey('token', 'blink_camera');
         $_accountBlink=config::byKey('account', 'blink_camera');
@@ -316,8 +318,20 @@ class blink_camera extends eqLogic
         }
         return "";
     }
-    
-
+    public function getConfigHistory() {
+        $cfgHisto=$this->getConfiguration('history_display_mode');
+        if (!isset($cfgHisto) || $cfgHisto=='') {
+            $this->setConfigHistory();
+            $cfgHisto=$this->getConfiguration('history_display_mode');
+        }
+//        blink_camera::logdebug('getConfigHistory:'.print_r($cfgHisto, true));
+        return $cfgHisto;
+    }
+    public function setConfigHistory(string $cfgHisto="mp4") {
+        $this->setConfiguration('history_display_mode',$cfgHisto);
+ //       blink_camera::logdebug('setConfigHistory:'.print_r($cfgHisto, true));
+        $this->save();
+    }
     public static function isConnected() {
         $_tokenBlink=config::byKey('token', 'blink_camera');
         //blink_camera::logdebug('isConnected Token : '.$_tokenBlink);
@@ -1421,6 +1435,7 @@ class blink_camera extends eqLogic
             $info->setOrder(1);
             $info->save();
         }
+        if ($typeDevice!="owl" and $typeDevice!="lotus") {
             $arm_status_camera = $this->getCmd(null, 'arm_status_camera');
             if (!is_object($arm_status_camera)) {
                 blink_camera::loginfo( 'Create new information : arm_status_camera');
@@ -1457,26 +1472,24 @@ class blink_camera extends eqLogic
                 $temperature->setOrder(3);
                 $temperature->save();
             }
-            
             $power = $this->getCmd(null, 'power');
-            if (!is_object($power)) {
-                blink_camera::loginfo( 'Create new information : power');
-                $power = new blink_cameraCmd();
-                $power->setName(__('Pile', __FILE__));
-                $power->setTemplate('dashboard', 'badge');
-                $power->setDisplay("showNameOndashboard", 1);
-                $power->setConfiguration('historizeRound',"2");
-                $power->setConfiguration('historizeRound',"2");
-                $power->setUnite('V');
-                $power->setIsVisible(true);
-                $power->setLogicalId('power');
-                $power->setEqLogic_id($this->getId());
-                $power->setType('info');
-                $power->setSubType('numeric');
-                $power->setOrder(4);
-                $power->save();
-            }
-    
+                if (!is_object($power)) {
+                    blink_camera::loginfo( 'Create new information : power');
+                    $power = new blink_cameraCmd();
+                    $power->setName(__('Pile', __FILE__));
+                    $power->setTemplate('dashboard', 'badge');
+                    $power->setDisplay("showNameOndashboard", 1);
+                    $power->setConfiguration('historizeRound',"2");
+                    $power->setConfiguration('historizeRound',"2");
+                    $power->setUnite('V');
+                    $power->setIsVisible(true);
+                    $power->setLogicalId('power');
+                    $power->setEqLogic_id($this->getId());
+                    $power->setType('info');
+                    $power->setSubType('numeric');
+                    $power->setOrder(4);
+                    $power->save();
+                }
             $wifi_strength = $this->getCmd(null, 'wifi_strength');
             if (!is_object($wifi_strength)) {
                 blink_camera::loginfo( 'Create new information : wifi_strength');
@@ -1495,6 +1508,7 @@ class blink_camera extends eqLogic
                 $wifi_strength->setOrder(5);
                 $wifi_strength->save();
             }
+        }
         $info = $this->getCmd(null, 'last_event');
         if (!is_object($info)) {
             blink_camera::loginfo( 'Create new information : last_event');
@@ -1617,22 +1631,24 @@ class blink_camera extends eqLogic
             $info->setOrder(11);
             $info->save();
         }
-        $battery = $this->getCmd(null, 'battery');
-        if (!is_object($battery)) {
-            blink_camera::loginfo( 'Create new information : battery');
-            $battery = new blink_cameraCmd();
-            $battery->setName(__('Pile (pourcentage)', __FILE__));
-            $battery->setTemplate('dashboard', 'badge');
-            $battery->setDisplay("showNameOndashboard", 1);
-            $battery->setConfiguration('historizeRound',"2");
-            $battery->setUnite('%');
-            $battery->setIsVisible(true);
-            $battery->setLogicalId('battery');
-            $battery->setEqLogic_id($this->getId());
-            $battery->setType('info');
-            $battery->setSubType('numeric');
-            $battery->setOrder(12);
-            $battery->save();
+        if ($typeDevice!="owl") {
+            $battery = $this->getCmd(null, 'battery');
+            if (!is_object($battery)) {
+                blink_camera::loginfo( 'Create new information : battery');
+                $battery = new blink_cameraCmd();
+                $battery->setName(__('Pile (pourcentage)', __FILE__));
+                $battery->setTemplate('dashboard', 'badge');
+                $battery->setDisplay("showNameOndashboard", 1);
+                $battery->setConfiguration('historizeRound',"2");
+                $battery->setUnite('%');
+                $battery->setIsVisible(true);
+                $battery->setLogicalId('battery');
+                $battery->setEqLogic_id($this->getId());
+                $battery->setType('info');
+                $battery->setSubType('numeric');
+                $battery->setOrder(12);
+                $battery->save();
+            }
         }
         $refresh = $this->getCmd(null, 'refresh');
         if (!is_object($refresh)) {
@@ -1676,6 +1692,7 @@ class blink_camera extends eqLogic
             $arm_network->useIconAndName();
             $arm_network->save();
         }
+        if ($typeDevice!="owl" and $typeDevice!="lotus") {
             $arm_camera = $this->getCmd(null, 'arm_camera');
             if (!is_object($arm_camera)) {
                 blink_camera::loginfo( 'Create new action : arm_camera');
@@ -1705,6 +1722,7 @@ class blink_camera extends eqLogic
                 $disarm_camera->useIconAndName();
                 $disarm_camera->save();
             }
+        }
         $history = $this->getCmd(null, 'history');
         if (!is_object($history)) {
             blink_camera::loginfo( 'Create new action : history');
@@ -1763,25 +1781,7 @@ class blink_camera extends eqLogic
             //$force_download->setOrder(107);
             $force_download->save();
         }
-        if ($typeDevice=="owl") {
-            $arm_camera->remove();
-            $arm_status_camera->remove();
-            $disarm_camera->remove();
-            $wifi_strength->remove();
-            $power->remove();
-            $battery->remove();
-            $temperature->remove();
-        }
         if ($typeDevice=="lotus") {
-            $wifi_strength->setUnite('%');
-            $wifi_strength->save();
-            $power->remove();
-            //$newThumbnail->remove();
-            //$newClip->remove();
-            $arm_camera->remove();
-            //$arm_status_camera->remove();
-            $disarm_camera->remove();
-            $temperature->remove();
             $info = $this->getCmd(null, 'source_last_event');
             if (!is_object($info)) {
                 blink_camera::loginfo( 'Create new information : source_last_event');
@@ -1794,7 +1794,6 @@ class blink_camera extends eqLogic
                 $info->setEqLogic_id($this->getId());
                 $info->setType('info');
                 $info->setSubType('string');
-//                $info->setOrder(11);
                 $info->save();
             }
 
@@ -1915,6 +1914,7 @@ class blink_cameraCmd extends cmd
                 
                 $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']:last .action\').off(\'click\').on(\'click\', function () {';
                 $result.='$(\'#md_modal\').dialog({title: "Historique '.$bl_cam->getName().'"});';
+#                $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'&mode='.$bl_cam->getConfigHistory().'\').dialog(\'open\');});';
                 $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'\').dialog(\'open\');});';
                 $result.="</script>";
 
