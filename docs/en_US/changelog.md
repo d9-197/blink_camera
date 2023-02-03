@@ -1,5 +1,9 @@
 [&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
 
+> 2023-01-17
+  + V2.4.0
+  + Take into account (partially) of the Blink Doorbell
+
 > 2022-06-28
   + V2.3.2
   + Modification of the retrieval of temperature values
