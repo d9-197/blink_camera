@@ -207,5 +207,19 @@ $('#showPhotos').change(function() {
     $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
     $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=mp4').dialog('open');
 });
-
+Promise.all(Array.from(document.images).map(img => {
+    if (img.complete)
+        return Promise.resolve(img.naturalHeight !== 0);
+    return new Promise(resolve => {
+        img.addEventListener('load', () => resolve(true));
+        img.addEventListener('error', () => resolve(false));
+    });
+})).then(results => {
+    /*if (results.every(res => res))
+        console.log('all images loaded successfully');
+    else
+        console.log('some images failed to load, all finished loading');
+        */
+    $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+});
 </script>
