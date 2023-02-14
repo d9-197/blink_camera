@@ -1,7 +1,7 @@
 {
 	"id" : "blink_camera",
 	"name" : "Blink Camera",
-	"version" : "2.5.0",
+	"version" : "2.5.1",
 	"description" : "Plugin for Blink Camera",
 	"licence" : "AGPL",
 	"author" : "Duke 9",
