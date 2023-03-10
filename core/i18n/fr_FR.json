@@ -64,7 +64,10 @@
         "Rechercher": "Rechercher"
     },
     "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
-        "Tout télécharger": "Tout télécharger"
+        "Tout télécharger": "Tout télécharger",
+        "Vidéos": "Vidéos",
+        "Vignettes de la caméra": "Vignettes de la caméra",
+        "Vignettes des vidéos": "Vignettes des vidéos"
     },
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Système armé ?": "Système armé ?",

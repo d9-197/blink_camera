@@ -65,7 +65,10 @@
         "Rechercher": "Search"
     },
     "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
-        "Tout télécharger": "Download all"
+        "Tout télécharger": "Download all",
+		"Vidéos": "Videos",
+        "Vignettes de la caméra": "Camera thumbnails",
+        "Vignettes des vidéos": "Videos thumbnails"
     },
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Système armé ?": "Armed system?",

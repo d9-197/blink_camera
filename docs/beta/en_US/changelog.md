@@ -1,5 +1,13 @@
-[&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
+## [&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
 
+> 2023-03-10
+  + V2.6.0 Beta
+  + Camera thumbnails ("Take photo") are now saved.
+  + They are accessible in the historical view.
+  + **Blink only allows you to retrieve the last photo, the photos are saved in Jeedom as they are found.**
+  + Example 1: If you delete a photo from the historical view, it can no longer be found (unless it was the last photo from the camera).
+  + Example 2: if your Jeedom cannot connect to Blink servers for a certain period of time, it is possible that photos taken during this time will never be downloaded.
+  
 > 2023-02-14
   + V2.5.1
   + Fix the issue with thumbnails display in historical view

@@ -1,4 +1,13 @@
-[&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
+## [&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
+
+> 2023-03-10
+  + V2.6.0 Beta
+  + Les vignettes de la caméra ("Prendre une photo") sont maintenant sauvegardées.
+  + Elles sont accessibles dans la vue historique.
+  + **Blink ne permettant de récupérer que la dernière photo, les photos sont sauvegardées dans Jeedom au fur et à mesure qu'elles sont trouvées.**
+  + Exemple 1 : Si vous effacez une photo depuis la vue historique, elle ne pourra pas être retrouvée (sauf s'il s'agissait de la dernière photo de la caméra).
+  + Exemple 2 : si votre Jeedom ne peut pas se connecter aux serveurs Blink pendant un certains temps, il est possible que des photos prises pendant ce temps ne soient jamais téléchargées.
+  
 
 > 2023-02-14
   + V2.5.1

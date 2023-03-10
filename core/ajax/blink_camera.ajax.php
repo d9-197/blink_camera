@@ -24,7 +24,11 @@ try {
     if (!isConnect('admin')) {
         throw new Exception(__('401 - Accès non autorisé', __FILE__));
     }
-    
+    if (!function_exists('str_starts_with')) {
+        function str_starts_with($str, $start) {
+          return (@substr_compare($str, $start, 0, strlen($start))==0);
+        }
+      }
     ajax::init();
 
     if (init('action') == 'removeRecord') { 
@@ -32,7 +36,7 @@ try {
         $dir = init('dir');
         $filepath = realpath($dir.'/'.$file);
         blink_camera::deleteMedia($filepath);
-        if (!blink_camera::endsWith($file, "*")) {
+        if (!blink_camera::endsWith($file, "*") && !str_starts_with($file, blink_camera::PREFIX_THUMBNAIL)) {
             blink_camera::deleteMediaCloud($filepath);
         }
         ajax::success();
