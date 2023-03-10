@@ -1,5 +1,13 @@
 [&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
 
+> 2023-02-14
+  + V2.5.1
+  + Correction du problème d'affichage des vignettes dans la vue historique
+
+> 2023-02-03
+  + V2.5.0
+  + Ajout du choix entre vignettes ou vidéos dans la vue Historique : nouveau bouton en haut de la vue historique (le dernier choix est mémorisé individuellement pour chaque caméra)
+
 > 2023-01-17
   + V2.4.0
   + Prise en compte (partielle) des Blink Doorbell

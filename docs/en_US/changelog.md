@@ -1,5 +1,13 @@
 [&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
 
+> 2023-02-14
+  + V2.5.1
+  + Fix the issue with thumbnails display in historical view
+
+> 2023-02-03
+  + V2.5.0
+  + Add option between display thumbnails or videos in the Historical view : new switch on the top of the view (the last choise is save in configuration for each camera)
+
 > 2023-01-17
   + V2.4.0
   + Take into account (partially) of the Blink Doorbell
