@@ -1009,7 +1009,7 @@ class blink_camera extends eqLogic
         // Nettoyage des fichiers du dossier medias
         foreach ($fileToDelete as $file) {
             if ($file!=="." && $file!=="..") {
-                blink_camera::logdebug( 'blink_camera->forceCleanup() Delete file: '. $this->getMediaDir().'/'.$file);
+                //blink_camera::logdebug( 'blink_camera->forceCleanup() Delete file: '. $this->getMediaDir().'/'.$file);
                 blink_camera::deleteMedia($this->getMediaDir().'/'.$file);
             }
         }
