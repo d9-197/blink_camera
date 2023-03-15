@@ -91,8 +91,8 @@
         "URL dernière vidéo": "URL dernière vidéo",
         "URL vignette": "URL vignette",
         "URL vignette caméra":"URL vignette caméra",
-        "Chemin vignette caméra":"Chemin vignette caméra"
-
+        "Chemin vignette caméra":"Chemin vignette caméra",
+        "Mode hors ligne":"Attention le plugin est hors ligne (vérifiez la configuration du plugin)"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",

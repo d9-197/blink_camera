@@ -629,7 +629,7 @@ class blink_camera extends eqLogic
     }
     public static function getMediaForce($urlMedia, $equipement_id, $filename="default",$format="mp4",$overwrite=false)
     {
-        blink_camera::logdebug('blink_camera->getMedia() url : '.$urlMedia);
+        //blink_camera::logdebug('blink_camera->getMedia() url : '.$urlMedia);
         if (!empty($urlMedia)) {
                 $_tokenBlink=config::byKey('token', 'blink_camera');
                 $_accountBlink=config::byKey('account', 'blink_camera');
@@ -1971,7 +1971,9 @@ class blink_cameraCmd extends cmd
             }
         }else if ($this->getType()!=='action') {
             $bl_cam=$this->getEqLogic();
-            if ($bl_cam->isConfigured()) {
+            if ($this->getLogicalId()==='thumbnail' && !$bl_cam->isConnected() ) {
+                return "<div class=\"badge text-warning text-wrap\">".__('Mode hors ligne', __FILE__)."</div>".parent::toHtml($_version, $_options, $_cmdColor);
+            } else if ($bl_cam->isConfigured()) {
                 return parent::toHtml($_version, $_options, $_cmdColor);
             } else {
                 return "";
