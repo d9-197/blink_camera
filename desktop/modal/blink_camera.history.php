@@ -86,13 +86,19 @@ if ($nbMax <= 0) {
 }
 $cptVideo=0;
 if ($thumbFilter=='') {
-    if ($blink_camera->getToken()) {
+    if ($blink_camera->isConnected() && $blink_camera->getToken()) {
+        $pageVide=0;
         for ($page=1;$page<=50;$page++) {
+            if ($pageVide>=3) {
+                break;
+            }
             if ($nbMax>0 && $cptVideo>=($nbMax)) {
                 break;
             };
             $videos=$blink_camera->getVideoList($page);
+            $pageVide++;
             foreach (json_decode($videos, true) as $video) {
+                $pageVide--;
                 if ($nbMax>0 && $cptVideo>=($nbMax)) {
                     break;
                 };
@@ -109,7 +115,19 @@ if ($thumbFilter=='') {
             }
         } 
     } else {
-        //TODO : get already downloaded videos...
+         //liste les thumbnail*.jpg dans jeedom
+        $scandir = scandir($dir);
+        foreach($scandir as $fichier){
+            if(preg_match("#[0-9]*-.*\.mp4$#",strtolower($fichier))){
+                $datetime = explode("-", $fichier);
+                $date=$datetime[1].'-'.$datetime[2].'-'.explode("_",$datetime[3])[0];
+            if (array_key_exists($date, $videoFiltered)) {
+                    array_push($videoFiltered[$date], json_decode("{\"id\":\"".$fichier."\"}",true));
+                } else {
+                    $videoFiltered[$date]=array(json_decode("{\"id\":\"".$fichier."\"}",true));
+                }
+            }
+        }
     }
 } else {
     //liste les thumbnail*.jpg dans jeedom
@@ -119,8 +137,8 @@ if ($thumbFilter=='') {
             $datetime = explode("_", $fichier);
             $date=str_replace(blink_camera::PREFIX_THUMBNAIL."-","",$datetime[0]);
         if (array_key_exists($date, $videoFiltered)) {
-                array_push($videoFiltered[$date], json_decode("{\"id\":\"".$fichier."\"}",true));
-            } else {
+            array_push($videoFiltered[$date], json_decode("{\"id\":\"".$fichier."\"}",true));
+        } else {
                 $videoFiltered[$date]=array(json_decode("{\"id\":\"".$fichier."\"}",true));
             }
         }
@@ -154,7 +172,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
         if ($nbMax>0 && $cptVideo>$nbMax) {
             break;
         };
-        if ($thumbFilter=='') {
+        if (isset($video['created_at'])) {
             $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']);
             $path=$blink_camera->getMedia($video['media'], init('id'), $filename);
         } else {

@@ -2,7 +2,9 @@
 
 > 2023-03-10
   + V2.6.0 Beta
-  + Les vignettes de la caméra ("Prendre une photo") sont maintenant sauvegardées.
+  + **Ajout d'un mode "hors ligne"** : quand les serveurs Blink sont inaccessibles ou quand le mot de passe a expiré, le plugin utilise les vidéos, photos et infos déjà présentes dans Jeedom.
+  <br><br>
+  + **Les vignettes de la caméra ("Prendre une photo") sont maintenant sauvegardées :**
   + Elles sont accessibles dans la vue historique.
   + **Blink ne permettant de récupérer que la dernière photo, les photos sont sauvegardées dans Jeedom au fur et à mesure qu'elles sont trouvées.**
   + Exemple 1 : Si vous effacez une photo depuis la vue historique, elle ne pourra pas être retrouvée (sauf s'il s'agissait de la dernière photo de la caméra).
