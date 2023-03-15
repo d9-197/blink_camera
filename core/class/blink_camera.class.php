@@ -572,7 +572,7 @@ class blink_camera extends eqLogic
             //blink_camera::logdebug('getAccountConfigDatas2() after reformat '.print_r($reto,true));
             return $force_json_string ? $reto : json_decode($reto,true);
         }
-        $messag='{"message":"{{Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mots de passe. Recharger la page ensuite.}}"}';
+        $messag='{"message":"{{Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mots de passe. Recharger la page ensuite.}}"}';
         return $force_json_string ? $messag : json_decode($messag,true);
 	}
 
