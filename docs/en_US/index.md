@@ -1,3 +1,5 @@
+[&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
+
 # Description
 
 Plugin dedicated to Blink cameras.

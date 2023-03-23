@@ -1,3 +1,4 @@
+[&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
 # Description
 
 Plugin dédié aux caméras Blink.
