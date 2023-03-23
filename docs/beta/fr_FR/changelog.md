@@ -1,4 +1,4 @@
-## [&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
+[&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
 
 > 2023-03-10
   + V2.6.0 Beta
