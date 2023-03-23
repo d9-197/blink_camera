@@ -1,8 +1,11 @@
 {
 	"id" : "blink_camera",
 	"name" : "Blink Camera",
-	"version" : "2.5.1",
-	"description" : "Plugin for Blink Camera",
+	"version" : "2.6.0",
+	"description": {
+        "fr_FR": "Permet de récupérer les informations, vidéos et photos des caméras Blink.",
+        "en_US": "Allow to get informations, videos and photos from Blink cameras."
+    },
 	"licence" : "AGPL",
 	"author" : "Duke 9",
 	"require" : "4.0",

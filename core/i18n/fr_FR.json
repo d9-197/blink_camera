@@ -24,8 +24,7 @@
         "Recharger la configuration": "Reload configuration",
         "Paramètres": "Paramètres",
         "Options": "Options",
-        "Actions": "Actions",
-        "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite.": "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite (F5)."
+        "Actions": "Actions"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
         "Choisir": "Choisir"
@@ -64,7 +63,10 @@
         "Rechercher": "Rechercher"
     },
     "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
-        "Tout télécharger": "Tout télécharger"
+        "Tout télécharger": "Tout télécharger",
+        "Vidéos": "Vidéos",
+        "Vignettes de la caméra": "Vignettes de la caméra",
+        "Vignettes des vidéos": "Vignettes des vidéos"
     },
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Système armé ?": "Système armé ?",
@@ -88,8 +90,9 @@
         "URL dernière vidéo": "URL dernière vidéo",
         "URL vignette": "URL vignette",
         "URL vignette caméra":"URL vignette caméra",
-        "Chemin vignette caméra":"Chemin vignette caméra"
-
+        "Chemin vignette caméra":"Chemin vignette caméra",
+        "Mode hors ligne":"Attention le plugin est hors ligne (vérifiez la configuration du plugin)",
+        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe dans la configuration du plugin."
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
