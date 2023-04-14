@@ -1,3 +1,5 @@
+[&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
+
 # Description
 
 Plugin dedicated to Blink cameras.
@@ -44,11 +46,13 @@ In the plugin configuration screen the following options are available:
 
 * Widget
   + Thumbnail content: allows you to choose what is displayed in the widget
+    + If you choose "Last video", a checkbox is displayed to choose whether to display (or not) the thumbnail of the camera if there are no videos.
+
   + Thumbnail size: allows you to define the reduction to be applied (as a percentage of the initial size).
     
 * Historical view
   + This view is accessible from the widget
-  + It displays the latest videos available
+  + It displays the latest videos/thumbnails available
   + The maximum number of downloaded videos allows you to limit the amount of data to download when opening the historical view
   + The size of the video previews can also be configured.
 
@@ -100,12 +104,18 @@ The "Display" checkboxes allow you to choose the information or commands that wi
 
 ![Onglet commandes](..\assets\images\cfg_commands.png "Commandes")
 
+>**Special widget for "Camera armed?" and "System armed?" commands.**<br>
+By default, these commands show the detection status of the camera/system.<br>
+ It is possible to modify the display of these commands in order to have only one button for the 3 commands "Camera armed?", "Arm the camera", "Disarm the camera" (and for the 3 System commands).<br>In this case, the icon of the button which indicates the state (open padlock: no detection, closed padlock: detection) and by clicking on it you can change the state.<br>
+ To activate this operating mode, you must use the "Blink_camera/Camera or System status" widget in the advanced configuration of the "Camera armed?" commands and/or "System armed?":<br>
+>![Open advanced configuration of commands](..\assets\images\cfg_command_switch_1.png "Commands config")<br>
+>![select the widget](..\assets\images\cfg_command_switch_2.png "Select widget")
 
 Historical view
 ===
 The history view is accessible from the camera widget. (History command)
 
-This view gives you access to the latest videos from the camera.
+This view gives you access to the latest videos or lastest thumbnails from the camera.
 
 The number of videos displayed as well as the size of the thumbnails is configurable on the plugin: see [Configuration du plugin](#-Configuration-du-plugin)
 

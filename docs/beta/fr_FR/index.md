@@ -1,10 +1,12 @@
+[**&rarr; Lien pour soutenir les développements de ce plugin gratuit**](https://fr.tipeee.com/duke-9)
+
 # Description
 
 Plugin dédié aux caméras Blink.
 
 Il permet d'afficher les vidéos des différentes caméras.
 
-[&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
+[**&rarr; Lien pour soutenir les développements de ce plugin gratuit**](https://fr.tipeee.com/duke-9)
 
 Les actions suivantes sont disponibles (en fonction du modèle de caméra):
 - d'armer/désarmer la détection de mouvement d'un système
@@ -22,7 +24,7 @@ Les informations liées à la caméra sont également disponibles :
 * Etat des piles,
 * [Doorbell uniquement] Source du dernier évenement ("pir" pour la détection, "button_press" pour la sonette)
 
->**Dans le plugin, les caméras Blink Mini et les Doorbell n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini, il n'est pas possible d'activer/désactiver la détection d'un Doorbell**
+>**Dans le plugin, les caméras Blink Mini et les Doorbell n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini, il n'est pas possible d'activer/désactiver la détection d'une Doorbell**
 
 
 # Configuration du plugin
@@ -30,7 +32,7 @@ Les informations liées à la caméra sont également disponibles :
 Dans l'écran de configuration du plugin les options suivantes sont disponibles :
 
 * Compte Blink
-  + Zone permettant de saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisi du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
+  + Zone permettant de saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisie du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
 
 * Sécurité
   + _"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?"_
@@ -44,12 +46,14 @@ Dans l'écran de configuration du plugin les options suivantes sont disponibles 
 
 * Widget
   + Contenu de la vignette : permet de choisir ce qui est affiché dans le widget
+    + Si vous choisissez "Dernière vidéo", une case à cocher s'affiche pour choisir d'afficher (ou non) la vignette de la caméra s'il n'y a pas de vidéos.
+
   + Taille de la vignette : permet de définir la réduction à appliquer (en pourcentage de la taille initiale).
 
 
 * Vue historique
   + Cette vue est accessible depuis le widget
-  + Elle affiche les dernières vidéos disponibles
+  + Elle affiche les dernières vidéos/vignettes disponibles
   + Le nombre maximum de vidéos téléchargées permet de limiter la quantité de données à télécharger à l'ouverture de la vue historique
   + La taille des aperçus des vidéos peut également être confirgurée.
 
@@ -71,7 +75,7 @@ L'ajout des équipements se fait manuellement.
 
 Pour cela, vous devez cliquer sur le bouton "Ajouter" ayant l'icône "+".
 
-![Ajout d'un équipment](..\assets\images\cfg_plugin_general.png "Ajout d'un équipment")
+![Ajout d'un équipement](..\assets\images\cfg_plugin_general.png "Ajout d'un équipement")
 
 Vous pouvez alors renseigner un nom pour l'équipement.
 
@@ -88,7 +92,6 @@ Si vous avez correctement configuré votre compte Blink (voir configuration du p
 - Système : Correspond au système créé dans votre application Blink.
 - Caméra : vous permet de sélectionner la caméra à utiliser avec cet équipement
 
-
 >**N'oubliez pas de cliquer sur le bouton "Sauvegarder"**
 
 
@@ -103,10 +106,19 @@ Les cases à cocher "Afficher" vous permettent de choisir les informations ou co
 ![Onglet commandes](..\assets\images\cfg_commands.png "Commandes")
 
 
+>**Widget particulier pour les commandes "Caméra armée ?" et "Système armé ?"**
+Par défaut, ces commandes affichent l'état de détection de la caméra/système.<br> 
+ Il est possible de modifier l'affichage de ces commandes afin de n'avoir qu'un seul bouton pour les 3 commandes "Caméra armée ?", "Armer la caméra", "Désarmer la caméra" (et les 3 commandes pour le Système).<br>Dans ce cas, l'icone du bouton qui indique l'état (cadenas ouvert : pas de détection, cadenas fermé : détection) et en cliquant dessus vous pouvez changer l'état.<br>
+ Pour activer ce mode de fonctionnement, il faut utiliser le widget "Blink_camera/Camera or System status" dans la configuration avancée des commandes "Caméra armée ?" et/ou "Système armé ?" :<br>
+>![Ouvrir la configuration avancée des commandes](..\assets\images\cfg_command_switch_1.png "Config commandes")<br>
+>![Choisir le widget](..\assets\images\cfg_command_switch_2.png "Choix widget")
+
+
+
 Vue historique
 ===
 La vue historique est accessible depuis le widget de la caméra. (commande Historique)
-Cette vue vous donne accès aux dernières vidéos de la caméra.
+Cette vue vous donne accès aux dernières vidéos de la caméra ou aux dernières vignettes. Le choix se fait directement dans la fenêtre "historique" et ce choix est mémorisé pour chaque caméra.<br>
 Le nombre de vidéos affichées ainsi que la taille des vignettes est configurable sur le plugin : voir [Configuration du plugin](#-Configuration-du-plugin)
 
 Utilisation dans des scénarios

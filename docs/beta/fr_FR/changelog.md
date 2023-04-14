@@ -1,12 +1,16 @@
-[&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
+[**&rarr; Lien pour soutenir les développements de ce plugin gratuit**](https://fr.tipeee.com/duke-9)
 
-> 2023-03-10
-  + V2.6.0 Beta
-  + **Ajout d'un mode "hors ligne"** : quand les serveurs Blink sont inaccessibles ou quand le mot de passe a expiré, le plugin utilise les vidéos, photos et infos déjà présentes dans Jeedom.
+> 2023-04-14
+  + V2.7.0 Beta
+  + **Ajout d'un widget spécial pour les commandes "Statut","Armer" et "Désarmer" des caméras ou systèmes.** Voir la documentation plus de détail.
+
+> 2023-03-23
+  + V2.6.0
+  + Ajout d'un mode "hors ligne" : quand les serveurs Blink sont inaccessibles ou quand le mot de passe a expiré, le plugin utilise les vidéos, photos et infos déjà présentes dans Jeedom.
   <br><br>
-  + **Les vignettes de la caméra ("Prendre une photo") sont maintenant sauvegardées :**
+  + Les vignettes de la caméra ("Prendre une photo") sont maintenant sauvegardées :
   + Elles sont accessibles dans la vue historique.
-  + **Blink ne permettant de récupérer que la dernière photo, les photos sont sauvegardées dans Jeedom au fur et à mesure qu'elles sont trouvées.**
+  + Blink ne permettant de récupérer que la dernière photo, les photos sont sauvegardées dans Jeedom au fur et à mesure qu'elles sont trouvées.
   + Exemple 1 : Si vous effacez une photo depuis la vue historique, elle ne pourra pas être retrouvée (sauf s'il s'agissait de la dernière photo de la caméra).
   + Exemple 2 : si votre Jeedom ne peut pas se connecter aux serveurs Blink pendant un certains temps, il est possible que des photos prises pendant ce temps ne soient jamais téléchargées.
   
@@ -52,7 +56,7 @@
 > 2021-02-10
   + V2.0.1
   + Corrections suite aux modifications des API de connexion Blink
-  + **L'authentification avec code pin envoyé par SMS n'a pas encore été testée. Donc elle peut ne pas fonctionner**
+  + L'authentification avec code pin envoyé par SMS n'a pas encore été testée. Donc elle peut ne pas fonctionner
 
 > 2020-08-26
   + V2.0.0
