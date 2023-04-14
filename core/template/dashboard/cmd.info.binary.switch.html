@@ -32,14 +32,6 @@
         cmd.find('.iconCmd').empty().append("#_icon_off_#");
         bouton#id#='off';
       }
-
-/*      if ('#switchState#' == '1'){
-        $('.cmd[data-cmd_id=#id#] .action').empty().html($content_on);
-        bouton#id#='on';
-      } else {
-        $('.cmd[data-cmd_id=#id#] .action').empty().html($content_off);
-        bouton#id#='off';
-      }*/
       });
       $('.cmd[data-cmd_id=#id#] .bouton').off().on('click', function (event) {
         if (bouton#id#=='off'){

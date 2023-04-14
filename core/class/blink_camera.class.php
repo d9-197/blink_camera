@@ -1973,25 +1973,22 @@ class blink_cameraCmd extends cmd
                     $off = $bl_cam->getCmd(null, 'disarm_network');
                 }
                 if (is_object($on) && is_object($off)) {
-                    $replace['switchState'] = $this->execCmd();
                     $replace['cmd_on_id'] = $on->getId();
                     $replace['cmd_off_id'] = $off->getId();
                     $replace['_icon_on_'] ='<i class=\"icon jeedom-lock-ferme\"></i>';
                     $replace['_icon_off_'] ='<i class=\"icon jeedom-lock-ouvert\"></i>';
                 } else {
-                    $replace['switchState'] = '""';
                     $replace['cmd_on_id'] = '""';
                     $replace['cmd_off_id'] = '""';
                     $replace['_icon_on_'] ='';
                     $replace['_icon_off_'] ='';
                 }
-                $result=parent::toHtml($_version,$replace,$_cmdColor);
+                return parent::toHtml($_version,$replace,$_cmdColor);
     //		    $template = $this->getTemplate($_version, 'default');
     //            blink_camera::logdebug('cmd->toHtml '. $replace['#id#'].' template : '.$template);
     //            if ($template =='blink_camera::switch') {
     //              blink_camera::logdebug('cmd->toHtml '. $replace['#id#'].' parent : '.print_r($result,true));
     //            }
-                return $result;
             } else {
                 return "";
             } 
