@@ -1891,7 +1891,6 @@ class blink_camera extends eqLogic
     
     public function toHtml($_version = 'dashboard', $_fluxOnly = false)
     {
-        // L'affichage des vignettes est géré dans lastEventDate()
         return parent::toHtml($_version);
     }
 
@@ -1934,7 +1933,22 @@ class blink_camera extends eqLogic
         }
         */
     }
-
+	public static function templateWidget()
+	{
+        $return = array('info' => array('binary' => array()));
+        $return['info']['binary']['Camera or System status'] = array(
+            'template' => 'switch',
+            'display' => array(
+                '#icon#' => '<i class=\'jeedom jeedom-lock-ferme\'></i>',
+            ),
+            'replace' => array(
+                '#_icon_on_#' => '<i class=\'jeedom jeedom-lock-ferme\'></i>',
+                '#_icon_off_#' => '<i class=\'jeedom jeedom-lock-ouvert\'></i>',
+                '#_time_widget_#' => '0'
+            )
+        );
+        return $return;
+    }
 }
 
 class blink_cameraCmd extends cmd
@@ -1948,10 +1962,43 @@ class blink_cameraCmd extends cmd
 
     /*     * *********************Methode d'instance************************* */
     public function toHtml($_version = 'dashboard', $_options = '', $_cmdColor = null) {
-        
-        // L'affichage des vignettes est géré dans lastEventDate()
-
-        if ($this->getLogicalId()==='history') {
+        if ($this->getLogicalId() == 'arm_status_camera' || $this->getLogicalId() == 'arm_status') {
+            $bl_cam=$this->getEqLogic();
+            if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
+                if ($this->getLogicalId() == 'arm_status_camera') {
+                    $on = $bl_cam->getCmd(null, 'arm_camera');
+                    $off = $bl_cam->getCmd(null, 'disarm_camera');
+                } else {
+                    $on = $bl_cam->getCmd(null, 'arm_network');
+                    $off = $bl_cam->getCmd(null, 'disarm_network');
+                }
+                if (is_object($on) && is_object($off)) {
+                    $replace['switchState'] = $this->execCmd();
+                    $replace['cmd_on_id'] = $on->getId();
+                    $replace['cmd_off_id'] = $off->getId();
+                    $replace['_icon_on_'] ='<i class=\"icon jeedom-lock-ferme\"></i>';
+                    $replace['_icon_off_'] ='<i class=\"icon jeedom-lock-ouvert\"></i>';
+                } else {
+                    $replace['switchState'] = '""';
+                    $replace['cmd_on_id'] = '""';
+                    $replace['cmd_off_id'] = '""';
+                    $replace['_icon_on_'] ='';
+                    $replace['_icon_off_'] ='';
+                }
+                $result=parent::toHtml($_version,$replace,$_cmdColor);
+    //		    $template = $this->getTemplate($_version, 'default');
+    //            blink_camera::logdebug('cmd->toHtml '. $replace['#id#'].' template : '.$template);
+    //            if ($template =='blink_camera::switch') {
+    //              blink_camera::logdebug('cmd->toHtml '. $replace['#id#'].' parent : '.print_r($result,true));
+    //            }
+                return $result;
+            } else {
+                return "";
+            } 
+        }else if ($this->getLogicalId() == 'arm_status') {
+            $result=parent::toHtml($_version,$_options,$_cmdColor);
+            return $result;
+        } else if ($this->getLogicalId()==='history') {
             $bl_cam=$this->getEqLogic();
             //if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
                 if ($bl_cam->isConfigured()) {
