@@ -12,7 +12,7 @@
     <div>time : date ({{Affiche l'info time sous forme de date}})</div>
   </template>
   <script>
-      bouton#id#='on';
+      //bouton#id#='on';
       jeedom.cmd.addUpdateFunction('#id#',function(_options) {
       let cmd = $('.cmd[data-cmd_id=#id#]')
       // suppress on and off command
@@ -34,11 +34,14 @@
       }
       });
       $('.cmd[data-cmd_id=#id#] .bouton').off().on('click', function (event) {
+        //alert(bouton#id#);
         if (bouton#id#=='off'){
           jeedom.cmd.execute({id: '#cmd_on_id#', notify: false});
+          jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}]);
           bouton#id#='on';
         } else{
           jeedom.cmd.execute({id: '#cmd_off_id#', notify: false});
+          jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}]);
           bouton#id#='off';
         }
         event.preventDefault()
