@@ -1294,7 +1294,7 @@ class blink_camera extends eqLogic
                 $url='/network/'.$this->getConfiguration('network_id').'/arm';
                 try {
                     blink_camera::queryPost($url);
-                    sleep(1);
+                    jeedomUtils.sleep(1);
                     $this->refreshCameraInfos();
                     return true;
                 } catch (TransferException $e) {
@@ -1310,7 +1310,7 @@ class blink_camera extends eqLogic
             $url='/network/'.$this->getConfiguration('network_id').'/disarm';
             try {
                 blink_camera::queryPost($url);
-                sleep(1);
+                jeedomUtils.sleep(1);
                 $this->refreshCameraInfos();
                 return true;
             } catch (TransferException $e) {
@@ -1329,7 +1329,7 @@ class blink_camera extends eqLogic
             $url="/network/".$this->getConfiguration('network_id')."/camera/".$this->getConfiguration('camera_id')."/enable";
             try {
                 blink_camera::queryPost($url);
-                sleep(1);
+                jeedomUtils.sleep(1);
                 $this->refreshCameraInfos();
                 return true;
             } catch (TransferException $e) {
@@ -1346,7 +1346,7 @@ class blink_camera extends eqLogic
             $url="/network/".$this->getConfiguration('network_id')."/camera/".$this->getConfiguration('camera_id')."/disable";
             try {
                 blink_camera::queryPost($url);
-                sleep(1);
+                jeedomUtils.sleep(1);
                 $this->refreshCameraInfos();
                 return true;
             } catch (TransferException $e) {
@@ -2003,7 +2003,7 @@ class blink_cameraCmd extends cmd
                 $result=parent::toHtml($_version,$_options,$_cmdColor);
                 $bl_cam=$this->getEqLogic();
                 
-                $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']:last .action\').off(\'click\').on(\'click\', function () {';
+                $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']\').off(\'click\').on(\'click\', function () {';
                 $result.='$(\'#md_modal\').dialog({title: "Historique '.$bl_cam->getName().'"});';
 #                $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'&mode='.$bl_cam->getConfigHistory().'\').dialog(\'open\');});';
                 $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'\').dialog(\'open\');});';

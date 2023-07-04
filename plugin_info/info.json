@@ -8,7 +8,7 @@
     },
 	"licence" : "AGPL",
 	"author" : "Duke 9",
-	"require" : "4.0",
+	"require" : "4.2",
 	"category" : "security",
 	"display" : "",
 	"mobile":"",
