@@ -1,5 +1,9 @@
 [**&rarr; Link to support developpements for this free plugin**](https://fr.tipeee.com/duke-9)
 
+> 2023-07-04
+  + V2.7.1 Beta
+  + **Security fix.
+
 > 2023-04-14
   + V2.7.0 Beta
   + **Addition of special widget for "arm status","arm" and "desarm" commands of cameras or systems.** See documentation for more details.
