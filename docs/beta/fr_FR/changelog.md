@@ -1,5 +1,9 @@
 [**&rarr; Lien pour soutenir les développements de ce plugin gratuit**](https://fr.tipeee.com/duke-9)
 
+> 2023-07-04
+  + V2.7.1 Beta
+  + **Fix sécurité
+
 > 2023-04-14
   + V2.7.0 Beta
   + **Ajout d'un widget spécial pour les commandes "Statut","Armer" et "Désarmer" des caméras ou systèmes.** Voir la documentation plus de détail.
