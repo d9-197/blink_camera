@@ -64,6 +64,15 @@ if (!isConnect()) {
             <div id ="pinstatus"></div>
         </div>
         </div>
+        <!--div class="form-group">
+            <label class="col-lg-3 control-label">{{Type de stockage}}</label>
+            <div class="col-lg-3">
+                <select  class="configKey form-control" data-l1key="blink_storage">
+                    <option value="cloud">{{Cloud}}</option>
+                    <option value="local">{{Local}}</option>
+                </select>
+            </div>
+        </div-->
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Unité de température}}</label>
             <div class="col-lg-3">

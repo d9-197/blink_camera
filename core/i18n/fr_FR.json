@@ -57,7 +57,10 @@
         "Sauvegarder et tester la connexion Blink":"Sauvegarder et tester la connexion Blink",
         "Sécurité": "Sécurité",
         "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?",
-        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\"."
+        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".",
+        "Type de stockage":"Type de stockage",
+        "Cloud":"Cloud",
+        "Local":"Local"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Rechercher"
