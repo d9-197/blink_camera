@@ -1160,9 +1160,14 @@ file_put_contents($folderJson,json_encode($jsonrep));
             }
             //Recalcul de la vignette à afficher
             $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
-            $hauteurVignette=720*$facteur;
-            $largeurVignette=1280*$facteur;
-            $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
+            if ($facteur<=0) {
+                $hauteurVignette='width="100%"';
+                $largeurVignette='width="100%"';
+            } else {
+                $hauteurVignette='height="'.(720*$facteur).'"';
+                $largeurVignette='width="'.(1280*$facteur).'"';    
+            }
+            $urlLine ='<img src="#urlFile#" '.$largeurVignette.' '. $hauteurVignette.' class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
             $config_thumb=config::byKey('blink_dashboard_content_type', 'blink_camera');
             
             if ($config_thumb==="1" && $this->getBlinkDeviceType()!=="owlZZ") {
@@ -1174,14 +1179,14 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $clipUrlCmd=$this->getCmd(null, 'clip_path');
                 $urlFile=$clipUrlCmd->execCmd();
                 //On affiche la video
-                $urlLine ='<video class="displayVideo vignette" height="'.$hauteurVignette.'" controls loop data-src="#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="#urlFile#">Your browser does not support the video tag.</video>';
+                $urlLine ='<video class="displayVideo vignette" '. $hauteurVignette.' controls loop data-src="#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="#urlFile#">Your browser does not support the video tag.</video>';
             } else  {
                 $thumbUrlCmd=$this->getCmd(null, 'thumb_path');
                 $urlFile=$thumbUrlCmd->execCmd();
                 //On affiche la vignette de la derniere video
             }                           
             if (($urlFile ==="-" || $urlFile ==="") && $config_thumb !== 1) {
-                $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
+                $urlLine ='<img src="#urlFile#" '.$largeurVignette.' '. $hauteurVignette.' class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
                 if ((boolean) config::byKey('fallback_to_thumbnail', 'blink_camera')) {
                     $this->getCameraThumbnail();
                    	$thumbUrlCmd=$this->getCmd(null, 'camera_thumb_path');

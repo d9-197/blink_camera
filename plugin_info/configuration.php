@@ -120,6 +120,7 @@ if (!isConnect()) {
             <label class="col-lg-3 control-label">{{Taille de la vignette}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_size_thumbnail">
+                    <option value="-1.0">{{Largeur du widget}}</option>
                     <option value="0.1">10%</option>
                     <option value="0.2">20%</option>
                     <option value="0.3">30%</option>

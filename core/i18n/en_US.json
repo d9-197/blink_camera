@@ -61,7 +61,8 @@
         "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"You will received a SMS from Blink with a pin code, you must fill it here and clic  \"Send\".",
         "Type de stockage":"Storage",
         "Cloud":"Cloud",
-        "Local":"Local"
+        "Local":"Local",
+        "Largeur du widget":"Widget width"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
