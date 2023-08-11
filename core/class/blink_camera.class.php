@@ -780,14 +780,21 @@ class blink_camera extends eqLogic
                             $camera_name=$clips['camera_name'];
                             $clip_date=$clips['created_at'];
                             $filename=$clip_id.'-'.blink_camera::getDateJeedomTimezone($clip_date).'_LOCAL';
+                            blink_camera::logdebug('getLocalMedia clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$this->getName().') - created_at : ' .$clip_date);
                             if ($camera_name===$this->getName()) {
                                 $url_media=$url_manifest.'/'.$manifest_id.'/clip/request/'.$clip_id;
                                 /* POST : {base_url}/api/v1/accounts/{account_id}/networks/{network_id}/sync_modules/{sync_id}/local_storage/manifest/{manifest_id}/clip/request/{clip_id} */
-                                $jsonrep=blink_camera::queryPost($url_media);
+                                blink_camera::logdebug('getLocalMedia URL MEDIA : '.$url_media);
+                                try {
+                                    $jsonrep=blink_camera::queryPost($url_media);
+                                } catch (TransferException $e) {
+                                    blink_camera::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_media. ' - ERROR:'.print_r($e->getMessage(), true));
+                                    return false;
+                                }
     $folderJson=__DIR__.'/../../medias/'.$this->getId().'/localStorage_ph3.json';
     file_put_contents($folderJson,json_encode($jsonrep));
     //blink_camera::logdebug('getLocalMedia Phase 3 : '.print_r($jsonrep,true));
-    //blink_camera::logdebug('getLocalMedia URL MEDIA : '.$url_media);
+    blink_camera::logdebug('getLocalMedia URL MEDIA : '.$url_media);
                                 jeedomUtils.sleep(1);
                                 self::getMediaForce($url_media, $this->getId(), $filename,'mp4',true);
                             }
