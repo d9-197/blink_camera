@@ -743,6 +743,8 @@ class blink_camera extends eqLogic
 		return $valeur;
     }
     public function getLocalMedia() {
+        blink_camera::logdebug('getLocalMedia Call : '.$this->getId().' '.$this->getName());
+
         // https://github.com/fronzbot/blinkpy#sync-module-local-storage
 
 /*        if ($clip_id=="") {
@@ -755,6 +757,7 @@ class blink_camera extends eqLogic
         $netId=$this->getConfiguration('network_id');
         $syncId=$this->getConfiguration('sync_id');
         if (!$syncId =="") {
+blink_camera::logdebug('getLocalMedia syncId=: '.$syncId);
             $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
             $url_manifest_req=$url_manifest.'/request';
             /* POST : {base_url}/api/v1/accounts/{account_id}/networks/{network_id}/sync_modules/{sync_id}/local_storage/manifest/request */
@@ -763,7 +766,7 @@ class blink_camera extends eqLogic
     $folderJson=__DIR__.'/../../medias/'.$this->getId().'/localStorage_ph1.json';
     file_put_contents($folderJson,json_encode($jsonrep));
                 jeedomUtils.sleep(1);
-//blink_camera::logdebug('getLocalMedia Phase 1 : '.print_r($jsonrep,true));
+blink_camera::logdebug('getLocalMedia Phase 1 : '.print_r($jsonrep,true));
                 $manifest_req_id=$jsonrep['id'];
                 // blink_camera::logdebug('getLocalMedia : '.$manifest_req_id);
                 /* GET : {base_url}/api/v1/accounts/{account_id}/networks/{network_id}/sync_modules/{sync_id}/local_storage/manifest/request/{manifest_request_id} */
@@ -772,7 +775,8 @@ class blink_camera extends eqLogic
                 if (isset($jsonrep)) {
     $folderJson=__DIR__.'/../../medias/'.$this->getId().'/localStorage_ph2.json';
     file_put_contents($folderJson,json_encode($jsonrep));
-//blink_camera::logdebug('getLocalMedia Phase 2 : '.print_r($jsonrep,true));
+
+blink_camera::logdebug('getLocalMedia Phase 2 : '.print_r($jsonrep,true));
                     $manifest_id=$jsonrep['manifest_id'];
                     if (isset($manifest_id)) {
                         foreach ($jsonrep['clips'] as $clips) {
@@ -794,7 +798,6 @@ class blink_camera extends eqLogic
     $folderJson=__DIR__.'/../../medias/'.$this->getId().'/localStorage_ph3.json';
     file_put_contents($folderJson,json_encode($jsonrep));
     //blink_camera::logdebug('getLocalMedia Phase 3 : '.print_r($jsonrep,true));
-    blink_camera::logdebug('getLocalMedia URL MEDIA : '.$url_media);
                                 jeedomUtils.sleep(1);
                                 self::getMediaForce($url_media, $this->getId(), $filename,'mp4',true);
                             }
@@ -802,6 +805,8 @@ class blink_camera extends eqLogic
                     }
                 }
             }
+        } else {
+            blink_camera::logdebug('getLocalMedia syncID not found !');
         }
     }
     public function isConfigured()
@@ -1826,6 +1831,18 @@ class blink_camera extends eqLogic
             $arm_network->useIconAndName();
             $arm_network->save();
         }
+        $downlod_local = $this->getCmd(null, 'downlod_local');
+        if (!is_object($downlod_local)) {
+            blink_camera::loginfo( 'Create new action : downlod_local');
+            $downlod_local = new blink_cameraCmd();
+            $downlod_local->setName(__('(BETA) Download local storage videos', __FILE__));
+            $downlod_local->setEqLogic_id($this->getId());
+            $downlod_local->setLogicalId('downlod_local');
+            $downlod_local->setType('action');
+            $downlod_local->setSubType('other');
+            $downlod_local->useIconAndName();
+            $downlod_local->save();
+        }
         if ($typeDevice!="owl" and $typeDevice!="lotus") {
             $arm_camera = $this->getCmd(null, 'arm_camera');
             if (!is_object($arm_camera)) {
@@ -2136,6 +2153,10 @@ class blink_cameraCmd extends cmd
         $eqlogic = $this->getEqLogic(); //récupère l'éqqlogic de la commande $this
 
         switch ($this->getLogicalId()) {	//vérifie le logicalid de la commande
+            case 'downlod_local':
+                $eqlogic->getLocalMedia();
+                break;
+
             case 'refresh':
                 if ($eqlogic->isConfigured() && blink_camera::isConnected()) {
                     //rafraichissement de la datetime du dernier event
@@ -2188,7 +2209,6 @@ class blink_cameraCmd extends cmd
             case 'arm_camera':
                 $eqlogic->cameraArm();
                 jeedomUtils.sleep(1);
-                $eqlogic->getLocalMedia();
                 break;
 
             case 'disarm_camera':
