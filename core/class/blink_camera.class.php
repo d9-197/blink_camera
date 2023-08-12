@@ -785,7 +785,7 @@ blink_camera::logdebug('getLocalMedia Phase 2 : '.print_r($jsonrep,true));
                             $clip_date=$clips['created_at'];
                             $filename=$clip_id.'-'.blink_camera::getDateJeedomTimezone($clip_date).'_LOCAL';
                             blink_camera::logdebug('getLocalMedia clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$this->getName().') - created_at : ' .$clip_date);
-                            if ($camera_name===$this->getName()) {
+                            if (strtolower($camera_name)===strtolower($this->getName())) {
                                 $url_media=$url_manifest.'/'.$manifest_id.'/clip/request/'.$clip_id;
                                 /* POST : {base_url}/api/v1/accounts/{account_id}/networks/{network_id}/sync_modules/{sync_id}/local_storage/manifest/{manifest_id}/clip/request/{clip_id} */
                                 blink_camera::logdebug('getLocalMedia URL MEDIA : '.$url_media);
