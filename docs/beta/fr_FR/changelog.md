@@ -1,5 +1,3 @@
-[**&rarr; Lien pour soutenir les développements de ce plugin gratuit**](https://fr.tipeee.com/duke-9)
-
 > 2023-08-12
   + V2.8.0 Beta
   + **Ajout de l'option "Largeur du widget" dans le choix de la taille de la vignette (config du plugin)
