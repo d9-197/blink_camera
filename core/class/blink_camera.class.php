@@ -53,14 +53,14 @@ class blink_camera extends eqLogic
 
     public static function logdebugBlinkAPIRequest($message) {
         //if (!config::byKeys('log::level::blink_camera_api')) {
-            config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","default":"0"}');
+           // config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","default":"0"}');
         //}
         //log::add('blink_camera_api','debug',$message);
         return;
     }
     public static function logdebugBlinkAPIResponse($message) {
         //if (!config::byKeys('log::level::blink_camera_api')) {
-            config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","default":"0"}');
+            //config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","default":"0"}');
         //}
         //log::add('blink_camera_api','debug',$message);
         return;
@@ -99,12 +99,12 @@ class blink_camera extends eqLogic
                     if (is_object($info)) {
                         $cam->checkAndUpdateCmd('source_last_event', $last_event['source']);
                     }
-                   self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
+                   //self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                 }
+                $cam->refreshCameraInfos("cron10");
             }
         }
     }
-     
     public static function cron($_eqLogic_id = null)
     {
         if ($_eqLogic_id == null) {
@@ -114,11 +114,10 @@ class blink_camera extends eqLogic
         }
         foreach ($eqLogics as $cam) {
             //blink_camera::logdebug('blink_camera->cron() '.$cam->getConfiguration("camera_id"));
-               
             if ($cam->getIsEnable() == 1 && $cam->isConnected()) {
                 //blink_camera::logdebug('blink_camera->cron() camera active');
                 $cam->getLastEventDate();
-                $cam->refreshCameraInfos();
+                //$cam->refreshCameraInfos();
             }
         }
     }
@@ -137,8 +136,8 @@ class blink_camera extends eqLogic
         foreach ($eqLogics as $cam) {//parcours tous les équipements du plugin blink_camera
             if ($cam->getIsEnable() == 1  && $cam->getToken(true)) {//vérifie que l'équipement est acitf
                 $cam->forceCleanup(true);
-                $cam->getLastEventDate(true);
-                $cam->refreshCameraInfos();
+               // $cam->getLastEventDate(true);
+                //$cam->refreshCameraInfos("cronHourly");
             }
         }
     }
@@ -169,6 +168,7 @@ class blink_camera extends eqLogic
         return $jsonrep;
     }
 
+   
     
     public static function queryGetMedia(string $url, string $file_path) {
         $_tokenBlink=config::byKey('token', 'blink_camera');
@@ -564,7 +564,7 @@ class blink_camera extends eqLogic
     }
     public function getAccountConfigDatas2($force_json_string=false,$forceReinitToken=false) {
         if (self::getToken($forceReinitToken)) {
-            $datas=blink_camera::getHomescreenData();
+            $datas=blink_camera::getHomescreenData("getAccountConfigDatas2");
             if ($datas==null) 
                 $datas=[];
             //blink_camera::logdebug('getAccountConfigDatas2() '.print_r($datas,true));
@@ -625,7 +625,14 @@ class blink_camera extends eqLogic
     }
     public static function getMedia($urlMedia, $equipement_id, $filename="default",$format="mp4")
     {
-        return blink_camera::getMediaForce($urlMedia, $equipement_id, $filename,$format,false);
+        $cam = self::byId($equipement_id);
+        if ($cam->getConfiguration('storage')==='local') {
+            //TODO : calculer clip_id_req a partir de $urlMedia
+            $clip_id_req="";
+            return blink_camera::getMediaLocal($clip_id_req,$equipement_id);
+        } else {
+            return blink_camera::getMediaForce($urlMedia, $equipement_id, $filename,$format,false);
+        }
     }
     public static function getMediaForce($urlMedia, $equipement_id, $filename="default",$format="mp4",$overwrite=false)
     {
@@ -690,14 +697,14 @@ class blink_camera extends eqLogic
         return blink_camera::ERROR_IMG;
     }
 
-    public static function getHomescreenData()
+    public static function getHomescreenData($callOrig="")
     {
         $jsonrep=json_decode('{"message":"error"}',true);
         if (self::isConnected()) {
             $_accountBlink=config::byKey('account', 'blink_camera');
             $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
             try {
-                blink_camera::logdebugBlinkAPIRequest("CALL[getHomescreenData] -->");
+                blink_camera::logdebugBlinkAPIRequest("CALL[getHomescreenData from ".$callOrig."] -->");
                 $jsonrep=blink_camera::queryGet($url);
                 #$folderJson=__DIR__.'/../../medias/getHomescreenData.json';
                 #file_put_contents($folderJson,json_encode($jsonrep));
@@ -708,33 +715,101 @@ class blink_camera extends eqLogic
                     $jsonrep=json_decode('{"message":"'.$errorTxt.'"}',true);
 
             }
+        //blink_camera::logdebug('getHomescreenData :\n'.print_r($jsonrep,true));
             return $jsonrep;
         }
     }
         
     /*     * *********************Méthodes d'instance************************* */
     public function getBlinkDeviceType() {
-        $valeur="unknown";
-        $datas=blink_camera::getHomescreenData();
-        $camera_id = $this->getConfiguration("camera_id");
-        foreach ($datas['cameras'] as $device) {
-            if ("".$device['id']==="".$camera_id) {
-                $valeur=$device['type'];
+        $valeur = $this->getConfiguration("camera_type");
+        if ($valeur=="") {
+            $datas=blink_camera::getHomescreenData("getBlinkDeviceType");
+            $camera_id = $this->getConfiguration("camera_id");
+            foreach ($datas['cameras'] as $device) {
+                if ("".$device['id']==="".$camera_id) {
+                    $valeur=$device['type'];
+                }
             }
-        }
-        foreach ($datas['owls'] as $device) {
-            if ("".$device['id']==="".$camera_id) {
-                $valeur=$device['type'];
+            foreach ($datas['owls'] as $device) {
+                if ("".$device['id']==="".$camera_id) {
+                    $valeur=$device['type'];
+                }
             }
-        }
-        foreach ($datas['doorbells'] as $device) {
-            if ("".$device['id']==="".$camera_id) {
-                $valeur=$device['type'];
+            foreach ($datas['doorbells'] as $device) {
+                if ("".$device['id']==="".$camera_id) {
+                    $valeur=$device['type'];
+                }
             }
+            $this->setConfiguration("camera_type",$valeur);
+            $this->save();
         }
         
         //blink_camera::logdebug('TYPE DEVICE='.$valeur);
 		return $valeur;
+    }
+    public function getMediaLocal($clip_id_req="",$equipement_id=null) {
+
+        blink_camera::logdebug('getMediaLocal Call : '.$this->getId().' '.$this->getName());
+        $_accountBlink=config::byKey('account', 'blink_camera');
+        $netId=$this->getConfiguration('network_id');
+        $syncId=$this->getConfiguration('sync_id');
+        if (!$syncId =="") {
+blink_camera::logdebug('getMediaLocal syncId=: '.$syncId);
+            $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
+            $url_manifest_req=$url_manifest.'/request';
+            $jsonrep=blink_camera::queryPost($url_manifest_req);
+            if (isset($jsonrep)) {
+$folderJson=__DIR__.'/../../medias/'.$this->getId().'/localStorage_ph1.json';
+file_put_contents($folderJson,json_encode($jsonrep));
+jeedomUtils.sleep(1);
+blink_camera::logdebug('getMediaLocal Phase 1 : '.print_r($jsonrep,true));
+                $manifest_req_id=$jsonrep['id'];
+                $url=$url_manifest_req.'/'.$manifest_req_id;
+                $jsonrep=blink_camera::queryGet($url);
+                if (isset($jsonrep)) {
+$folderJson=__DIR__.'/../../medias/'.$this->getId().'/localStorage_ph2.json';
+file_put_contents($folderJson,json_encode($jsonrep));
+blink_camera::logdebug('getMediaLocal Phase 2 : '.print_r($jsonrep,true));
+                    $manifest_id=$jsonrep['manifest_id'];
+                    if (isset($manifest_id)) {
+                        foreach ($jsonrep['clips'] as $clips) {
+                            $clip_id=$clips['id'];
+                            if ($clip_id_req=="" || $clip_id_req==$clip_id) {
+                                $camera_name=$clips['camera_name'];
+                                $clip_date=$clips['created_at'];
+                                $filename=$clip_id.'-'.blink_camera::getDateJeedomTimezone($clip_date).'_LOCAL';
+                                blink_camera::logdebug('getMediaLocal clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$this->getName().') - created_at : ' .$clip_date);
+                                if (strtolower($camera_name)===strtolower($this->getName())) {
+                                    $url_media=$url_manifest.'/'.$manifest_id.'/clip/request/'.$clip_id;
+blink_camera::logdebug('getMediaLocal URL MEDIA : '.$url_media);
+                                    try {
+                                        $jsonrep=blink_camera::queryPost($url_media);
+                                    } catch (TransferException $e) {
+                                        blink_camera::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_media. ' - ERROR:'.print_r($e->getMessage(), true));
+                                        return false;
+                                    }
+$folderJson=__DIR__.'/../../medias/'.$this->getId().'/localStorage_ph3.json';
+file_put_contents($folderJson,json_encode($jsonrep));
+                                    jeedomUtils.sleep(1);
+                                    return self::getMediaForce($url_media, $this->getId(), $filename,'mp4',true);
+                                }
+                            }
+                        }
+                        blink_camera::logdebug('getMediaLocal clip_id not found in clips list !');
+                    } else {
+                        blink_camera::logdebug('getMediaLocal pas de manifest !');
+                    }
+                } else {
+                    blink_camera::logdebug('getMediaLocal pas de réponse de API manifest !');
+                }
+            } else {
+                blink_camera::logdebug('getMediaLocal pas de réponse de API manifest REQUEST !');
+            }
+        } else {
+            blink_camera::logdebug('getMediaLocal syncID not found !');
+        }
+        return blink_camera::ERROR_IMG;
     }
 
     public function isConfigured()
@@ -753,6 +828,7 @@ class blink_camera extends eqLogic
 
             $url='/network/'.$this->getConfiguration('network_id').'/camera/'.$this->getConfiguration('camera_id');
             try {
+               blink_camera::logdebugBlinkAPIRequest("CALL[getCameraInfo] -->");
                $jsonrep=blink_camera::queryGet($url);
                #$folderJson=__DIR__.'/../../medias/getCameraInfoOwl.json';
                 #file_put_contents($folderJson,json_encode($jsonrep));
@@ -770,7 +846,7 @@ class blink_camera extends eqLogic
 	      	$lastThumbnailTime = $this->getConfiguration("last_camera_thumb_time");
 	      	$newtime=time();
 	      	if ($forceDownload || ($newtime-$lastThumbnailTime)>5*6) {
-		        $datas=blink_camera::getHomescreenData();
+		        $datas=blink_camera::getHomescreenData("getCameraThumbnail");
                 
                 //blink_camera::logdebug('getHomescreenData - responce: '.print_r($datas, true));
                 
@@ -847,9 +923,10 @@ class blink_camera extends eqLogic
             $url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page='.$page;
             
             try {
+                blink_camera::logdebugBlinkAPIRequest("CALL[getVideoList] -->");
                 $jsonrep=blink_camera::queryGet($url);
-               # $folderJson=__DIR__.'/../../medias/getVideoList.json';
-                #file_put_contents($folderJson,json_encode($jsonrep));
+                //$folderJson=__DIR__.'/../../medias/getVideoList.json';
+                //file_put_contents($folderJson,json_encode($jsonrep));
                 
                 if (isset($jsonrep)) {
                     $jsonstr =self::reformatVideoDatas($jsonrep);
@@ -1015,7 +1092,7 @@ class blink_camera extends eqLogic
         }
 
         $temp =$this->getLastEvent(false);
-        self::getMedia($temp['media'], $this->getId(), 'last','mp4');
+        //self::getMedia($temp['media'], $this->getId(), 'last','mp4');
         $info = $this->getCmd(null, 'source_last_event');
         if (is_object($info)) {
             $this->checkAndUpdateCmd('source_last_event', $temp['source']);
@@ -1103,9 +1180,14 @@ class blink_camera extends eqLogic
             }
             //Recalcul de la vignette à afficher
             $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
-            $hauteurVignette=720*$facteur;
-            $largeurVignette=1280*$facteur;
-            $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
+            if ($facteur<=0) {
+                $hauteurVignette='width="100%"';
+                $largeurVignette='width="100%"';
+            } else {
+                $hauteurVignette='height="'.(720*$facteur).'"';
+                $largeurVignette='width="'.(1280*$facteur).'"';    
+            }
+            $urlLine ='<img src="#urlFile#" '.$largeurVignette.' '. $hauteurVignette.' class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
             $config_thumb=config::byKey('blink_dashboard_content_type', 'blink_camera');
             
             if ($config_thumb==="1" && $this->getBlinkDeviceType()!=="owlZZ") {
@@ -1117,14 +1199,14 @@ class blink_camera extends eqLogic
                 $clipUrlCmd=$this->getCmd(null, 'clip_path');
                 $urlFile=$clipUrlCmd->execCmd();
                 //On affiche la video
-                $urlLine ='<video class="displayVideo vignette" height="'.$hauteurVignette.'" controls loop data-src="#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="#urlFile#">Your browser does not support the video tag.</video>';
+                $urlLine ='<video class="displayVideo vignette" '. $hauteurVignette.' controls loop data-src="#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="#urlFile#">Your browser does not support the video tag.</video>';
             } else  {
                 $thumbUrlCmd=$this->getCmd(null, 'thumb_path');
                 $urlFile=$thumbUrlCmd->execCmd();
                 //On affiche la vignette de la derniere video
             }                           
             if (($urlFile ==="-" || $urlFile ==="") && $config_thumb !== 1) {
-                $urlLine ='<img src="#urlFile#" width="'.$largeurVignette.'" height="'.$hauteurVignette.'" class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
+                $urlLine ='<img src="#urlFile#" '.$largeurVignette.' '. $hauteurVignette.' class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
                 if ((boolean) config::byKey('fallback_to_thumbnail', 'blink_camera')) {
                     $this->getCameraThumbnail();
                    	$thumbUrlCmd=$this->getCmd(null, 'camera_thumb_path');
@@ -1143,7 +1225,7 @@ class blink_camera extends eqLogic
             $this->checkAndUpdateCmd('thumbnail',template_replace($replace, $urlLine));
         }
 	}
-	public function refreshCameraInfos() {
+	public function refreshCameraInfos($callOrig="") {
 		if ($this->isConfigured()&& $this->isConnected()) {
             $this->getCameraThumbnail();
             //$this->emptyCacheWidget();
@@ -1189,7 +1271,7 @@ class blink_camera extends eqLogic
                 $this->setConfiguration('battery',100);
                 $this->batteryStatus(100);
             }
-            $datas=blink_camera::getHomescreenData();
+            $datas=blink_camera::getHomescreenData("refreshCameraInfos - ".$callOrig);
             if (!$datas['message']) {
                 foreach($datas['cameras'] as $camera) {
                     //blink_camera::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
@@ -1277,8 +1359,24 @@ class blink_camera extends eqLogic
                         break;
                     }
                 }
+                foreach($datas['sync_modules'] as $syncMod) {
+                    if ($syncMod['network_id']==$this->getConfiguration('network_id')) {
+                        //blink_camera::logdebug('refreshCameraInfos: '.$this->getName().' sync module: '.print_r($syncMod,true));
+                        blink_camera::logdebug('refreshCameraInfos: '.$this->getName().' sync module - local_storage_enabled='.$syncMod['local_storage_enabled'].' - local_storage_compatible='.$syncMod['local_storage_compatible'].' - local_storage_status='.$syncMod['local_storage_status']);
+                        $this->setConfiguration('storage', 'cloud');
+                        if ($syncMod['local_storage_enabled'] && $syncMod['local_storage_compatible'] && $syncMod['local_storage_status']==='active') {
+                            $this->setConfiguration('storage', 'local');
+                            blink_camera::logdebug('refreshCameraInfos: storage=local');
+                        } else {
+                            blink_camera::logdebug('refreshCameraInfos: storage=cloud');
+                        }
+                        $this->setConfiguration('sync_id',$syncMod['id']);
+                        break;
+                    }
+                }
                 $this->setConfiguration('account_storage',$datas['video_stats']['storage']);
                 $this->setConfiguration('account_auto_delete_days', $datas['video_stats']['auto_delete_days']);
+                $this->save();
             }
 		}
     }
@@ -1294,8 +1392,8 @@ class blink_camera extends eqLogic
                 $url='/network/'.$this->getConfiguration('network_id').'/arm';
                 try {
                     blink_camera::queryPost($url);
-                    sleep(1);
-                    $this->refreshCameraInfos();
+                    jeedomUtils.sleep(1);
+                    $this->refreshCameraInfos("networkArm");
                     return true;
                 } catch (TransferException $e) {
                     blink_camera::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -1310,8 +1408,8 @@ class blink_camera extends eqLogic
             $url='/network/'.$this->getConfiguration('network_id').'/disarm';
             try {
                 blink_camera::queryPost($url);
-                sleep(1);
-                $this->refreshCameraInfos();
+                jeedomUtils.sleep(1);
+                $this->refreshCameraInfos("networkDisarm");
                 return true;
             } catch (TransferException $e) {
                 blink_camera::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -1329,8 +1427,8 @@ class blink_camera extends eqLogic
             $url="/network/".$this->getConfiguration('network_id')."/camera/".$this->getConfiguration('camera_id')."/enable";
             try {
                 blink_camera::queryPost($url);
-                sleep(1);
-                $this->refreshCameraInfos();
+                jeedomUtils.sleep(1);
+                $this->refreshCameraInfos("cameraArm");
                 return true;
             } catch (TransferException $e) {
                 blink_camera::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -1346,8 +1444,8 @@ class blink_camera extends eqLogic
             $url="/network/".$this->getConfiguration('network_id')."/camera/".$this->getConfiguration('camera_id')."/disable";
             try {
                 blink_camera::queryPost($url);
-                sleep(1);
-                $this->refreshCameraInfos();
+                jeedomUtils.sleep(1);
+                $this->refreshCameraInfos("cameraDisarm");
                 return true;
             } catch (TransferException $e) {
                 blink_camera::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -1738,6 +1836,22 @@ class blink_camera extends eqLogic
             $arm_network->useIconAndName();
             $arm_network->save();
         }
+        $download_local = $this->getCmd(null, 'downlod_local');
+        if (is_object($download_local)) {
+            $download_local->remove();
+        }
+        $download_local = $this->getCmd(null, 'download_local');
+        if (!is_object($download_local)) {
+            blink_camera::loginfo( 'Create new action : download_local');
+            $download_local = new blink_cameraCmd();
+            $download_local->setName(__('(BETA) Download local storage videos', __FILE__));
+            $download_local->setEqLogic_id($this->getId());
+            $download_local->setLogicalId('download_local');
+            $download_local->setType('action');
+            $download_local->setSubType('other');
+            $download_local->useIconAndName();
+            $download_local->save();
+        }
         if ($typeDevice!="owl" and $typeDevice!="lotus") {
             $arm_camera = $this->getCmd(null, 'arm_camera');
             if (!is_object($arm_camera)) {
@@ -1873,10 +1987,10 @@ class blink_camera extends eqLogic
 
     public function postUpdate()
     {
-		$cmd = $this->getCmd(null, 'refresh'); 
+		/*$cmd = $this->getCmd(null, 'refresh'); 
 		if (($this->getIsEnable() == 1) && is_object($cmd)) { 
 			 $cmd->execCmd();
-        }
+        }*/
         //$this::refreshCacheWidget();
     }
 
@@ -1891,7 +2005,6 @@ class blink_camera extends eqLogic
     
     public function toHtml($_version = 'dashboard', $_fluxOnly = false)
     {
-        // L'affichage des vignettes est géré dans lastEventDate()
         return parent::toHtml($_version);
     }
 
@@ -1934,7 +2047,22 @@ class blink_camera extends eqLogic
         }
         */
     }
-
+	public static function templateWidget()
+	{
+        $return = array('info' => array('binary' => array()));
+        $return['info']['binary']['Camera or System status'] = array(
+            'template' => 'switch',
+            'display' => array(
+                '#icon#' => '<i class=\'jeedom jeedom-lock-ferme\'></i>',
+            ),
+            'replace' => array(
+                '#_icon_on_#' => '<i class=\'jeedom jeedom-lock-ferme\'></i>',
+                '#_icon_off_#' => '<i class=\'jeedom jeedom-lock-ouvert\'></i>',
+                '#_time_widget_#' => '0'
+            )
+        );
+        return $return;
+    }
 }
 
 class blink_cameraCmd extends cmd
@@ -1948,10 +2076,40 @@ class blink_cameraCmd extends cmd
 
     /*     * *********************Methode d'instance************************* */
     public function toHtml($_version = 'dashboard', $_options = '', $_cmdColor = null) {
-        
-        // L'affichage des vignettes est géré dans lastEventDate()
-
-        if ($this->getLogicalId()==='history') {
+        if ($this->getLogicalId() == 'arm_status_camera' || $this->getLogicalId() == 'arm_status') {
+            $bl_cam=$this->getEqLogic();
+            if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
+                if ($this->getLogicalId() == 'arm_status_camera') {
+                    $on = $bl_cam->getCmd(null, 'arm_camera');
+                    $off = $bl_cam->getCmd(null, 'disarm_camera');
+                } else {
+                    $on = $bl_cam->getCmd(null, 'arm_network');
+                    $off = $bl_cam->getCmd(null, 'disarm_network');
+                }
+                if (is_object($on) && is_object($off)) {
+                    $replace['cmd_on_id'] = $on->getId();
+                    $replace['cmd_off_id'] = $off->getId();
+                    $replace['_icon_on_'] ='<i class=\"icon jeedom-lock-ferme\"></i>';
+                    $replace['_icon_off_'] ='<i class=\"icon jeedom-lock-ouvert\"></i>';
+                } else {
+                    $replace['cmd_on_id'] = '""';
+                    $replace['cmd_off_id'] = '""';
+                    $replace['_icon_on_'] ='';
+                    $replace['_icon_off_'] ='';
+                }
+                return parent::toHtml($_version,$replace,$_cmdColor);
+    //		    $template = $this->getTemplate($_version, 'default');
+    //            blink_camera::logdebug('cmd->toHtml '. $replace['#id#'].' template : '.$template);
+    //            if ($template =='blink_camera::switch') {
+    //              blink_camera::logdebug('cmd->toHtml '. $replace['#id#'].' parent : '.print_r($result,true));
+    //            }
+            } else {
+                return "";
+            } 
+        }else if ($this->getLogicalId() == 'arm_status') {
+            $result=parent::toHtml($_version,$_options,$_cmdColor);
+            return $result;
+        } else if ($this->getLogicalId()==='history') {
             $bl_cam=$this->getEqLogic();
             //if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
                 if ($bl_cam->isConfigured()) {
@@ -1959,7 +2117,7 @@ class blink_cameraCmd extends cmd
                 $result=parent::toHtml($_version,$_options,$_cmdColor);
                 $bl_cam=$this->getEqLogic();
                 
-                $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']:last .action\').off(\'click\').on(\'click\', function () {';
+                $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']\').off(\'click\').on(\'click\', function () {';
                 $result.='$(\'#md_modal\').dialog({title: "Historique '.$bl_cam->getName().'"});';
 #                $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'&mode='.$bl_cam->getConfigHistory().'\').dialog(\'open\');});';
                 $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'\').dialog(\'open\');});';
@@ -2001,18 +2159,24 @@ class blink_cameraCmd extends cmd
 
     public function execute($_options = array())
     {
-        $eqlogic = $this->getEqLogic(); //récupère l'éqqlogic de la commande $this
+        $eqlogic = $this->getEqLogic(); //récupère l'éqlogic de la commande $this
 
         switch ($this->getLogicalId()) {	//vérifie le logicalid de la commande
+            case 'download_local':
+                if ($eqlogic->getConfiguration('storage')=='local') {
+                    $eqlogic->getMediaLocal("",$eqlogic->getId());
+                } else {
+                    message::add($eqlogic->getEqType_name(), "La caméra '".$eqlogic->getName()."' n'a pas de stockage local");
+                }
+                break;
+
             case 'refresh':
-                // Nettoyage des fichiers du dossier medias
-				//$eqlogic->forceCleanup();
-				//$eqlogic->getLastEvent();
                 if ($eqlogic->isConfigured() && blink_camera::isConnected()) {
                     //rafraichissement de la datetime du dernier event
                     $eqlogic->getLastEventDate();
-                    $eqlogic->refreshCameraInfos();
+                    $eqlogic->refreshCameraInfos("execute refresh");
                 }
+           
 				break;
 			case 'force_download':
                 // Nettoyage des fichiers du dossier medias
@@ -2020,7 +2184,7 @@ class blink_cameraCmd extends cmd
                  
                 //rafraichissement de la datetime du dernier event
                 $eqlogic->getLastEventDate();
-                $eqlogic->refreshCameraInfos();
+                $eqlogic->refreshCameraInfos("execute force_download");
                 break;
 			
 			case 'new_clip':
@@ -2032,7 +2196,7 @@ class blink_cameraCmd extends cmd
                     $eqlogic->requestNewMediaCamera("clip");
                 }
                 $eqlogic->getLastEventDate();
-                $eqlogic->refreshCameraInfos();
+                $eqlogic->refreshCameraInfos("execute new_clip");
 				break;
 
             case 'new_thumbnail':
@@ -2044,7 +2208,7 @@ class blink_cameraCmd extends cmd
                     $eqlogic->requestNewMediaCamera("thumbnail");
                 }
                 $eqlogic->getLastEventDate();
-                $eqlogic->refreshCameraInfos();
+                $eqlogic->refreshCameraInfos("execute new_thumbnail");
                 break;                
                 
             case 'arm_network':
@@ -2057,6 +2221,7 @@ class blink_cameraCmd extends cmd
 
             case 'arm_camera':
                 $eqlogic->cameraArm();
+                jeedomUtils.sleep(1);
                 break;
 
             case 'disarm_camera':

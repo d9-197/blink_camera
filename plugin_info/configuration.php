@@ -64,6 +64,15 @@ if (!isConnect()) {
             <div id ="pinstatus"></div>
         </div>
         </div>
+        <!--div class="form-group">
+            <label class="col-lg-3 control-label">{{Type de stockage}}</label>
+            <div class="col-lg-3">
+                <select  class="configKey form-control" data-l1key="blink_storage">
+                    <option value="cloud">{{Cloud}}</option>
+                    <option value="local">{{Local}}</option>
+                </select>
+            </div>
+        </div-->
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Unité de température}}</label>
             <div class="col-lg-3">
@@ -80,6 +89,16 @@ if (!isConnect()) {
                 <input  type="checkbox"class="configKey form-control" data-l1key="medias_security"/>
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
+            <div class="col-lg-3">
+                <select  class="configKey form-control" data-l1key="blink_base_url">
+                    <option value="internal">{{Interne}}</option>
+                    <option value="external">{{Externe}}</option>
+                </select>
+            </div>
+        </div>
+
         <h4 class="icon_blue"><i class="fa fa-eye"></i> {{Widget}}</h4>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Contenu de la vignette}}</label>
@@ -101,20 +120,12 @@ if (!isConnect()) {
             <label class="col-lg-3 control-label">{{Taille de la vignette}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_size_thumbnail">
+                    <option value="-1.0">{{Largeur du widget}}</option>
                     <option value="0.1">10%</option>
                     <option value="0.2">20%</option>
                     <option value="0.3">30%</option>
                     <option value="0.4">40%</option>
                     <option value="0.5">50%</option>
-                </select>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-lg-3 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
-            <div class="col-lg-3">
-                <select  class="configKey form-control" data-l1key="blink_base_url">
-                    <option value="internal">{{Interne}}</option>
-                    <option value="external">{{Externe}}</option>
                 </select>
             </div>
         </div>

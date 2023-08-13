@@ -20,7 +20,7 @@
         " Système ": "System",
         " Caméra ": "Camera",
         "Nom": "Name",
-        "Liste de commandes": "List of commands",
+        "Liste de commandes": "Logical Id",
         "Recharger la configuration": "Reload configuration",
         "Paramètres": "Settings",
         "Options": "Options",
@@ -58,7 +58,11 @@
         "Sauvegarder et tester la connexion Blink":"Save and check Blink connection",
         "Sécurité": "Security",
         "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Block access to video and image URLs without being authenticated in Jeedom?",
-        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"VousYou will received a SMS from Blink with a pin code, you must fill it here and clic  \"Send\"."
+        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"You will received a SMS from Blink with a pin code, you must fill it here and clic  \"Send\".",
+        "Type de stockage":"Storage",
+        "Cloud":"Cloud",
+        "Local":"Local",
+        "Largeur du widget":"Widget width"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
