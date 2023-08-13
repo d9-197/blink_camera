@@ -105,7 +105,6 @@ class blink_camera extends eqLogic
             }
         }
     }
-  /*   
     public static function cron($_eqLogic_id = null)
     {
         if ($_eqLogic_id == null) {
@@ -122,7 +121,7 @@ class blink_camera extends eqLogic
             }
         }
     }
-*/
+
 
     public static function cronHourly($_eqLogic_id = null)
     {
