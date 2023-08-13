@@ -1,5 +1,3 @@
-[&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
-
 > 2023-03-23
   + V2.6.0
   + **Addition of an "offline" mode**: when the Blink servers are inaccessible or when the password has expired, the plugin uses the videos, photos and info already present in Jeedom.

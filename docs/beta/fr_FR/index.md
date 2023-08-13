@@ -1,4 +1,4 @@
-[**&rarr; Lien pour soutenir les développements de ce plugin gratuit**](https://fr.tipeee.com/duke-9)
+[**&rarr; Lien vers GITHUB de ce plugin gratuit**](https://github.com/d9-197/blink_camera)
 
 # Description
 
@@ -6,7 +6,7 @@ Plugin dédié aux caméras Blink.
 
 Il permet d'afficher les vidéos des différentes caméras.
 
-[**&rarr; Lien pour soutenir les développements de ce plugin gratuit**](https://fr.tipeee.com/duke-9)
+[**&rarr; Lien vers GITHUB de ce plugin gratuit**](https://github.com/d9-197/blink_camera)
 
 Les actions suivantes sont disponibles (en fonction du modèle de caméra):
 - d'armer/désarmer la détection de mouvement d'un système

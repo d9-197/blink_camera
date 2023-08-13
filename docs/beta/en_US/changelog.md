@@ -1,4 +1,7 @@
-[**&rarr; Link to support developpements for this free plugin**](https://fr.tipeee.com/duke-9)
+> 2023-08-12
+  + V2.8.0 Beta
+  + **Addition of the option "Widget width" in thumbnails size (config du plugin)
+  + **Download of local storage videos.
 
 > 2023-07-04
   + V2.7.1 Beta
