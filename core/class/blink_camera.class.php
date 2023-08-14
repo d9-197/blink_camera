@@ -2063,7 +2063,20 @@ file_put_contents($folderJson,json_encode($jsonrep));
         );
         return $return;
     }
+    public function dumpConfiguration() {
+        $values = array(
+            'plugin' => 'blink_camera',
+            'id' => $this->getId()
+        );
+        $sql = 'SELECT `id`, `configuration` FROM eqLogic where `eqtype_name` =:plugin and `id` = :id';
+        $values = DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL);
+        foreach ($values as $value) {
+            blink_camera::logdebug($this->getName().' ('.$this->getID().') dumpConfiguration :');
+            blink_camera::logdebug($value['configuration']);
+        }
+    }
 }
+
 
 class blink_cameraCmd extends cmd
 {
@@ -2163,6 +2176,7 @@ class blink_cameraCmd extends cmd
 
         switch ($this->getLogicalId()) {	//vérifie le logicalid de la commande
             case 'download_local':
+                $eqlogic->dumpConfiguration();
                 if ($eqlogic->getConfiguration('storage')=='local') {
                     $eqlogic->getMediaLocal("",$eqlogic->getId());
                 } else {
