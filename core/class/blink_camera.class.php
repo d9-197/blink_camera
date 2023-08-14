@@ -925,8 +925,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
             try {
                 blink_camera::logdebugBlinkAPIRequest("CALL[getVideoList] -->");
                 $jsonrep=blink_camera::queryGet($url);
-                //$folderJson=__DIR__.'/../../medias/getVideoList.json';
-                //file_put_contents($folderJson,json_encode($jsonrep));
+                $folderJson=__DIR__.'/../../medias/getVideoList.json';
+                file_put_contents($folderJson,json_encode($jsonrep));
                 
                 if (isset($jsonrep)) {
                     $jsonstr =self::reformatVideoDatas($jsonrep);
