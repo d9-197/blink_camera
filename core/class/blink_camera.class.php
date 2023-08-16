@@ -948,7 +948,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
     { 
         $network_id = $this->getConfiguration("network_id");
         $camera_id = $this->getConfiguration("camera_id");
-        $jsonstr="erreur";
+        $result="erreur";
         if ($page==1 && self::isConnected() && $this->isConfigured()) {
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
@@ -985,6 +985,12 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                     $idx++;
                                 }
                             }
+                            if ($idx>0) {
+                                return $result;
+                            } else {
+                                $result="no_video";
+                            }
+                            
                         } else {
                             blink_camera::logdebug('getVideoListLocal pas de manifest !');
                         }
