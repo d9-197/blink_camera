@@ -978,7 +978,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                 if (strtolower($clip['camera_name'])===strtolower($this->getName())) {
                                     $clip['media']=$clip['id'];
                                     $clip['thumbnail']=$clip['id'];
-                                    $clip['deleted']='false';
+                                    $clip['deleted']=false;
                                     $clip['device_id']=$this->getConfiguration('camera_id');
                                     $clip['device_name']=$clip['camera_name'];
                                     $result[$idx]=$clip;
