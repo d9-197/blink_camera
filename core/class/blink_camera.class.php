@@ -776,7 +776,7 @@ blink_camera::logdebug('getMediaLocal Phase 2 : '.print_r($jsonrep,true));
                             if ($clip_id_req=="" || $clip_id_req==$clip_id) {
                                 $camera_name=$clips['camera_name'];
                                 $clip_date=$clips['created_at'];
-                                $filename=$clip_id.'-'.blink_camera::getDateJeedomTimezone($clip_date).'_LOCAL';
+                                $filename=$clip_id.'-'.blink_camera::getDateJeedomTimezone($clip_date);
                                 blink_camera::logdebug('getMediaLocal clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$this->getName().') - created_at : ' .$clip_date);
                                 if (strtolower($camera_name)===strtolower($this->getName())) {
                                     $url_media=$url_manifest.'/'.$manifest_id.'/clip/request/'.$clip_id;
