@@ -931,7 +931,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page='.$page;
             
             try {
-                blink_camera::logdebugBlinkAPIRequest("CALL[getVideoList] -->");
+                blink_camera::logdebugBlinkAPIRequest("CALL[getVideoListCloud] -->");
                 $jsonrep=blink_camera::queryGet($url);
 
                 if (isset($jsonrep)) {
@@ -986,7 +986,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                 }
                             }
                             if ($idx>0) {
-                                return $result;
+                                return json_encode($result);
                             } else {
                                 $result="no_video";
                             }
