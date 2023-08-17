@@ -978,7 +978,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                 if (strtolower($clip['camera_name'])===strtolower($this->getName())) {
                                     $clip['media']=$clip['id'];
                                     $clip['thumbnail']=$clip['id'];
-                                    $clip['deleted']=false;
+                                    $clip['deleted']=(bool) 0;
                                     $clip['device_id']=$this->getConfiguration('camera_id');
                                     $clip['device_name']=$clip['camera_name'];
                                     $result[$idx]=$clip;
@@ -986,6 +986,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                 }
                             }
                             if ($idx>0) {
+                                $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_result.json';
+                                file_put_contents($folderJson,json_encode($result));
+                                blink_camera::logdebug('getVideoListLocal result  : '.print_r($result,true));
                                 return json_encode($result);
                             } else {
                                 $result="no_video";
