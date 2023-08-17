@@ -917,7 +917,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
         }
         $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getVideoList_'.$this->getConfiguration('storage').'.json';
         file_put_contents($folderJson,json_encode($result));
-        return $result;        
+        return json_decode($result,true);        
     }
     public function getVideoListCloud(int $page=1)
     {
@@ -936,12 +936,15 @@ file_put_contents($folderJson,json_encode($jsonrep));
 
                 if (isset($jsonrep)) {
                     $jsonstr =self::reformatVideoDatas($jsonrep);
+                    $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideocloud_result.json';
+                    file_put_contents($folderJson,json_encode($jsonstr));
+
                 }
             } catch (TransferException $e) {
                 blink_camera::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
-                return $jsonstr;
+                return json_encode($jsonstr, true);
             }
-            return $jsonstr;
+            return json_encode($jsonstr, true);
         }
 	}
     public function getVideoListLocal($page)
@@ -991,7 +994,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                 blink_camera::logdebug('getVideoListLocal result  : '.print_r($result,true));
                                 return json_encode($result);
                             } else {
-                                $result="no_video";
+                                $result="no video";
                             }
                             
                         } else {
@@ -1007,6 +1010,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 blink_camera::logdebug('getVideoListLocal syncID not found !');
             }
         }
+        return json_encode($result);
     }
     public function requestNewMediaCamera($type="clip")
     {
@@ -1065,8 +1069,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
         if ($this->isConnected()) {
             $pageVide=0;
             for ($page=1;$page<=100;$page++) {
-                $videos=$this->getVideoList($page);
-                $videosJson=json_decode($videos, true);
+                $videosJson=$this->getVideoList($page);
                 $existVideoInPage=false;
                 // Si en cherchant des videos on a rencontré 50 pages vides, on arrete de rechercher (perfo)
                 if ($pageVide>=10) {
@@ -1177,7 +1180,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
         for ($page=1;$page<=50;$page++) {
             $jsonvideo=$this->getVideoList($page);
             //TODO il faut sortir si on est en local
-            foreach (json_decode($jsonvideo, true) as $event) {
+            foreach ($jsonvideo as $event) {
                 if ($include_deleted || $event['deleted']===false) {
                     //blink_camera::logdebug('blink_camera->getLastEvent() '.$event['created_at']);
                     if (!isset($last_event) || $last_event['created_at']<$event['created_at']) {
