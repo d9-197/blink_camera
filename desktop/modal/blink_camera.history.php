@@ -97,7 +97,7 @@ if ($thumbFilter=='') {
             };
             $videos=$blink_camera->getVideoList($page);
             $pageVide++;
-            foreach (json_decode($videos, true) as $video) {
+            foreach ($videos as $video) {
                 $pageVide--;
                 if ($nbMax>0 && $cptVideo>=($nbMax)) {
                     break;

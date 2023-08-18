@@ -626,7 +626,7 @@ class blink_camera extends eqLogic
     public static function getMedia($urlMedia, $equipement_id, $filename="default",$format="mp4")
     {
         $cam = self::byId($equipement_id);
-        if ($cam->getConfiguration('storage')==='local') {
+        if ($cam->getConfiguration('storage')=='local') {
             return blink_camera::getMediaLocal($urlMedia,$equipement_id);
         } else {
             return blink_camera::getMediaForce($urlMedia, $equipement_id, $filename,$format,false);
@@ -923,7 +923,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
     {
         $network_id = $this->getConfiguration("network_id");
         $camera_id = $this->getConfiguration("camera_id");
-        $jsonstr="erreur";
+        $jsonstr="erreur_cloud";
         if (self::isConnected() && $this->isConfigured()) {
             $_tokenBlink=config::byKey('token', 'blink_camera');
             $_accountBlink=config::byKey('account', 'blink_camera');
@@ -942,17 +942,17 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 }
             } catch (TransferException $e) {
                 blink_camera::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
-                return json_encode($jsonstr, true);
+                return $jsonstr;
             }
-            return json_encode($jsonstr, true);
+            return $jsonstr;
         }
 	}
     public function getVideoListLocal($page)
     { 
         $network_id = $this->getConfiguration("network_id");
         $camera_id = $this->getConfiguration("camera_id");
-        $result="erreur";
-        if ($page==1 && self::isConnected() && $this->isConfigured()) {
+        $result="erreur_local";
+        if (self::isConnected() && $this->isConfigured()) {
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
             $syncId=$this->getConfiguration('sync_id');
@@ -1070,17 +1070,19 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $pageVide=0;
             $pageMax=100;
             $storage=$this->getConfiguration('storage');
-            if ($storage==='local') {
+            if ($storage=='local') {
                 $pageMax=1;
             }
             for ($page=1;$page<=$pageMax;$page++) {
                 $videosJson=$this->getVideoList($page);
+                blink_camera::logdebug( 'blink_camera->forceCleanup() list videos  : '. print_r($videosJson,true));            
+                    
                 $existVideoInPage=false;
                 // Si en cherchant des videos on a rencontré 50 pages vides, on arrete de rechercher (perfo)
                 if ($pageVide>=10) {
                     break;
                 }
-                foreach ($videosJson as $video) {
+                foreach ($videosJson as $videoApi) {
                     $existVideoInPage=true;
                     //blink_camera::logdebug( 'blink_camera->forceCleanup() video dans page : '. $page);
                     break;
@@ -1092,21 +1094,22 @@ file_put_contents($folderJson,json_encode($jsonrep));
                         if (($key = array_search($file, $fileOnCloudAndOnJeedom)) == false) {
                             if ($file!=="." && $file!=="..") {
                                 $filename="";
-                                foreach ($videosJson as $video) {
-                                    if ($storage==='local' || !$video['deleted']) {
-                                        $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']).'.mp4';
-                                        if (($key = array_search($filename, $fileCloud)) == false) {
-                                            $fileCloud[$filename]=$video['media'];
+                                foreach ($videosJson as $videoApi) {
+//                                    blink_camera::logdebug( 'blink_camera->forceCleanup() videoApi : '. print_r($videoApi,true));            
+                                    if ($storage==='local' || !$videoApi['deleted']) {
+                                        $filename=$videoApi['id'].'-'.blink_camera::getDateJeedomTimezone($videoApi['created_at']).'.mp4';
+                                        if (($key = array_search($filename, $fileToDownload)) == false) {
+                                            $fileToDownload[$filename]=$videoApi['media'];
                                             $cptVideo++;
                                             if ($file === $filename && ($key = array_search($filename, $fileOnCloudAndOnJeedom)) == false) {
                                                 $fileOnCloudAndOnJeedom[]=$filename;
-                                                //blink_camera::logdebug( 'blink_camera->forceCleanup() fichier existant trouve sur le cloud : '. $filename);
+  //blink_camera::logdebug( 'blink_camera->forceCleanup() fichier existant trouve sur le cloud : '. $filename);
                                             }
-                                            $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']).'.jpg';
-                                            $fileCloudThumb[$filename]=$video['thumbnail'];
+                                            $filename=$videoApi['id'].'-'.blink_camera::getDateJeedomTimezone($videoApi['created_at']).'.jpg';
+                                            $fileCloudThumb[$filename]=$videoApi['thumbnail'];
                                             if ($file === $filename && ($key = array_search($filename, $fileOnCloudAndOnJeedom)) == false) {
                                                 $fileOnCloudAndOnJeedom[]=$filename;
-                                                //blink_camera::logdebug( 'blink_camera->forceCleanup() fichier existant trouve sur le cloud : '. $filename);
+                    //blink_camera::logdebug( 'blink_camera->forceCleanup() fichier existant trouve sur le cloud : '. $filename);
                                             }
                                         }
                                     }
@@ -1118,16 +1121,16 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     $pageVide++;
                 }
             }  
-            //blink_camera::logdebug( 'blink_camera->forceCleanup() Videos listed on cloud : '. count($fileCloud));     
+            //blink_camera::logdebug( 'blink_camera->forceCleanup() Videos listed on cloud : '. count($fileToDownload));     
                    
             $cptVideo=0;
 
             // TELECHARGEMENT DES FICHIERS MANQUANTS
-            $fileCloud=array_unique($fileCloud);
-            arsort($fileCloud);
+            $fileToDownload=array_unique($fileToDownload);
+            arsort($fileToDownload);
             
             // Récupération des videos
-            foreach ($fileCloud as $filename => $urlMedia) {
+            foreach ($fileToDownload as $filename => $urlMedia) {
                 if ($nbMax>0 && $cptVideo>=$nbMax) {
                     break;
                 } 
@@ -1184,14 +1187,14 @@ file_put_contents($folderJson,json_encode($jsonrep));
         // on boucle sur les pages au cas ou les premières pages ne contiendraient que des event supprimés
         $storage=$this->getConfiguration('storage');
         $pageMax=50;
-        if ($storage==='local') {
+        if ($storage=='local') {
             $pageMax=1;
         }
         for ($page=1;$page<=$pageMax;$page++) {
             $jsonvideo=$this->getVideoList($page);
             //TODO il faut sortir si on est en local
             foreach ($jsonvideo as $event) {
-                if ($storage==='local' || $include_deleted || $event['deleted']===false) {
+                if ($storage=='local' || $include_deleted || $event['deleted']===false) {
                     //blink_camera::logdebug('blink_camera->getLastEvent() '.$event['created_at']);
                     if (!isset($last_event) || $last_event['created_at']<$event['created_at']) {
                         $last_event=$event;
@@ -2261,8 +2264,10 @@ class blink_cameraCmd extends cmd
             case 'download_local':
                 $eqlogic->dumpConfiguration();
                 if (true || $eqlogic->getConfiguration('storage')=='local') {
-                    $eqlogic->getVideoListLocal(1);
-                    $eqlogic->getMediaLocal("",$eqlogic->getId());
+                    $result=$eqlogic->getVideoListLocal(1);
+                    $folderJson=__DIR__.'/../../medias/'.$eqlogic->getId().'/getVideoList_local_BETA.json';
+                    file_put_contents($folderJson,json_encode($result));
+//                    $eqlogic->getMediaLocal("",$eqlogic->getId());
                 } else {
                     message::add($eqlogic->getEqType_name(), "La caméra '".$eqlogic->getName()."' n'a pas de stockage local");
                 }
