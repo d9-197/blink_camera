@@ -623,6 +623,8 @@ class blink_camera extends eqLogic
         }
         return date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
     }
+
+
     public static function getMedia($urlMedia, $equipement_id, $filename="default",$format="mp4")
     {
         $cam = self::byId($equipement_id);
@@ -634,13 +636,13 @@ class blink_camera extends eqLogic
     }
     private static function getMediaForce($urlMedia, $equipement_id, $filename="default",$format="mp4",$overwrite=false)
     {
-        //blink_camera::logdebug('blink_camera->getMedia() url : '.$urlMedia);
+        //blink_camera::logdebug('blink_camera->getMediaForce() url : '.$urlMedia);
         if (!empty($urlMedia)) {
                 $_tokenBlink=config::byKey('token', 'blink_camera');
                 $_accountBlink=config::byKey('account', 'blink_camera');
                 $_regionBlink=config::byKey('region', 'blink_camera');
                 $filenameTab = explode('/', $urlMedia);
-               // blink_camera::logdebug("blink_camera->getMedia() split : ".print_r($filenameTab,true));
+               // blink_camera::logdebug("blink_camera->getMediaForce() split : ".print_r($filenameTab,true));
                 if (count($filenameTab)>0) {
                     if ($filename==="default") {
                         $filename = 'thumb.png';
@@ -660,7 +662,7 @@ class blink_camera extends eqLogic
                 }
                 $folderBase=__DIR__.'/../../medias/'.$equipement_id.'/';
             if ((!file_exists($folderBase.$filename) || $overwrite) && self::isConnected()) {
-                //blink_camera::logdebug("blink_camera->getMedia() url : $urlMedia - path : $filename");
+                //blink_camera::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : $filename");
                 if (!empty($_tokenBlink) && !empty($_accountBlink) && !empty($_regionBlink)) {
                     if (!file_exists($folderBase)) {
                         mkdir($folderBase, 0775);
@@ -685,11 +687,11 @@ class blink_camera extends eqLogic
                         }
                     }
                 } else {
-                    //blink_camera::logdebug("blink_camera->getMedia() url : $urlMedia - path : error.png");
+                    //blink_camera::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : error.png");
                     return blink_camera::ERROR_IMG;
                 }
             }
-                //blink_camera::logdebug("blink_camera->getMedia() url : $urlMedia - path : $filename");
+                //blink_camera::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : $filename");
                 return '/plugins/blink_camera/medias/'.$equipement_id.'/'.$filename;
         }
         return blink_camera::ERROR_IMG;
@@ -713,7 +715,7 @@ class blink_camera extends eqLogic
                     $jsonrep=json_decode('{"message":"'.$errorTxt.'"}',true);
 
             }
-        //blink_camera::logdebug('getHomescreenData :\n'.print_r($jsonrep,true));
+            //blink_camera::logdebug('getHomescreenData :\n'.print_r($jsonrep,true));
             return $jsonrep;
         }
     }
@@ -916,7 +918,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $result=$this->getVideoListCloud($page);
         }
         $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getVideoList_'.$this->getConfiguration('storage').'.json';
-        file_put_contents($folderJson,json_encode($result));
+        file_put_contents($folderJson,$result);
         return json_decode($result,true);        
     }
     public function getVideoListCloud(int $page=1)
@@ -957,7 +959,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $_regionBlink=config::byKey('region', 'blink_camera');
             $syncId=$this->getConfiguration('sync_id');
             if (!$syncId =="") {
-    blink_camera::logdebug('getVideoListLocal syncId=: '.$syncId);
+    blink_camera::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
                 $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                 $url_manifest_req=$url_manifest.'/request';
                 $jsonrep=blink_camera::queryPost($url_manifest_req);
@@ -965,14 +967,14 @@ file_put_contents($folderJson,json_encode($jsonrep));
     $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
     file_put_contents($folderJson,json_encode($jsonrep));
     jeedomUtils.sleep(1);
-    blink_camera::logdebug('getVideoListLocal Phase 1 : '.print_r($jsonrep,true));
+    blink_camera::logdebug('getVideoListLocal '.$this->getName().' Phase 1 : '.print_r($jsonrep,true));
                     $manifest_req_id=$jsonrep['id'];
                     $url=$url_manifest_req.'/'.$manifest_req_id;
                     $jsonrep=blink_camera::queryGet($url);
                     if (isset($jsonrep)) {
     $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
     file_put_contents($folderJson,json_encode($jsonrep));
-    blink_camera::logdebug('getVideoListLocal Phase 2 : '.print_r($jsonrep,true));
+    blink_camera::logdebug('getVideoListLocal '.$this->getName().' Phase 2 : '.print_r($jsonrep,true));
                         $manifest_id=$jsonrep['manifest_id'];
                         if (isset($manifest_id)) {
                             $result= array();
@@ -982,6 +984,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                     $clip['media']=$clip['id'];
                                     $clip['thumbnail']=$clip['id'];
                                     $clip['deleted']=(bool) 0;
+                                    $clip['source']="-";
                                     $clip['device_id']=$this->getConfiguration('camera_id');
                                     $clip['device_name']=$clip['camera_name'];
                                     $result[$idx]=$clip;
@@ -991,7 +994,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                             if ($idx>0) {
                                 $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_result.json';
                                 file_put_contents($folderJson,json_encode($result));
-                                blink_camera::logdebug('getVideoListLocal result  : '.print_r($result,true));
+                                blink_camera::logdebug('getVideoListLocal '.$this->getName().' result  : '.print_r($result,true));
                                 return json_encode($result);
                             } else {
                                 $result="no video";
@@ -1183,7 +1186,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
 
     public function getLastEvent($include_deleted=false)
     {
-        //blink_camera::logdebug('blink_camera->getLastEvent() start');
+        blink_camera::logdebug('blink_camera->getLastEvent() '.$this->getName().' start');
         // on boucle sur les pages au cas ou les premières pages ne contiendraient que des event supprimés
         $storage=$this->getConfiguration('storage');
         $pageMax=50;
@@ -1192,17 +1195,16 @@ file_put_contents($folderJson,json_encode($jsonrep));
         }
         for ($page=1;$page<=$pageMax;$page++) {
             $jsonvideo=$this->getVideoList($page);
-            //TODO il faut sortir si on est en local
             foreach ($jsonvideo as $event) {
                 if ($storage=='local' || $include_deleted || $event['deleted']===false) {
-                    //blink_camera::logdebug('blink_camera->getLastEvent() '.$event['created_at']);
+                    blink_camera::logdebug('blink_camera->getLastEvent() '.$this->getName().' '.$event['created_at']);
                     if (!isset($last_event) || $last_event['created_at']<$event['created_at']) {
                         $last_event=$event;
                     }
                 }
             }
             if (isset($last_event)) {
-                //blink_camera::logdebug('blink_camera->getLastEvent() return an event:'.$last_event['created_at']);
+                blink_camera::logdebug('blink_camera->getLastEvent() '.$this->getName().' return an event:'.$last_event['created_at']);
                 self::getMedia($last_event['media'], $this->getId(), 'last','mp4');
                 return $last_event;
             } else {
@@ -1226,7 +1228,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
     public function getLastEventDate($ignorePrevious=false)
     {
         if ($this->isConfigured()) {
-            //blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' START');
+            blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' START');
             $event = $this->getLastEvent(false);
             if (!isset($event)) {
                 $this->checkAndUpdateCmd('last_event', "-");
@@ -1246,7 +1248,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     }
                     $new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
                     if (isset($new) && $new!="" && ($new>$previous || $ignorePrevious)) {
-                        //blink_camera::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
+                        blink_camera::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
                         $this->checkAndUpdateCmd('last_event', $new);
                         $pathThumb=blink_camera::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.blink_camera::getDateJeedomTimezone($event['created_at']),'jpg');
                         $this->checkAndUpdateCmd('thumb_path',$pathThumb);
