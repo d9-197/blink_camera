@@ -779,7 +779,7 @@ blink_camera::logdebug('getMediaLocal Phase 2 : '.print_r($jsonrep,true));
                                 $camera_name=$clips['camera_name'];
                                 $clip_date=$clips['created_at'];
                                 $filename=$clip_id.'-'.blink_camera::getDateJeedomTimezone($clip_date);
-                                blink_camera::logdebug('getMediaLocal clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$this->getName().') - created_at : ' .$clip_date);
+blink_camera::logdebug('getMediaLocal clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$this->getName().') - created_at : ' .$clip_date);
                                 if (strtolower($camera_name)===strtolower($this->getName())) {
                                     $url_media=$url_manifest.'/'.$manifest_id.'/clip/request/'.$clip_id;
 blink_camera::logdebug('getMediaLocal URL MEDIA : '.$url_media);
@@ -842,6 +842,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
 	}
 
 	public function getCameraThumbnail($forceDownload=false) {
+        blink_camera::logdebug('blink_camera->getCameraThumbnail() '.$this->getId().' START ' );
+
 		if ($this->getBlinkDeviceType()!=="owlZZ") {
 	      	$lastThumbnailTime = $this->getConfiguration("last_camera_thumb_time");
 	      	$newtime=time();
@@ -907,6 +909,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
 	      		//blink_camera::logdebug('getCameraThumbnail (Camera id:'.$this->getId().')- not need to refresh thumbnail URL- previous time: '.$lastThumbnailTime.' - new time:'.$newtime.' - path:'.$path);
         	}
 		}
+        blink_camera::logdebug('blink_camera->getCameraThumbnail() '.$this->getId().' END '.$path );
 		return $path;
 	}
 
@@ -1227,8 +1230,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
   
     public function getLastEventDate($ignorePrevious=false)
     {
+        blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' START');
         if ($this->isConfigured()) {
-            blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' START');
             $event = $this->getLastEvent(false);
             if (!isset($event)) {
                 $this->checkAndUpdateCmd('last_event', "-");
@@ -1266,6 +1269,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     $this->checkAndUpdateCmd('source_last_event', $event['source']);
                 }
             }
+            blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' recalcul vignette START '.print_r($event,true) );
             //Recalcul de la vignette à afficher
             $facteur= (float) config::byKey('blink_size_thumbnail', 'blink_camera');
             if ($facteur<=0) {
@@ -1310,8 +1314,10 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $urlFile=blink_camera::GET_RESOURCE.$urlFile;
             }
             $replace['#urlFile#']=$urlFile;
+            blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' recalcul vignette END '.print_r($replace,true) );
             $this->checkAndUpdateCmd('thumbnail',template_replace($replace, $urlLine));
         }
+        blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' END');
 	}
 	public function refreshCameraInfos($callOrig="") {
 		if ($this->isConfigured()&& $this->isConnected()) {
@@ -2268,8 +2274,11 @@ class blink_cameraCmd extends cmd
                 if (true || $eqlogic->getConfiguration('storage')=='local') {
                     $result=$eqlogic->getVideoListLocal(1);
                     $folderJson=__DIR__.'/../../medias/'.$eqlogic->getId().'/getVideoList_local_BETA.json';
-                    file_put_contents($folderJson,json_encode($result));
-//                    $eqlogic->getMediaLocal("",$eqlogic->getId());
+                    file_put_contents($folderJson3,json_encode($result));
+                    jeedomUtils.sleep(1);
+                    $eqlogic->forceCleanup(true);        
+                    $existingFilesOnJeedom = scandir($this->getMediaDir());
+blink_camera::logdebug('EXECUTE download_local : '.print_r($existingFilesOnJeedom,true));
                 } else {
                     message::add($eqlogic->getEqType_name(), "La caméra '".$eqlogic->getName()."' n'a pas de stockage local");
                 }
@@ -2326,7 +2335,6 @@ class blink_cameraCmd extends cmd
 
             case 'arm_camera':
                 $eqlogic->cameraArm();
-                jeedomUtils.sleep(1);
                 break;
 
             case 'disarm_camera':
