@@ -632,7 +632,7 @@ class blink_camera extends eqLogic
             return blink_camera::getMediaForce($urlMedia, $equipement_id, $filename,$format,false);
         }
     }
-    public static function getMediaForce($urlMedia, $equipement_id, $filename="default",$format="mp4",$overwrite=false)
+    private static function getMediaForce($urlMedia, $equipement_id, $filename="default",$format="mp4",$overwrite=false)
     {
         //blink_camera::logdebug('blink_camera->getMedia() url : '.$urlMedia);
         if (!empty($urlMedia)) {
@@ -746,7 +746,7 @@ class blink_camera extends eqLogic
         //blink_camera::logdebug('TYPE DEVICE='.$valeur);
 		return $valeur;
     }
-    public function getMediaLocal($clip_id_req="",$equipement_id=null) {
+    private function getMediaLocal($clip_id_req="",$equipement_id=null) {
 
         blink_camera::logdebug('getMediaLocal Call : '.$this->getId().' '.$this->getName());
         $_accountBlink=config::byKey('account', 'blink_camera');
@@ -1068,7 +1068,12 @@ file_put_contents($folderJson,json_encode($jsonrep));
         $fileToKeep[]="thumbnail.jpg";
         if ($this->isConnected()) {
             $pageVide=0;
-            for ($page=1;$page<=100;$page++) {
+            $pageMax=100;
+            $storage=$this->getConfiguration('storage');
+            if ($storage==='local') {
+                $pageMax=1;
+            }
+            for ($page=1;$page<=$pageMax;$page++) {
                 $videosJson=$this->getVideoList($page);
                 $existVideoInPage=false;
                 // Si en cherchant des videos on a rencontré 50 pages vides, on arrete de rechercher (perfo)
@@ -1088,7 +1093,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                             if ($file!=="." && $file!=="..") {
                                 $filename="";
                                 foreach ($videosJson as $video) {
-                                    if (!$video['deleted']) {
+                                    if ($storage==='local' || !$video['deleted']) {
                                         $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']).'.mp4';
                                         if (($key = array_search($filename, $fileCloud)) == false) {
                                             $fileCloud[$filename]=$video['media'];
@@ -1177,11 +1182,16 @@ file_put_contents($folderJson,json_encode($jsonrep));
     {
         //blink_camera::logdebug('blink_camera->getLastEvent() start');
         // on boucle sur les pages au cas ou les premières pages ne contiendraient que des event supprimés
-        for ($page=1;$page<=50;$page++) {
+        $storage=$this->getConfiguration('storage');
+        $pageMax=50;
+        if ($storage==='local') {
+            $pageMax=1;
+        }
+        for ($page=1;$page<=$pageMax;$page++) {
             $jsonvideo=$this->getVideoList($page);
             //TODO il faut sortir si on est en local
             foreach ($jsonvideo as $event) {
-                if ($include_deleted || $event['deleted']===false) {
+                if ($storage==='local' || $include_deleted || $event['deleted']===false) {
                     //blink_camera::logdebug('blink_camera->getLastEvent() '.$event['created_at']);
                     if (!isset($last_event) || $last_event['created_at']<$event['created_at']) {
                         $last_event=$event;
