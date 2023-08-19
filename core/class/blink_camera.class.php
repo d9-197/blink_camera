@@ -1233,6 +1233,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
         blink_camera::logdebug('blink_camera->getLastEventDate() START');
         if ($this->isConfigured()) {
             $event = $this->getLastEvent(false);
+            blink_camera::logdebug('blink_camera->getLastEventDate() POST getLastEvent');
             if (!isset($event)) {
                 blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' pas d\'event');
                 $this->checkAndUpdateCmd('last_event', "-");
