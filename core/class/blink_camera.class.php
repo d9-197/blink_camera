@@ -113,9 +113,9 @@ class blink_camera extends eqLogic
             $eqLogics = array(self::byId($_eqLogic_id));
         }
         foreach ($eqLogics as $cam) {
-            //blink_camera::logdebug('blink_camera->cron() '.$cam->getConfiguration("camera_id"));
+            blink_camera::logdebug('blink_camera->cron() '.$cam->getId());
             if ($cam->getIsEnable() == 1 && $cam->isConnected()) {
-                //blink_camera::logdebug('blink_camera->cron() camera active');
+                blink_camera::logdebug('blink_camera->cron() '.$cam->getId().' camera active');
                 $cam->getLastEventDate();
                 //$cam->refreshCameraInfos();
             }
@@ -1230,19 +1230,22 @@ file_put_contents($folderJson,json_encode($jsonrep));
   
     public function getLastEventDate($ignorePrevious=false)
     {
-        blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' START');
+        blink_camera::logdebug('blink_camera->getLastEventDate() START');
         if ($this->isConfigured()) {
             $event = $this->getLastEvent(false);
             if (!isset($event)) {
+                blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' pas d\'event');
                 $this->checkAndUpdateCmd('last_event', "-");
                 $this->checkAndUpdateCmd('thumb_path',"-");
                 $this->checkAndUpdateCmd('thumb_url',"-");
                 $this->checkAndUpdateCmd('clip_path',"-");
                 $this->checkAndUpdateCmd('clip_url',"-");
             } else {
+                blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' event trouvé');
                 $infoCmd=$this->getCmd(null, 'last_event');
                 if (is_object($infoCmd) && isset($event)) {
                     $previous=$infoCmd->execCmd();
+                    blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' previous='.$previous);
                     $dtim = date_create_from_format(blink_camera::FORMAT_DATETIME, $event['created_at']);
                     if (getTZoffsetMin()<0) {
                         $dtim=date_sub($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
@@ -1250,6 +1253,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                         $dtim=date_add($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
                     }
                     $new=date_format($dtim, blink_camera::FORMAT_DATETIME_OUT);
+                    blink_camera::logdebug('blink_camera->getLastEventDate() '.$this->getId().' new='.$new);
                     if (isset($new) && $new!="" && ($new>$previous || $ignorePrevious)) {
                         blink_camera::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
                         $this->checkAndUpdateCmd('last_event', $new);
@@ -2277,7 +2281,7 @@ class blink_cameraCmd extends cmd
                     file_put_contents($folderJson3,json_encode($result));
                     jeedomUtils.sleep(1);
                     $eqlogic->forceCleanup(true);        
-                    $existingFilesOnJeedom = scandir($this->getMediaDir());
+                    $existingFilesOnJeedom = scandir($eqlogic->getMediaDir());
 blink_camera::logdebug('EXECUTE download_local : '.print_r($existingFilesOnJeedom,true));
                 } else {
                     message::add($eqlogic->getEqType_name(), "La caméra '".$eqlogic->getName()."' n'a pas de stockage local");
