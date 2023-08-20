@@ -1951,11 +1951,11 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $arm_network->useIconAndName();
             $arm_network->save();
         }
-        $download_local = $this->getCmd(null, 'downlod_local');
+        $download_local = $this->getCmd(null, 'download_local');
         if (is_object($download_local)) {
             $download_local->remove();
         }
-        $download_local = $this->getCmd(null, 'download_local');
+/*        $download_local = $this->getCmd(null, 'download_local');
         if (!is_object($download_local)) {
             self::loginfo( 'Create new action : download_local');
             $download_local = new blink_cameraCmd();
@@ -1966,7 +1966,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $download_local->setSubType('other');
             $download_local->useIconAndName();
             $download_local->save();
-        }
+        }*/
         if ($typeDevice!="owl" and $typeDevice!="lotus") {
             $arm_camera = $this->getCmd(null, 'arm_camera');
             if (!is_object($arm_camera)) {

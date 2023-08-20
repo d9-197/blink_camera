@@ -88,7 +88,13 @@ $cptVideo=0;
 if ($thumbFilter=='') {
     if ($blink_camera->isConnected() && $blink_camera->getToken()) {
         $pageVide=0;
-        for ($page=1;$page<=50;$page++) {
+        $maxPage=50;
+        $storage=$blink_camera->getConfiguration('storage');
+        if ($storage=='local') {
+            $maxPage=1;
+
+        }
+        for ($page=1;$page<=$maxPage;$page++) {
             if ($pageVide>=3) {
                 break;
             }
@@ -102,7 +108,7 @@ if ($thumbFilter=='') {
                 if ($nbMax>0 && $cptVideo>=($nbMax)) {
                     break;
                 };
-                if (!$video['deleted']) {
+                if ($storage=='local' || !$video['deleted']) {
                     $cptVideo++;
                     $datetime = explode("_", blink_camera::getDateJeedomTimezone($video['created_at']));
                     $date=$datetime[0];
