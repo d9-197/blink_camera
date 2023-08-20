@@ -39,6 +39,7 @@ class blink_camera extends eqLogic
     const NO_EVENT_IMG="/plugins/blink_camera/img/no_event.png";
     const GET_RESOURCE="/plugins/blink_camera/core/php/getResource.php?file=";
     const PREFIX_THUMBNAIL="thumbnail";    
+    const ATTENTE_MINI_DEFAUT=5;
     public static $_widgetPossibility = array('custom' => array(
         'visibility' => true,
         'displayName' => true,
@@ -759,6 +760,7 @@ self::logdebug('getMediaLocal syncId=: '.$syncId);
             $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
             $url_manifest_req=$url_manifest.'/request';
             try {
+                self::checkAndWaitBetweenCalls('syncId-'.$syncId);
                 $jsonrep=self::queryPost($url_manifest_req);
             } catch (TransferException $e) {
                 self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -816,7 +818,21 @@ file_put_contents($folderJson,json_encode($jsonrep));
         }
         return self::ERROR_IMG;
     }
-
+    private static function checkAndWaitBetweenCalls($ident='all', $attente_mini=self::ATTENTE_MINI_DEFAUT) {
+        $previousCall=config::byKey('api_last_call_'.$ident,'blink_camera');
+        $first_log=true;
+        while ((time()-$previousCall) < $attente_mini) {
+            if ($first_log) {
+                $first_log=false;
+                self::logdebug('checkAndWaitBetweenCalls('.$ident.') Début d\'attente...');
+            }
+            sleep(1);
+        }
+        if (!$first_log) {
+            self::logdebug('checkAndWaitBetweenCalls('.$ident.') Fin d\'attente...');
+        }
+        config::save('api_last_call_'.$ident, time(),'blink_camera');
+    }
     public function isConfigured()
     {
         $network_id = $this->getConfiguration("network_id");
@@ -942,6 +958,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             
             try {
                 self::logdebugBlinkAPIRequest("CALL[getVideoListCloud] -->");
+                self::checkAndWaitBetweenCalls('net-'.$network_id,2);
                 $jsonrep=self::queryGet($url);
 
                 if (isset($jsonrep)) {
@@ -966,8 +983,10 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
             $syncId=$this->getConfiguration('sync_id');
+
             if (!$syncId =="") {
     self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
+                self::checkAndWaitBetweenCalls('syncId-'.$syncId);
                 $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                 $url_manifest_req=$url_manifest.'/request';
                 try {
