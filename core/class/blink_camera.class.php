@@ -758,7 +758,12 @@ class blink_camera extends eqLogic
 self::logdebug('getMediaLocal syncId=: '.$syncId);
             $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
             $url_manifest_req=$url_manifest.'/request';
-            $jsonrep=self::queryPost($url_manifest_req);
+            try {
+                $jsonrep=self::queryPost($url_manifest_req);
+            } catch (TransferException $e) {
+                self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
+                return self::ERROR_IMG;
+            }
             if (isset($jsonrep)) {
 $folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph1.json';
 file_put_contents($folderJson,json_encode($jsonrep));
@@ -787,7 +792,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                                         $jsonrep=self::queryPost($url_media);
                                     } catch (TransferException $e) {
                                         self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_media. ' - ERROR:'.print_r($e->getMessage(), true));
-                                        return false;
+                                        return self::ERROR_IMG;
                                     }
 $folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph3.json';
 file_put_contents($folderJson,json_encode($jsonrep));
@@ -965,7 +970,12 @@ file_put_contents($folderJson,json_encode($jsonrep));
     self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
                 $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                 $url_manifest_req=$url_manifest.'/request';
-                $jsonrep=self::queryPost($url_manifest_req);
+                try {
+                    $jsonrep=self::queryPost($url_manifest_req);
+                } catch (TransferException $e) {
+                    self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
+                    return $result;
+                }
                 if (isset($jsonrep)) {
     $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
     file_put_contents($folderJson,json_encode($jsonrep));
@@ -973,7 +983,12 @@ file_put_contents($folderJson,json_encode($jsonrep));
     self::logdebug('getVideoListLocal '.$this->getName().' Phase 1 : '.print_r($jsonrep,true));
                     $manifest_req_id=$jsonrep['id'];
                     $url=$url_manifest_req.'/'.$manifest_req_id;
-                    $jsonrep=self::queryGet($url);
+                    try {
+                        $jsonrep=self::queryGet($url);
+                    } catch (TransferException $e) {
+                        self::logdebug('An error occured during Blink Cloud call GET : '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                        return $result;
+                    }
                     if (isset($jsonrep)) {
     $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
     file_put_contents($folderJson,json_encode($jsonrep));
