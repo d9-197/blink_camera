@@ -86,10 +86,10 @@ if ($nbMax <= 0) {
 }
 $cptVideo=0;
 if ($thumbFilter=='') {
-    if ($blink_camera->isConnected() && $blink_camera->getToken()) {
+    $storage=$blink_camera->getConfiguration('storage');
+    if ($storage!='local' && $blink_camera->isConnected() && $blink_camera->getToken()) {
         $pageVide=0;
         $maxPage=50;
-        $storage=$blink_camera->getConfiguration('storage');
         if ($storage=='local') {
             $maxPage=1;
         }
