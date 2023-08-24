@@ -92,7 +92,6 @@ if ($thumbFilter=='') {
         $storage=$blink_camera->getConfiguration('storage');
         if ($storage=='local') {
             $maxPage=1;
-
         }
         for ($page=1;$page<=$maxPage;$page++) {
             if ($pageVide>=3) {
@@ -112,6 +111,7 @@ if ($thumbFilter=='') {
                     $cptVideo++;
                     $datetime = explode("_", blink_camera::getDateJeedomTimezone($video['created_at']));
                     $date=$datetime[0];
+                    log::add('blink_camera','debug','History['.$blink_camera->getId().'] video found with API('.$storage.'): '.print_r($video,true));
                     if (array_key_exists($date, $videoFiltered)) {
                         array_push($videoFiltered[$date], $video);
                     } else {
@@ -174,13 +174,16 @@ foreach ($videoFiltered as $date => $videoByDate) {
     }
     rsort($videoByDate);
     foreach ($videoByDate as $video) {
+        log::add('blink_camera','debug','History['.$blink_camera->getId().'] Display video by date ('.$storage.'): '.print_r($video,true));
         $cptVideo++;
         if ($nbMax>0 && $cptVideo>$nbMax) {
             break;
         };
         if (isset($video['created_at'])) {
             $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']);
-            $path=$blink_camera->getMedia($video['media'], init('id'), $filename);
+            log::add('blink_camera','debug','History['.$blink_camera->getId().'] Display video by date ('.$storage.'): before getMedia : '.$video['media']);
+            $path=$blink_camera->getMedia($video['media'], $blink_camera->getId(), $filename);
+            log::add('blink_camera','debug','History['.$blink_camera->getId().'] Display video by date ('.$storage.'): after getMedia');
         } else {
             $filename=$video['id'];
             $path=$dir.'/'.$filename;
