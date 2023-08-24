@@ -39,7 +39,7 @@ class blink_camera extends eqLogic
     const NO_EVENT_IMG="/plugins/blink_camera/img/no_event.png";
     const GET_RESOURCE="/plugins/blink_camera/core/php/getResource.php?file=";
     const PREFIX_THUMBNAIL="thumbnail";    
-    const ATTENTE_MINI_DEFAUT=5;
+    const ATTENTE_MINI_DEFAUT=15;
     public static $_widgetPossibility = array('custom' => array(
         'visibility' => true,
         'displayName' => true,
@@ -958,7 +958,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             
             try {
                 self::logdebugBlinkAPIRequest("CALL[getVideoListCloud] -->");
-                self::checkAndWaitBetweenCalls('net-'.$network_id,2);
+                //self::checkAndWaitBetweenCalls('net-'.$network_id,2);
                 $jsonrep=self::queryGet($url);
 
                 if (isset($jsonrep)) {
