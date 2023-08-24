@@ -14,10 +14,13 @@ if (!is_object($blink_camera)) {
 if ($blink_camera->getEqType_name() != 'blink_camera') {
     throw new Exception(__('Cet équipement n\'est pas de type blink_camera : ', __FILE__) . $blink_camera->getEqType_name());
 }
+$storage=$blink_camera->getConfiguration('storage');
 $configMedia=init('mode');
 if (!isset($configMedia) || $configMedia=='') {
-//    $blink_camera->setConfigHistory();
 	$configMedia=$blink_camera->getConfigHistory();
+}
+if ($storage=='local' && $configMedia=='jpg') {
+    $configMedia='thumb';
 }
 if ($configMedia!='') {
     $blink_camera->setConfigHistory($configMedia);
@@ -32,24 +35,26 @@ $dir= realpath(dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/')
 ?>
 <script>
 if ('<?=$formatMedia?>'=='.jpg') {
-    //$('#showPhotos').prop('checked', true);
     if ('<?=$thumbFilter?>'=='') {
-        $('#btn-jpg').removeClass('btn-secondary');
-        $('#btn-jpg').addClass('btn-primary');
+        if ('<?=$storage?>'!='local') {
+            $('#btn-jpg').removeClass('btn-secondary');
+            $('#btn-jpg').addClass('btn-primary');
+        }
         $('#btn-mp4').removeClass('btn-primary');
         $('#btn-mp4').addClass('btn-secondary');
         $('#btn-thumb').removeClass('btn-primary');
         $('#btn-thumb').addClass('btn-secondary');
     } else {
-        $('#btn-jpg').removeClass('btn-primary');
-        $('#btn-jpg').addClass('btn-secondary');
+        if ('<?=$storage?>'!='local') {
+            $('#btn-jpg').removeClass('btn-primary');
+            $('#btn-jpg').addClass('btn-secondary');
+        }
         $('#btn-mp4').removeClass('btn-primary');
         $('#btn-mp4').addClass('btn-secondary');
         $('#btn-thumb').removeClass('btn-secondary');
         $('#btn-thumb').addClass('btn-primary');
     }
 } else {
-    //$('#showPhotos').prop('checked', false);
     $('#btn-jpg').removeClass('btn-primary');
     $('#btn-jpg').addClass('btn-secondary');
     $('#btn-mp4').removeClass('btn-secondary');
@@ -57,7 +62,9 @@ if ('<?=$formatMedia?>'=='.jpg') {
     $('#btn-thumb').removeClass('btn-primary');
     $('#btn-thumb').addClass('btn-secondary');
 }
-
+if ('<?=$storage?>'=='local') {
+    $('#btn-jpg').remove();
+}
 
 </script>
 <div id='div_blink_cameraRecordAlert' style="display: none;"></div>
@@ -67,12 +74,7 @@ echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink
 echo '</div>';
 
 ?>
-<!-- 
-<label class="switch">
-  <input type="checkbox" id="showPhotos">
-  <span class="slider round"></span>
-</label><span>{{Afficher les vignettes des vidéos}}</span>
--->
+
 <div>
     <button type="button" class="btn btn-secondary" id="btn-mp4">{{Vidéos}}</button>
     <button type="button" class="btn btn-secondary" id="btn-jpg">{{Vignettes des vidéos}}</button>
@@ -86,7 +88,6 @@ if ($nbMax <= 0) {
 }
 $cptVideo=0;
 if ($thumbFilter=='') {
-    $storage=$blink_camera->getConfiguration('storage');
     if ($storage!='local' && $blink_camera->isConnected() && $blink_camera->getToken()) {
         $pageVide=0;
         $maxPage=50;
@@ -205,7 +206,6 @@ foreach ($videoFiltered as $date => $videoByDate) {
         echo '<a target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($path) . '" class="btn btn-success btn-xs pull-right" style="color : white"><i class="fas fa-download"></i></a>';
         echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
         echo '</div>';
-        //echo '<div  class="blink_cameraThumbnailContainer2">';
         echo '<div style="padding:auto !important ;">';
         echo '<center style="margin-top:5px;">';
         if (strpos($file, '.mp4')) {
@@ -216,12 +216,10 @@ foreach ($videoFiltered as $date => $videoByDate) {
             $strVideo.= ' height="'.$tailleVideo.'" controls loop data-src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '" style="cursor:pointer"><source src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '">Your browser does not support the video tag.</video>';
             echo $strVideo;
         } else {
-            //echo '<center><img class="img-responsive cursor displayImage lazy" src="plugins/blink_camera/core/img/no-image.png" data-original="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) .  '"  style="max-height:'.$tailleVideo.'px;"/></center>';
             echo '<img class="displayImage" loading="eager" src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) .  '" width=360/>';
         }
         echo '</center>';
         echo '</div>';
-        //echo '</div>';
         echo '</div>';
     }
     echo '</div>';
@@ -270,9 +268,6 @@ $('.toggleList').on('click', function() {
     $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 });
   
-/*$("img.lazy").lazyload({
-	container: $("#md_modal")
-});*/
 $('.ui-resizable').resizable({
       resize: function( event, ui ) {$('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});}
 });
@@ -280,17 +275,6 @@ $('.ui-resizable').resizable({
 $( document ).ready(function() {
     $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 });
-/*$('#showPhotos').change(function() {
-   if($(this).is(":checked")) {
-    $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
-    $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=jpg').dialog('open');
-
-    
-    return;
-   }
-    $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
-    $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=mp4').dialog('open');
-});*/
 $('#btn-thumb').click(function() {
     $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
     $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=thumb').dialog('open');
@@ -311,11 +295,6 @@ Promise.all(Array.from(document.images).map(img => {
         img.addEventListener('error', () => resolve(false));
     });
 })).then(results => {
-    /*if (results.every(res => res))
-        console.log('all images loaded successfully');
-    else
-        console.log('some images failed to load, all finished loading');
-        */
     $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 });
 </script>

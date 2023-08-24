@@ -61,7 +61,8 @@
         "Type de stockage":"Type de stockage",
         "Cloud":"Cloud",
         "Local":"Local",
-        "Largeur du widget":"Largeur du widget"
+        "Largeur du widget":"Largeur du widget",
+        "Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).":"Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB)."
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Rechercher"

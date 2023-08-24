@@ -34,9 +34,6 @@ if (!isConnect()) {
             <div class="col-lg-3">
                 <a id="bt_test_blink" class="btn btn-success btn-xs">{{Sauvegarder et tester la connexion Blink}}</a>
             </div>
-            <!--div class="col-lg-3">
-                <a id="bt_reinit_blink" class="btn btn-success btn-xs">{{Réinitialiser la config Blink du plugin}}</a>
-            </div-->
         </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Mot de passe}}</label>
@@ -64,15 +61,6 @@ if (!isConnect()) {
             <div id ="pinstatus"></div>
         </div>
         </div>
-        <!--div class="form-group">
-            <label class="col-lg-3 control-label">{{Type de stockage}}</label>
-            <div class="col-lg-3">
-                <select  class="configKey form-control" data-l1key="blink_storage">
-                    <option value="cloud">{{Cloud}}</option>
-                    <option value="local">{{Local}}</option>
-                </select>
-            </div>
-        </div-->
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Unité de température}}</label>
             <div class="col-lg-3">
@@ -113,7 +101,10 @@ if (!isConnect()) {
         <div class="form-group" id="fallback_thumb">
             <label class="col-lg-5 control-label">{{Afficher la vignette de caméra s'il n'y a pas de vidéo ?}}</label>
             <div class="col-lg-1">
-                <input  type="checkbox"class="configKey form-control" data-l1key="fallback_to_thumbnail"/>
+                <input  id='fallback_checkbox' type="checkbox"class="configKey form-control" data-l1key="fallback_to_thumbnail"/>
+            </div>
+            <div id="warning_thumb" class="warning ">
+            {{Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).}}
             </div>
         </div>
         <div class="form-group">
@@ -246,6 +237,12 @@ if (!isConnect()) {
             $(fallback_thumb).show();
         } else {
             $(fallback_thumb).hide();
+        }
+        if ($('#thumb_type_select').val()==2 ) {
+            $(warning_thumb).show();
+            $(fallback_checkbox).prop( "checked", true );
+        } else {
+            $(warning_thumb).hide();
         }
     })
     checkConnexionBlink();
