@@ -39,7 +39,7 @@ class blink_camera extends eqLogic
     const NO_EVENT_IMG="/plugins/blink_camera/img/no_event.png";
     const GET_RESOURCE="/plugins/blink_camera/core/php/getResource.php?file=";
     const PREFIX_THUMBNAIL="thumbnail";    
-    const ATTENTE_MINI_DEFAUT=15;
+    const ATTENTE_MAXI_DEFAUT=2;
     public static $_widgetPossibility = array('custom' => array(
         'visibility' => true,
         'displayName' => true,
@@ -146,12 +146,15 @@ class blink_camera extends eqLogic
     public static function isOpenMediasAccess() {
         return !config::byKey('medias_security', 'blink_camera');
     }
+
+
     public static function queryGet(string $url) {
         $_tokenBlink=config::byKey('token', 'blink_camera');
         $_accountBlink=config::byKey('account', 'blink_camera');
         $_regionBlink=config::byKey('region', 'blink_camera');
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
+            $lock=self::checkAndGetLock('getQuery');
             self::logdebugBlinkAPIRequest("CALL[queryGet]: ".$url);
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
             $r = $client->request('GET', $url, [
@@ -163,13 +166,12 @@ class blink_camera extends eqLogic
                     'Accept' => '/'
                     ]
             ]);
+            self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
             self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
         }    
         return $jsonrep;
     }
-
-   
     
     public static function queryGetMedia(string $url, string $file_path) {
         $_tokenBlink=config::byKey('token', 'blink_camera');
@@ -177,50 +179,69 @@ class blink_camera extends eqLogic
         $_regionBlink=config::byKey('region', 'blink_camera');
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
+            $lock=self::checkAndGetLock('queryGetMedia');
             self::logdebugBlinkAPIRequest("CALL[queryGetMedia]: ".$url);
-            $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
-            $r = $client->request('GET', $url, [
-                'sink' => $file_path,
-                //['http_errors' => false],
-                'headers' => [
-                    'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
-                    'TOKEN_AUTH'=> ''.$_tokenBlink,
-                    'User-Agent' =>  ''.self::BLINK_DEFAULT_USER_AGENT,
-                    'Content-Type' => 'application/json',
-                    'Accept' => '/'
-                    ]
-            ]);
-            $jsonrep= json_decode($r->getBody(), true);
-          
-            self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
+            try {
+                $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
+                $r = $client->request('GET', $url, [
+                    'sink' => $file_path,
+                    //['http_errors' => false],
+                    'headers' => [
+                        'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
+                        'TOKEN_AUTH'=> ''.$_tokenBlink,
+                        'User-Agent' =>  ''.self::BLINK_DEFAULT_USER_AGENT,
+                        'Content-Type' => 'application/json',
+                        'Accept' => '/'
+                        ]
+                ]);
+                self::releaseLock($lock);
+                $jsonrep= json_decode($r->getBody(), true);
+            
+                self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
+            }  catch (Exception $e) {
+                self::releaseLock($lock);
+                self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
+                self::logdebug('ERROR:'.print_r($e->getMessage(), true));
+                return 1;
+            }
         }    
         return $jsonrep;
     }
     
     public static function queryPostLogin(string $url, string $datas) {
         //self::logdebug('queryPostLogin(url='.$url.',datas='.$datas.') START');
+        
         self::logdebugBlinkAPIRequest("CALL[queryPostLogin]: ".$url);
+        $lock=self::checkAndGetLock('queryPostLogin');  
         $jsonrep=null;
-        $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.prod.immedia-semi.com/'. $url]);
-        $r = $client->request('POST', 'login', [
-            //['http_errors' => false],
-            ['timeout' => 1],
-            'headers' => [
-                'Host'=> 'rest-prod.immedia-semi.com',
-                'Content-Type'=> 'application/json',
-                'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT,
-                'Accept' => '/'
-            ],
-            'json' => json_decode($datas)
-        ]);
-        $jsonrep= json_decode($r->getBody(), true);
-        self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
-        /*self::logdebug('#######################################');
-        self::logdebug('            queryPostLogin');        
-        self::logdebug(print_r($jsonrep,true));
-        self::logdebug('#######################################');
-		*/
-        return $jsonrep;
+        try {
+            $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.prod.immedia-semi.com/'. $url]);
+            $r = $client->request('POST', 'login', [
+                //['http_errors' => false],
+                ['timeout' => 1],
+                'headers' => [
+                    'Host'=> 'rest-prod.immedia-semi.com',
+                    'Content-Type'=> 'application/json',
+                    'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT,
+                    'Accept' => '/'
+                ],
+                'json' => json_decode($datas)
+            ]);
+            self::releaseLock($lock);
+            $jsonrep= json_decode($r->getBody(), true);
+            self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
+            /*self::logdebug('#######################################');
+            self::logdebug('            queryPostLogin');        
+            self::logdebug(print_r($jsonrep,true));
+            self::logdebug('#######################################');
+            */
+            return $jsonrep;
+        }  catch (Exception $e) {
+            self::releaseLock($lock);
+            self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
+            self::logdebug('ERROR:'.print_r($e->getMessage(), true));
+            return 1;
+        }
     }
     // 
     public static function queryPostPinVerify(string $pin) {
@@ -232,6 +253,7 @@ class blink_camera extends eqLogic
 
         $url='https://rest-'.$_regionBlink.'.immedia-semi.com/api/v4/account/'.$account_id.'/client/'.$client_id.'/pin/verify';
         self::logdebugBlinkAPIRequest("CALL[queryPostPinVerify]: ".$url);
+        $lock=self::checkAndGetLock('queryPostPinVerify');  
         $datas="{\"pin\":".$pin."}";
         try {
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $url]);
@@ -244,6 +266,7 @@ class blink_camera extends eqLogic
                 ],
                 'json' => json_decode($datas)
             ]);
+            self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
             self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
 
@@ -257,6 +280,7 @@ class blink_camera extends eqLogic
                 return 1;
             }
         }  catch (Exception $e) {
+            self::releaseLock($lock);
             self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
             self::logdebug('ERROR:'.print_r($e->getMessage(), true));
             return 1;
@@ -269,6 +293,7 @@ class blink_camera extends eqLogic
         $_regionBlink=config::byKey('region', 'blink_camera');
         $_tokenBlink=config::byKey('token', 'blink_camera');
         self::logdebugBlinkAPIRequest("CALL[queryPost]: ".$url);
+        $lock=self::checkAndGetLock('queryPost'); 
         try {
             $baseuri='https://rest.'.$_regionBlink.'.immedia-semi.com';
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $baseuri]);
@@ -281,11 +306,13 @@ class blink_camera extends eqLogic
                 ],
                 'json' => json_decode($datas)
             ]);
+            self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
             self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
             return $jsonrep;
 
         }  catch (Exception $e) {
+            self::releaseLock($lock);
             self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
             self::logdebug('ERROR:'.print_r($e->getMessage(), true));
         }
@@ -760,7 +787,7 @@ self::logdebug('getMediaLocal syncId=: '.$syncId);
             $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
             $url_manifest_req=$url_manifest.'/request';
             try {
-                self::checkAndWaitBetweenCalls('syncId-'.$syncId);
+//                self::checkAndGetLock('syncId-'.$syncId);
                 $jsonrep=self::queryPost($url_manifest_req);
             } catch (TransferException $e) {
                 self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -818,20 +845,39 @@ file_put_contents($folderJson,json_encode($jsonrep));
         }
         return self::ERROR_IMG;
     }
-    private static function checkAndWaitBetweenCalls($ident='all', $attente_mini=self::ATTENTE_MINI_DEFAUT) {
-        $previousCall=config::byKey('api_last_call_'.$ident,'blink_camera');
-        $first_log=true;
-        while ((time()-$previousCall) < $attente_mini) {
-            if ($first_log) {
-                $first_log=false;
-                self::logdebug('checkAndWaitBetweenCalls('.$ident.') Début d\'attente...');
+    private static function checkAndGetLock($ident='all', $attente_maxi=self::ATTENTE_MAXI_DEFAUT) {
+        $previousCaller=config::byKey('api_last_call_caller','blink_camera');
+        $newCaller=$ident.'-'.self::generateRandomString(10);
+        //self::logdebug('checkAndGetLock('.$newCaller.') START');
+        $idx=1;
+        while (isset ($previousCaller) && $previousCaller <> $newCaller && $previousCaller <> '' && $idx <= $attente_maxi) {
+            if ($idx==1) {
+                self::logdebug('checkAndGetLock('.$newCaller.') Debut attente de '.$previousCaller);
+            } else {
+                //self::logdebug('checkAndGetLock('.$newCaller.') Suite attente de '.$previousCaller.' ('.($idx-1).'s)');
             }
             sleep(1);
+            $previousCaller=config::byKey('api_last_call_caller','blink_camera');
+            $idx++;
         }
-        if (!$first_log) {
-            self::logdebug('checkAndWaitBetweenCalls('.$ident.') Fin d\'attente...');
+        if ($idx>=2) {
+            self::logdebug('checkAndGetLock('.$newCaller.') Fin attente de '.$previousCaller. ' ('.($idx-1).'s)');
         }
-        config::save('api_last_call_'.$ident, time(),'blink_camera');
+        config::save('api_last_call_caller', $newCaller,'blink_camera');
+
+        //config::remove('api_last_call_caller','blink_camera');
+        //self::logdebug('checkAndGetLock('.$newCaller.') END');
+        return $newCaller;
+
+    }
+    private static function releaseLock($caller) {
+        if (config::byKey('api_last_call_caller','blink_camera')!='local') {
+            $previousCaller=config::byKey('api_last_call_caller','blink_camera');
+            if ($previousCaller==$caller) {
+                self::logdebug('releaseLock('.$caller.') DONE');
+                config::remove('api_last_call_caller','blink_camera');
+            }
+        }
     }
     public function isConfigured()
     {
@@ -958,7 +1004,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             
             try {
                 self::logdebugBlinkAPIRequest("CALL[getVideoListCloud] -->");
-                //self::checkAndWaitBetweenCalls('net-'.$network_id,2);
+//                self::checkAndGetLock('net-'.$network_id,2);
                 $jsonrep=self::queryGet($url);
 
                 if (isset($jsonrep)) {
@@ -986,7 +1032,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
 
             if (!$syncId =="") {
     self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
-                self::checkAndWaitBetweenCalls('syncId-'.$syncId);
+//                self::checkAndGetLock('syncId-'.$syncId);
                 $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                 $url_manifest_req=$url_manifest.'/request';
                 try {
