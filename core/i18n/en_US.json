@@ -99,7 +99,8 @@
         "URL vignette caméra":"Camera thumbnail URL",
         "Chemin vignette caméra":"Camera thumbnail path",
         "Mode hors ligne":"Warning the plugin is offline (check the plugin configuration)",
-        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Can not connect to Blink account. Check your identifiant and password in plugin configuration."
+        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Can not connect to Blink account. Check your identifiant and password in plugin configuration.",
+        "System is busy, please wait":"System is busy, please wait."
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",

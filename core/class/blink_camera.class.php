@@ -306,15 +306,20 @@ class blink_camera extends eqLogic
                 ],
                 'json' => json_decode($datas)
             ]);
-            self::releaseLock($lock);
+            //self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
             self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
             return $jsonrep;
 
         }  catch (Exception $e) {
             self::releaseLock($lock);
-            self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
-            self::logdebug('ERROR:'.print_r($e->getMessage(), true));
+            throw $e;
+            /*$response = $e->getResponse();
+            $responseJson = json_decode($response->getBody()->getContents(),true);
+            if ($responseJson['code']=='307') {
+                message::add('Blink Camera', $responseJson['message']);
+                //{"message":"System is busy, please wait","code":307}
+            }*/
         }
         return "{}";
     }
@@ -1129,6 +1134,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     $jsonrep=self::queryPost($url);
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                    $response = $e->getResponse();
+                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                    message::add('Blink Camera', __($responseJson['message'], __FILE__));
                     return false;
                 }
             return $jsonrep;
@@ -1577,6 +1585,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     return true;
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                    $response = $e->getResponse();
+                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                    message::add('Blink Camera', __($responseJson['message'], __FILE__));
                     return false;
                 }
         }
@@ -1593,6 +1604,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 return true;
             } catch (TransferException $e) {
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                $response = $e->getResponse();
+                $responseJson = json_decode($response->getBody()->getContents(),true);
+                message::add('Blink Camera', __($responseJson['message'], __FILE__));
                 return false;
             }
         }
@@ -1612,6 +1626,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 return true;
             } catch (TransferException $e) {
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                $response = $e->getResponse();
+                $responseJson = json_decode($response->getBody()->getContents(),true);
+                message::add('Blink Camera', __($responseJson['message'], __FILE__));
                 return false;
             }
         }
@@ -1629,6 +1646,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 return true;
             } catch (TransferException $e) {
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                $response = $e->getResponse();
+                $responseJson = json_decode($response->getBody()->getContents(),true);
+                message::add('Blink Camera', __($responseJson['message'], __FILE__));
                 return false;
             }
        }
@@ -1688,6 +1708,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     } 
                     return false;
                 } catch (TransferException $e) {
+                    $response = $e->getResponse();
+                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                    message::add('Blink Camera', __($responseJson['message'], __FILE__));
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
@@ -2292,9 +2315,9 @@ class blink_cameraCmd extends cmd
                 }
                 return parent::toHtml($_version,$replace,$_cmdColor);
     //		    $template = $this->getTemplate($_version, 'default');
-    //            self::logdebug('cmd->toHtml '. $replace['#id#'].' template : '.$template);
-    //            if ($template =='self::switch') {
-    //              self::logdebug('cmd->toHtml '. $replace['#id#'].' parent : '.print_r($result,true));
+    //            blink_camera::logdebug('cmd->toHtml '. $replace['#id#'].' template : '.$template);
+    //            if ($template =='blink_camera::switch') {
+    //              blink_camera::logdebug('cmd->toHtml '. $replace['#id#'].' parent : '.print_r($result,true));
     //            }
             } else {
                 return "";
@@ -2306,7 +2329,7 @@ class blink_cameraCmd extends cmd
             $bl_cam=$this->getEqLogic();
             //if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
                 if ($bl_cam->isConfigured()) {
-                //self::logdebug('toHtml history : '.print_r(parent::toHtml($_version,$_options,$_cmdColor),true));
+                //blink_camera::logdebug('toHtml history : '.print_r(parent::toHtml($_version,$_options,$_cmdColor),true));
                 $result=parent::toHtml($_version,$_options,$_cmdColor);
                 $bl_cam=$this->getEqLogic();
                 
@@ -2355,23 +2378,8 @@ class blink_cameraCmd extends cmd
         $eqlogic = $this->getEqLogic(); //récupère l'éqlogic de la commande $this
 
         switch ($this->getLogicalId()) {	//vérifie le logicalid de la commande
-            case 'download_local':
-                $eqlogic->dumpConfiguration();
-                if (true || $eqlogic->getConfiguration('storage')=='local') {
-                    $result=$eqlogic->getVideoListLocal(1);
-                    $folderJson=__DIR__.'/../../medias/'.$eqlogic->getId().'/getVideoList_local_BETA.json';
-                    file_put_contents($folderJson3,json_encode($result));
-                    jeedomUtils.sleep(1);
-                    $eqlogic->forceCleanup(true);        
-                    $existingFilesOnJeedom = scandir($eqlogic->getMediaDir());
-self::logdebug('EXECUTE download_local : '.print_r($existingFilesOnJeedom,true));
-                } else {
-                    message::add($eqlogic->getEqType_name(), "La caméra '".$eqlogic->getName()."' n'a pas de stockage local");
-                }
-                break;
-
             case 'refresh':
-                if ($eqlogic->isConfigured() && self::isConnected()) {
+                if ($eqlogic->isConfigured() && blink_camera::isConnected()) {
                     //rafraichissement de la datetime du dernier event
                     $eqlogic->getLastEventDate();
                     $eqlogic->refreshCameraInfos("execute refresh");
