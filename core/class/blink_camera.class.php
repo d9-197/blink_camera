@@ -1034,6 +1034,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
             $syncId=$this->getConfiguration('sync_id');
+            $cameraApiName=$this->getConfiguration('camera_name');
+
 
             if (!$syncId =="") {
     self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
@@ -1068,7 +1070,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                             $result= array();
                             $idx=0;
                             foreach ($jsonrep['clips'] as $clip) {
-                                if (strtolower($clip['camera_name'])===strtolower($this->getName())) {
+                                if (strtolower($clip['camera_name'])===strtolower($cameraApiName)) {
                                     $clip['media']=$clip['id'];
                                     $clip['thumbnail']=$clip['id'];
                                     $clip['deleted']=(bool) 0;
