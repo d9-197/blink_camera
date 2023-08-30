@@ -240,7 +240,7 @@ class blink_camera extends eqLogic
             self::releaseLock($lock);
             self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
             self::logdebug('ERROR:'.print_r($e->getMessage(), true));
-            return 1;
+            throw $e;
         }
     }
     // 
