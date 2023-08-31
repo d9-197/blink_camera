@@ -54,14 +54,14 @@ class blink_camera extends eqLogic
 
     public static function logdebugBlinkAPIRequest($message) {
         //if (!config::byKeys('log::level::blink_camera_api')) {
-           // config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","default":"0"}');
+        //   config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
         //}
         //log::add('blink_camera_api','debug',$message);
         return;
     }
     public static function logdebugBlinkAPIResponse($message) {
         //if (!config::byKeys('log::level::blink_camera_api')) {
-            //config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","default":"0"}');
+        //    config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
         //}
         //log::add('blink_camera_api','debug',$message);
         return;
@@ -172,7 +172,7 @@ class blink_camera extends eqLogic
         }    
         return $jsonrep;
     }
-    
+ 
     public static function queryGetMedia(string $url, string $file_path) {
         $_tokenBlink=config::byKey('token', 'blink_camera');
         $_accountBlink=config::byKey('account', 'blink_camera');
@@ -230,14 +230,19 @@ class blink_camera extends eqLogic
             self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
             self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
-            /*self::logdebug('#######################################');
-            self::logdebug('            queryPostLogin');        
-            self::logdebug(print_r($jsonrep,true));
-            self::logdebug('#######################################');
-            */
+            config::save('limit_login', 'false', 'blink_camera');
             return $jsonrep;
         }  catch (Exception $e) {
             self::releaseLock($lock);
+            //{"message":"Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes."
+            $response = $e->getResponse();
+            $responseJson = json_decode($response->getBody()->getContents(),true);
+            if (isset($responseJson['message'])) {
+                message::add('Blink Camera', __($responseJson['message'], __FILE__));
+                if (str_starts_with(strtolower($responseJson['message']),"Login limit exceeded")) {
+                    config::save('limit_login', 'true', 'blink_camera');
+                }
+            }
             self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
             self::logdebug('ERROR:'.print_r($e->getMessage(), true));
             throw $e;
@@ -470,8 +475,8 @@ class blink_camera extends eqLogic
                     }
                 }
                 self::logdebug('An error occured during Blink Cloud call: /login - ERROR:'.print_r($e->getMessage(), true));
-                $date = date_create();
-                $tstamp2=date_timestamp_get($date);
+                //$date = date_create();
+                //$tstamp2=date_timestamp_get($date);
                 //self::logdebug('getToken()-3 END : '.($tstamp2-$tstamp1).' ms');
                 return false;
             }
@@ -486,8 +491,8 @@ class blink_camera extends eqLogic
             config::save('account', $_accountBlink, 'blink_camera');
             config::save('region', $_regionBlink,'blink_camera');
             config::save('client', $_clientIdBlink, 'blink_camera');
-            $date = date_create();
-            $tstamp2=date_timestamp_get($date);
+            //$date = date_create();
+            //$tstamp2=date_timestamp_get($date);
             //self::logdebug('getToken()-4 END : '.($tstamp2-$tstamp1).' ms');
         }
         return true;

@@ -100,7 +100,8 @@
         "Chemin vignette caméra":"Camera thumbnail path",
         "Mode hors ligne":"Warning the plugin is offline (check the plugin configuration)",
         "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Can not connect to Blink account. Check your identifiant and password in plugin configuration.",
-        "System is busy, please wait":"System is busy, please wait."
+        "System is busy, please wait":"System is busy, please wait.",
+        "Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes.":"The connection limit on the Blink servers has been reached. The Jeedom plugin automatically disconnects (widgets and history view) but do not open the configuration page for 60 minutes."
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
