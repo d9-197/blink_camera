@@ -98,8 +98,10 @@
         "Chemin vignette caméra":"Chemin vignette caméra",
         "Mode hors ligne":"Attention le plugin est hors ligne (vérifiez la configuration du plugin)",
         "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe dans la configuration du plugin.",
+        "APImessage":"[Message des serveurs Blink] ",
         "System is busy, please wait":"Le système est occupé, Merci de patienter.",
-        "Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes.":"La limite de connexion sur les serveurs Blink est atteinte. Le plugin Jeedom se déconnecte automatiquement (widgets et vue historique) mais n'ouvrez plus la page de configuration pendant 60 minutes."
+        "Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes.":"La limite de connexion sur les serveurs Blink est atteinte. Le plugin Jeedom se déconnecte automatiquement (widgets et vue historique) mais n'ouvrez plus la page de configuration pendant 60 minutes.",
+        "Login attempted too quickly. Please try again in a few seconds.":"Tentative de connexion trop rapide. Veuillez réessayer dans quelques secondes."
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",

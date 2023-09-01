@@ -238,7 +238,7 @@ class blink_camera extends eqLogic
             $response = $e->getResponse();
             $responseJson = json_decode($response->getBody()->getContents(),true);
             if (isset($responseJson['message'])) {
-                message::add('Blink Camera', __($responseJson['message'], __FILE__));
+                message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
                 if (str_starts_with(strtolower($responseJson['message']),"Login limit exceeded")) {
                     config::save('limit_login', 'true', 'blink_camera');
                 }
@@ -1143,7 +1143,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     $response = $e->getResponse();
                     $responseJson = json_decode($response->getBody()->getContents(),true);
-                    message::add('Blink Camera', __($responseJson['message'], __FILE__));
+                    message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
                     return false;
                 }
             return $jsonrep;
@@ -1594,7 +1594,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     $response = $e->getResponse();
                     $responseJson = json_decode($response->getBody()->getContents(),true);
-                    message::add('Blink Camera', __($responseJson['message'], __FILE__));
+                    message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
                     return false;
                 }
         }
@@ -1613,7 +1613,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                 $response = $e->getResponse();
                 $responseJson = json_decode($response->getBody()->getContents(),true);
-                message::add('Blink Camera', __($responseJson['message'], __FILE__));
+                message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
                 return false;
             }
         }
@@ -1635,7 +1635,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                 $response = $e->getResponse();
                 $responseJson = json_decode($response->getBody()->getContents(),true);
-                message::add('Blink Camera', __($responseJson['message'], __FILE__));
+                message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
                 return false;
             }
         }
@@ -1655,7 +1655,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                 $response = $e->getResponse();
                 $responseJson = json_decode($response->getBody()->getContents(),true);
-                message::add('Blink Camera', __($responseJson['message'], __FILE__));
+                message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
                 return false;
             }
        }
@@ -1717,7 +1717,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 } catch (TransferException $e) {
                     $response = $e->getResponse();
                     $responseJson = json_decode($response->getBody()->getContents(),true);
-                    message::add('Blink Camera', __($responseJson['message'], __FILE__));
+                    message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
