@@ -52,19 +52,25 @@ class blink_camera extends eqLogic
         'layout' => true
     ));
 
-    public static function logdebugBlinkAPIRequest($message) {
+    public static function logDebugBlinkAPIRequest($message) {
         //if (!config::byKeys('log::level::blink_camera_api')) {
         //   config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
         //}
         //log::add('blink_camera_api','debug',$message);
         return;
     }
-    public static function logdebugBlinkAPIResponse($message) {
+    public static function logDebugBlinkAPIResponse($message) {
         //if (!config::byKeys('log::level::blink_camera_api')) {
         //    config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
         //}
         //log::add('blink_camera_api','debug',$message);
         return;
+    }
+    private static function logDebugBlinkResponse($message) {
+        if (log::getLogLevel('blink_camera')==100) {
+            //message::add('Blink Camera',__('APImessage', __FILE__). __($message, __FILE__));
+        }
+        self::logdebug(__('APImessage', __FILE__). __($message, __FILE__));
     }
 
     public static function logdebug($message) {
@@ -155,7 +161,7 @@ class blink_camera extends eqLogic
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
             $lock=self::checkAndGetLock('getQuery');
-            self::logdebugBlinkAPIRequest("CALL[queryGet]: ".$url);
+            self::logDebugBlinkAPIRequest("CALL[queryGet]: ".$url);
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
             $r = $client->request('GET', $url, [
                 //['http_errors' => false],
@@ -168,7 +174,7 @@ class blink_camera extends eqLogic
             ]);
             self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
-            self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
+            self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
         }    
         return $jsonrep;
     }
@@ -180,7 +186,7 @@ class blink_camera extends eqLogic
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
             $lock=self::checkAndGetLock('queryGetMedia');
-            self::logdebugBlinkAPIRequest("CALL[queryGetMedia]: ".$url);
+            self::logDebugBlinkAPIRequest("CALL[queryGetMedia]: ".$url);
             try {
                 $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
                 $r = $client->request('GET', $url, [
@@ -197,7 +203,7 @@ class blink_camera extends eqLogic
                 self::releaseLock($lock);
                 $jsonrep= json_decode($r->getBody(), true);
             
-                self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
+                self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
             }  catch (Exception $e) {
                 self::releaseLock($lock);
                 self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
@@ -211,7 +217,7 @@ class blink_camera extends eqLogic
     public static function queryPostLogin(string $url, string $datas) {
         //self::logdebug('queryPostLogin(url='.$url.',datas='.$datas.') START');
         
-        self::logdebugBlinkAPIRequest("CALL[queryPostLogin]: ".$url);
+        self::logDebugBlinkAPIRequest("CALL[queryPostLogin]: ".$url);
         $lock=self::checkAndGetLock('queryPostLogin');  
         $jsonrep=null;
         try {
@@ -229,7 +235,7 @@ class blink_camera extends eqLogic
             ]);
             self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
-            self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
+            self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
             config::save('limit_login', 'false', 'blink_camera');
             return $jsonrep;
         }  catch (Exception $e) {
@@ -238,7 +244,7 @@ class blink_camera extends eqLogic
             $response = $e->getResponse();
             $responseJson = json_decode($response->getBody()->getContents(),true);
             if (isset($responseJson['message'])) {
-                message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
+                self::logDebugBlinkResponse($responseJson['message']);
                 if (str_starts_with(strtolower($responseJson['message']),"Login limit exceeded")) {
                     config::save('limit_login', 'true', 'blink_camera');
                 }
@@ -257,7 +263,7 @@ class blink_camera extends eqLogic
         $_tokenBlink=config::byKey('token', 'blink_camera');
 
         $url='https://rest-'.$_regionBlink.'.immedia-semi.com/api/v4/account/'.$account_id.'/client/'.$client_id.'/pin/verify';
-        self::logdebugBlinkAPIRequest("CALL[queryPostPinVerify]: ".$url);
+        self::logDebugBlinkAPIRequest("CALL[queryPostPinVerify]: ".$url);
         $lock=self::checkAndGetLock('queryPostPinVerify');  
         $datas="{\"pin\":".$pin."}";
         try {
@@ -273,7 +279,7 @@ class blink_camera extends eqLogic
             ]);
             self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
-            self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
+            self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
 
             if ($jsonrep['valid']==1) {
                 self::logdebug('queryPostPinVerify(pin='.$pin.') Vérification OK');
@@ -297,7 +303,7 @@ class blink_camera extends eqLogic
         //self::logdebug('queryPost datas:'.$datas);
         $_regionBlink=config::byKey('region', 'blink_camera');
         $_tokenBlink=config::byKey('token', 'blink_camera');
-        self::logdebugBlinkAPIRequest("CALL[queryPost]: ".$url);
+        self::logDebugBlinkAPIRequest("CALL[queryPost]: ".$url);
         $lock=self::checkAndGetLock('queryPost'); 
         try {
             $baseuri='https://rest.'.$_regionBlink.'.immedia-semi.com';
@@ -313,7 +319,7 @@ class blink_camera extends eqLogic
             ]);
             //self::releaseLock($lock);
             $jsonrep= json_decode($r->getBody(), true);
-            self::logdebugBlinkAPIResponse(print_r($jsonrep,true));
+            self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
             return $jsonrep;
 
         }  catch (Exception $e) {
@@ -322,8 +328,7 @@ class blink_camera extends eqLogic
             /*$response = $e->getResponse();
             $responseJson = json_decode($response->getBody()->getContents(),true);
             if ($responseJson['code']=='307') {
-                message::add('Blink Camera', $responseJson['message']);
-                //{"message":"System is busy, please wait","code":307}
+                self::logDebugBlinkResponse($responseJson['message']);
             }*/
         }
         return "{}";
@@ -410,7 +415,7 @@ class blink_camera extends eqLogic
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
                 $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
                 try {
-                    self::logdebugBlinkAPIRequest("CALL[queryToken] -->");
+                    self::logDebugBlinkAPIRequest("CALL[queryToken] -->");
                     $jsonrep=self::queryGet($url);
                 }
                 catch (TransferException $e) {
@@ -712,7 +717,7 @@ class blink_camera extends eqLogic
                             chmod($folderBase.$filename, 0775);
                         }
                         try {
-                            self::logdebugBlinkAPIRequest("CALL[getMediaForce] -->");
+                            self::logDebugBlinkAPIRequest("CALL[getMediaForce] -->");
                             self::queryGetMedia($urlMedia,$folderBase.$filename);
                             if (file_exists($folderBase.$filename)) {
                                 chmod($folderBase.$filename, 0775);
@@ -742,7 +747,7 @@ class blink_camera extends eqLogic
             $_accountBlink=config::byKey('account', 'blink_camera');
             $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
             try {
-                self::logdebugBlinkAPIRequest("CALL[getHomescreenData from ".$callOrig."] -->");
+                self::logDebugBlinkAPIRequest("CALL[getHomescreenData from ".$callOrig."] -->");
                 $jsonrep=self::queryGet($url);
                 #$folderJson=__DIR__.'/../../medias/getHomescreenData.json';
                 #file_put_contents($folderJson,json_encode($jsonrep));
@@ -905,7 +910,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
 
             $url='/network/'.$this->getConfiguration('network_id').'/camera/'.$this->getConfiguration('camera_id');
             try {
-               self::logdebugBlinkAPIRequest("CALL[getCameraInfo] -->");
+               self::logDebugBlinkAPIRequest("CALL[getCameraInfo] -->");
                $jsonrep=self::queryGet($url);
                #$folderJson=__DIR__.'/../../medias/getCameraInfoOwl.json';
                 #file_put_contents($folderJson,json_encode($jsonrep));
@@ -1013,7 +1018,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page='.$page;
             
             try {
-                self::logdebugBlinkAPIRequest("CALL[getVideoListCloud] -->");
+                self::logDebugBlinkAPIRequest("CALL[getVideoListCloud] -->");
 //                self::checkAndGetLock('net-'.$network_id,2);
                 $jsonrep=self::queryGet($url);
 
@@ -1136,14 +1141,14 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     } else  {
                         $url='/network/'.$this->getConfiguration('network_id').'/'.$typeDevice.'/'.$this->getConfiguration('camera_id').'/'.$type;
                     }
-                    self::logdebugBlinkAPIRequest("CALL[requestNewMedia]: --> ");
+                    self::logDebugBlinkAPIRequest("CALL[requestNewMedia]: --> ");
                 try {
                     $jsonrep=self::queryPost($url);
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     $response = $e->getResponse();
                     $responseJson = json_decode($response->getBody()->getContents(),true);
-                    message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
+                    self::logDebugBlinkResponse($responseJson['message']);
                     return false;
                 }
             return $jsonrep;
@@ -1594,7 +1599,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     $response = $e->getResponse();
                     $responseJson = json_decode($response->getBody()->getContents(),true);
-                    message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
+                    self::logDebugBlinkResponse($responseJson['message']);
                     return false;
                 }
         }
@@ -1613,7 +1618,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                 $response = $e->getResponse();
                 $responseJson = json_decode($response->getBody()->getContents(),true);
-                message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
+                self::logDebugBlinkResponse($responseJson['message']);
                 return false;
             }
         }
@@ -1635,7 +1640,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                 $response = $e->getResponse();
                 $responseJson = json_decode($response->getBody()->getContents(),true);
-                message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
+                self::logDebugBlinkResponse($responseJson['message']);
                 return false;
             }
         }
@@ -1655,7 +1660,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                 $response = $e->getResponse();
                 $responseJson = json_decode($response->getBody()->getContents(),true);
-                message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
+                self::logDebugBlinkResponse($responseJson['message']);
                 return false;
             }
        }
@@ -1717,7 +1722,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 } catch (TransferException $e) {
                     $response = $e->getResponse();
                     $responseJson = json_decode($response->getBody()->getContents(),true);
-                    message::add('Blink Camera',__('APImessage', __FILE__). __($responseJson['message'], __FILE__));
+                    self::logDebugBlinkResponse($responseJson['message']);
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }

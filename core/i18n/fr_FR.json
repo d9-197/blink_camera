@@ -101,7 +101,8 @@
         "APImessage":"[Message des serveurs Blink] ",
         "System is busy, please wait":"Le système est occupé, Merci de patienter.",
         "Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes.":"La limite de connexion sur les serveurs Blink est atteinte. Le plugin Jeedom se déconnecte automatiquement (widgets et vue historique) mais n'ouvrez plus la page de configuration pendant 60 minutes.",
-        "Login attempted too quickly. Please try again in a few seconds.":"Tentative de connexion trop rapide. Veuillez réessayer dans quelques secondes."
+        "Login attempted too quickly. Please try again in a few seconds.":"Tentative de connexion trop rapide. Veuillez réessayer dans quelques secondes.",
+        "Invalid credentials":"Votre compte ou votre mot de passe n'est pas valide"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
