@@ -17,7 +17,7 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 include_file('core', 'authentification', 'php');
-include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');
+//include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');
 if (!isConnect()) {
     include_file('desktop', '404', 'php');
     die();
