@@ -87,7 +87,6 @@ echo '</div>';
     <button type="button" class="btn btn-secondary" id="btn-mp4">{{Vidéos}}</button>
     <button type="button" class="btn btn-secondary" id="btn-jpg">{{Vignettes des vidéos}}</button>
     <button type="button" class="btn btn-secondary" id="btn-thumb">{{Vignettes de la caméra}}</button>
-    <span> Offline:<?=config::byKey('offline_history', 'blink_camera')?></span>
 </div>
 <?php
 $videoFiltered=array();
