@@ -15,6 +15,13 @@ if (!is_object($blink_camera)) {
 if ($blink_camera->getEqType_name() != 'blink_camera') {
     throw new Exception(__('Cet équipement n\'est pas de type blink_camera : ', __FILE__) . $blink_camera->getEqType_name());
 }
+log::add('blink_camera','debug','History['.$blink_camera->getId().'] START');
+
+
+if (blink_camera::isConnected() && $blink_camera->isConfigured()) {
+    $cameraConnected=false;
+}
+
 $storage=$blink_camera->getConfiguration('storage');
 $configMedia=init('mode');
 if (!isset($configMedia) || $configMedia=='') {
@@ -80,6 +87,7 @@ echo '</div>';
     <button type="button" class="btn btn-secondary" id="btn-mp4">{{Vidéos}}</button>
     <button type="button" class="btn btn-secondary" id="btn-jpg">{{Vignettes des vidéos}}</button>
     <button type="button" class="btn btn-secondary" id="btn-thumb">{{Vignettes de la caméra}}</button>
+    <span> Offline:<?=config::byKey('offline_history', 'blink_camera')?></span>
 </div>
 <?php
 $videoFiltered=array();
@@ -89,11 +97,13 @@ if ($nbMax <= 0) {
 }
 $cptVideo=0;
 if ($thumbFilter=='') {
-    if ($storage!='local' && $blink_camera->isConnected() && $blink_camera->getToken()) {
+    if ($storage!='local' && $blink_camera->isConnected() && $blink_camera->getToken() && ((boolean) config::byKey('offline_history', 'blink_camera'))===false) {
         $blink_camera->forceCleanup(true);
-    } 
-    
+    }
+    log::add('blink_camera','debug','History['.$blink_camera->getId().'] Avant scandir');
+
     $scandir = scandir($dir);
+    log::add('blink_camera','debug','History['.$blink_camera->getId().'] Après scandir');
     foreach($scandir as $fichier){
         if ($formatMedia==".mp4") {
             if(preg_match("#[0-9]*-.*\.mp4$#",strtolower($fichier))){
@@ -117,6 +127,7 @@ if ($thumbFilter=='') {
             }
         }
     }
+    log::add('blink_camera','debug','History['.$blink_camera->getId().'] Après boucle sur scandir');
 
 } else {
     //liste les thumbnail*.jpg dans jeedom
@@ -187,7 +198,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
         echo '<div class="panel panel-primary blink_cardVideo">';
         echo '<div class="panel-heading blink_cameraHistoryDate">'.$time;
         echo '<a target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($path) . '" class="btn btn-success btn-xs pull-right" style="color : white"><i class="fas fa-download"></i></a>';
-        if ($blink_camera->isConnected() && $blink_camera->getToken()) {
+        if ($cameraConnected) {
             echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
         }
         echo '</div>';

@@ -135,7 +135,12 @@ if (!isConnect()) {
                 <input type="number" class="configKey form-control" data-l1key="nb_max_video" min="0" />
             </div>
         </div>
-
+        <div class="form-group" id="offline_history">
+            <label class="col-lg-5 control-label">{{Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)}}</label>
+            <div class="col-lg-1">
+                <input  id='offline_history' type="checkbox"class="configKey form-control" data-l1key="offline_history"/>
+            </div>
+        </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Taille des aperçus des vidéos}}</label>
             <div class="col-lg-3">
@@ -145,11 +150,11 @@ if (!isConnect()) {
                     <option value="0.3">30%</option>
                     <option value="0.4">40%</option>
                     <option value="0.5">50%</option>
-                    <!--option value="0.6">60%</option>
+                    <option value="0.6">60%</option>
                     <option value="0.7">70%</option>
                     <option value="0.8">80%</option>
                     <option value="0.9">90%</option>
-                    <option value="1">100%</option-->
+                    <option value="1">100%</option>
                 </select>
             </div>
         </div>
