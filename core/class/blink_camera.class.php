@@ -809,16 +809,16 @@ self::logdebug('getMediaLocal syncId=: '.$syncId);
                 return self::ERROR_IMG;
             }
             if (isset($jsonrep)) {
-$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph1.json';
-file_put_contents($folderJson,json_encode($jsonrep));
+//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph1.json';
+//file_put_contents($folderJson,json_encode($jsonrep));
 jeedomUtils.sleep(1);
 self::logdebug('getMediaLocal Phase 1 : '.print_r($jsonrep,true));
                 $manifest_req_id=$jsonrep['id'];
                 $url=$url_manifest_req.'/'.$manifest_req_id;
                 $jsonrep=self::queryGet($url);
                 if (isset($jsonrep)) {
-$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph2.json';
-file_put_contents($folderJson,json_encode($jsonrep));
+//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph2.json';
+//file_put_contents($folderJson,json_encode($jsonrep));
 self::logdebug('getMediaLocal Phase 2 : '.print_r($jsonrep,true));
                     $manifest_id=$jsonrep['manifest_id'];
                     if (isset($manifest_id)) {
@@ -838,8 +838,8 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                                         self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_media. ' - ERROR:'.print_r($e->getMessage(), true));
                                         return self::ERROR_IMG;
                                     }
-$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph3.json';
-file_put_contents($folderJson,json_encode($jsonrep));
+//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph3.json';
+//file_put_contents($folderJson,json_encode($jsonrep));
                                     jeedomUtils.sleep(1);
                                     return self::getMediaForce($url_media, $cam->getId(), $filename,'mp4',true);
                                 }
@@ -1002,8 +1002,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
         } else {
             $result=$this->getVideoListCloud($page);
         }
-        $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getVideoList_'.$this->getConfiguration('storage').'.json';
-        file_put_contents($folderJson,$result);
+        //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getVideoList_'.$this->getConfiguration('storage').'.json';
+        //file_put_contents($folderJson,$result);
         return json_decode($result,true);        
     }
     public function getVideoListCloud(int $page=1)
@@ -1024,8 +1024,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
 
                 if (isset($jsonrep)) {
                     $jsonstr =self::reformatVideoDatas($jsonrep);
-                    $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideocloud_result.json';
-                    file_put_contents($folderJson,json_encode($jsonstr));
+//                    $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideocloud_result.json';
+//                    file_put_contents($folderJson,json_encode($jsonstr));
 
                 }
             } catch (TransferException $e) {
@@ -1059,8 +1059,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     return $result;
                 }
                 if (isset($jsonrep)) {
-    $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
-    file_put_contents($folderJson,json_encode($jsonrep));
+    //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
+    //file_put_contents($folderJson,json_encode($jsonrep));
     jeedomUtils.sleep(1);
     self::logdebug('getVideoListLocal '.$this->getName().' Phase 1 : '.print_r($jsonrep,true));
                     $manifest_req_id=$jsonrep['id'];
@@ -1072,8 +1072,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
                         return $result;
                     }
                     if (isset($jsonrep)) {
-    $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
-    file_put_contents($folderJson,json_encode($jsonrep));
+    //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
+    //file_put_contents($folderJson,json_encode($jsonrep));
     self::logdebug('getVideoListLocal '.$this->getName().' Phase 2 : '.print_r($jsonrep,true));
                         $manifest_id=$jsonrep['manifest_id'];
                         if (isset($manifest_id)) {
@@ -1092,8 +1092,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                 }
                             }
                             if ($idx>0) {
-                                $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_result.json';
-                                file_put_contents($folderJson,json_encode($result));
+//                                $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_result.json';
+//                                file_put_contents($folderJson,json_encode($result));
                                 self::logdebug('getVideoListLocal '.$this->getName().' result  : '.print_r($result,true));
                                 return json_encode($result);
                             } else {

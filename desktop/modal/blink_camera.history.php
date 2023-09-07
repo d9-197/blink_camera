@@ -1,4 +1,5 @@
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
+<?php include_file('desktop', 'blink_camera_history', 'js', 'blink_camera');?>
 <?php
 if (!isConnect()) {
     throw new Exception('{{401 - Accès non autorisé}}');
@@ -89,46 +90,26 @@ if ($nbMax <= 0) {
 $cptVideo=0;
 if ($thumbFilter=='') {
     if ($storage!='local' && $blink_camera->isConnected() && $blink_camera->getToken()) {
-        $pageVide=0;
-        $maxPage=50;
-        if ($storage=='local') {
-            $maxPage=1;
-        }
-        for ($page=1;$page<=$maxPage;$page++) {
-            if ($pageVide>=3) {
-                break;
-            }
-            if ($nbMax>0 && $cptVideo>=($nbMax)) {
-                break;
-            };
-            $videos=$blink_camera->getVideoList($page);
-            $pageVide++;
-            foreach ($videos as $video) {
-                $pageVide--;
-                if ($nbMax>0 && $cptVideo>=($nbMax)) {
-                    break;
-                };
-                if ($storage=='local' || !$video['deleted']) {
-                    $cptVideo++;
-                    $datetime = explode("_", blink_camera::getDateJeedomTimezone($video['created_at']));
-                    $date=$datetime[0];
-                    log::add('blink_camera','debug','History['.$blink_camera->getId().'] video found with API('.$storage.'): '.print_r($video,true));
-                    if (array_key_exists($date, $videoFiltered)) {
-                        array_push($videoFiltered[$date], $video);
-                    } else {
-                        $videoFiltered[$date]=array($video);
-                    }
-                }
-            }
-        } 
-    } else {
-         //liste les thumbnail*.jpg dans jeedom
-        $scandir = scandir($dir);
-        foreach($scandir as $fichier){
+        $blink_camera->forceCleanup(true);
+    } 
+    
+    $scandir = scandir($dir);
+    foreach($scandir as $fichier){
+        if ($formatMedia==".mp4") {
             if(preg_match("#[0-9]*-.*\.mp4$#",strtolower($fichier))){
                 $datetime = explode("-", $fichier);
                 $date=$datetime[1].'-'.$datetime[2].'-'.explode("_",$datetime[3])[0];
-            if (array_key_exists($date, $videoFiltered)) {
+                if (array_key_exists($date, $videoFiltered)) {
+                    array_push($videoFiltered[$date], json_decode("{\"id\":\"".$fichier."\"}",true));
+                } else {
+                    $videoFiltered[$date]=array(json_decode("{\"id\":\"".$fichier."\"}",true));
+                }
+            }
+        } else {
+            if(preg_match("#[0-9]*-.*\.jpg$#",strtolower($fichier)) && strpos(strtolower($fichier),blink_camera::PREFIX_THUMBNAIL)===false) {
+                $datetime = explode("-", $fichier);
+                $date=$datetime[1].'-'.$datetime[2].'-'.explode("_",$datetime[3])[0];
+                if (array_key_exists($date, $videoFiltered)) {
                     array_push($videoFiltered[$date], json_decode("{\"id\":\"".$fichier."\"}",true));
                 } else {
                     $videoFiltered[$date]=array(json_decode("{\"id\":\"".$fichier."\"}",true));
@@ -136,6 +117,7 @@ if ($thumbFilter=='') {
             }
         }
     }
+
 } else {
     //liste les thumbnail*.jpg dans jeedom
     $scandir = scandir($dir);
@@ -152,7 +134,8 @@ if ($thumbFilter=='') {
     }
 }
 $facteur= (float) config::byKey('blink_size_videos', 'blink_camera');
-$tailleVideo=720*$facteur;
+$newHeight=720*$facteur;
+$newWidth=2*$newHeight;
 
 $cptVideo=0;
 $cptDate=0;
@@ -183,7 +166,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
         if (isset($video['created_at'])) {
             $filename=$video['id'].'-'.blink_camera::getDateJeedomTimezone($video['created_at']);
             log::add('blink_camera','debug','History['.$blink_camera->getId().'] Display video by date ('.$storage.'): before getMedia : '.$video['media']);
-            $path=$blink_camera->getMedia($video['media'], $blink_camera->getId(), $filename);
+//            $path=$blink_camera->getMedia($video['media'], $blink_camera->getId(), $filename);
             log::add('blink_camera','debug','History['.$blink_camera->getId().'] Display video by date ('.$storage.'): after getMedia');
         } else {
             $filename=$video['id'];
@@ -204,7 +187,9 @@ foreach ($videoFiltered as $date => $videoByDate) {
         echo '<div class="panel panel-primary blink_cardVideo">';
         echo '<div class="panel-heading blink_cameraHistoryDate">'.$time;
         echo '<a target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($path) . '" class="btn btn-success btn-xs pull-right" style="color : white"><i class="fas fa-download"></i></a>';
-        echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
+        if ($blink_camera->isConnected() && $blink_camera->getToken()) {
+            echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
+        }
         echo '</div>';
         echo '<div style="padding:auto !important ;">';
         echo '<center style="margin-top:5px;">';
@@ -213,10 +198,21 @@ foreach ($videoFiltered as $date => $videoByDate) {
             if ($cptDate==1) {
                 $strVideo.= ' preload ';
             }
-            $strVideo.= ' height="'.$tailleVideo.'" controls loop data-src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '" style="cursor:pointer"><source src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '">Your browser does not support the video tag.</video>';
+            $strVideo.= ' height="'.$newHeight.'" controls loop data-src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '" style="cursor:pointer"><source src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '">Your browser does not support the video tag.</video>';
             echo $strVideo;
         } else {
-            echo '<img class="displayImage" loading="eager" src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) .  '" width=360/>';
+            list($width, $height, $type, $attr) = getimagesize($dir . '/' . $file);
+            if ($height<=200) {
+                $facteurImg=1;
+                $idIMG='';
+            } else {
+                $facteurImg=$facteur;
+                $idIMG=' id="'.$file.'" ';
+            }
+            $newHeight=$height*$facteurImg;
+            $newWidth=$width*$facteurImg;
+            echo '<!--ORIG HEIGHT: '.$height.' ORIG WIDTH: '.$width.' factor: '.$facteurImg.' HEIGTH: '.$newHeight.' WIDTH: '.$newWidth. ' -->';
+            echo '<div><img '.$idIMG.' class="displayImage" loading="eager" src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) .  '" height="'.$newHeight.'" width="'.$newWidth.'"/></div>';
         }
         echo '</center>';
         echo '</div>';
@@ -227,6 +223,10 @@ foreach ($videoFiltered as $date => $videoByDate) {
 }
 ?>
 <script>
+    $('img .displayImage').on('load', function(){
+        magnify($(this).attr('id'), (1/<?=$facteur?>));
+    })
+
 $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 $('.bt_removefile').on('click', function() {
 	var filename = $(this).attr('data-filename');
@@ -287,8 +287,16 @@ $('#btn-jpg').click(function() {
     $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
     $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=jpg').dialog('open');
 });
+
+
+document.querySelectorAll("img.displayImage").forEach(function (vignette) {
+    //alert(vignette.id);
+    magnify(vignette.id, 3);
+});
+
+
 Promise.all(Array.from(document.images).map(img => {
-    if (img.complete)
+    if (img.complete) 
         return Promise.resolve(img.naturalHeight !== 0);
     return new Promise(resolve => {
         img.addEventListener('load', () => resolve(true));
