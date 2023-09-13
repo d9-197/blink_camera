@@ -2,6 +2,11 @@
   + V2.8.0 Beta
   + **Ajout de l'option "Largeur du widget" dans le choix de la taille de la vignette (config du plugin)
   + **Ajout du téléchargement des vidéos stockées localement.
+  + **Ajout d'une page "santé"
+  + **Ajout des noms des modèles de caméra dans la liste des équipements,
+  + **Ajout d'un "template" pour l'info "battery" : affiche une icone "prise" lorsque le plugin détecte que la caméra est sur secteur
+  + **Ajout d'une loupe dans la vue "Historique" si la vignette a été réduite.
+  + **L'ouverture de la vue historique est plus rapide (pas de retéléchargement des vidéos/images)
 
 > 2023-07-04
   + V2.7.1

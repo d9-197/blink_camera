@@ -791,6 +791,15 @@ class blink_camera extends eqLogic
         //self::logdebug('TYPE DEVICE='.$valeur);
 		return $valeur;
     }
+
+    public function getBlinkHumanDeviceType() {
+        $type=$this->getBlinkDeviceType();
+        if (__($type, __FILE__)==$type) {
+            return __('type_name_missing', __FILE__).' : '.$type;
+        } else {
+            return __($type, __FILE__);
+        }
+    }
     private static function getMediaLocal($clip_id_req="",$equipement_id=null) {
         $cam = self::byId($equipement_id);
         self::logdebug('getMediaLocal Call : '.$cam->getId().' '.$cam->getName());
@@ -1439,28 +1448,38 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                     if ($blink_tempUnit==="C") {
                         $tempe =($tempe - 32) / 1.8;
                     }
-                    //self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
                    
                     $this->checkAndUpdateCmd('temperature', $tempe);
                     $this->setConfiguration('camera_temperature',$tempe);
                     */
+                    self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - cameraInfo: = '.print_r($datas,true));
+                    
+                    $ac_power=(boolean) $datas['camera_status']['ac_power'];
                     // MAJ Power 
-                    $power=(float) $datas['camera_status']['battery_voltage'];
-                    $this->checkAndUpdateCmd('power', ($power/100));
-                    $this->setConfiguration('camera_voltage',($power/100));
-                    $power_full=155;
-                    $power_empty=145;
-                    if ($power>=$power_full) {
-                        $battery = 100;
-                    } else if ($power<$power_full && $power>$power_empty) {
-                        $battery = ceil(($power*100)/$power_full);
+                    if (!$ac_power) {
+                        $power=(float) $datas['camera_status']['battery_voltage'];
+                        //$this->checkAndUpdateCmd('power', ($power/100));
+                        $this->setConfiguration('camera_voltage',($power/100));
+                        $power_full=155;
+                        $power_empty=145;
+                        if ($power>=$power_full) {
+                            $battery = 100;
+                        } else if ($power<$power_full && $power>$power_empty) {
+                            $battery = ceil(($power*100)/$power_full);
+                        } else {
+                            $battery = 1;
+                        }
+                        $this->checkAndUpdateCmd('battery', $battery);
+                        $this->setConfiguration('battery',$battery);
+                        $this->batteryStatus($battery);
+                        $this->setConfiguration('noBatterieCheck', 0);
                     } else {
-                        $battery = 1;
+                        $this->checkAndUpdateCmd('battery', '');
+                        //$this->checkAndUpdateCmd('power', '');
+                        $this->setConfiguration('battery',100);
+                        $this->batteryStatus(100);
+                        $this->setConfiguration('noBatterieCheck', 1);
                     }
-                    $this->checkAndUpdateCmd('battery', $battery);
-                    $this->setConfiguration('battery',$battery);
-                    $this->batteryStatus($battery);
-
                     // MAJ WIFI
                     $wifi=(float) $datas['camera_status']['wifi_strength'];
                     $this->checkAndUpdateCmd('wifi_strength', $wifi);
@@ -1468,8 +1487,10 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                 }
             } else {
                 $this->checkAndUpdateCmd('battery', 100);
+                //$this->checkAndUpdateCmd('power', 100);    
                 $this->setConfiguration('battery',100);
                 $this->batteryStatus(100);
+                $this->setConfiguration('noBatterieCheck', 1);
             }
             $datas=self::getHomescreenData("refreshCameraInfos - ".$callOrig);
             if (!$datas['message']) {
@@ -1832,7 +1853,10 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                 $temperature->save();
             }
             $power = $this->getCmd(null, 'power');
-                if (!is_object($power)) {
+            if (is_object($power)) {
+                $power->remove();
+            }
+             /*   if (!is_object($power)) {
                     self::loginfo( 'Create new information : power');
                     $power = new blink_cameraCmd();
                     $power->setName(__('Pile', __FILE__));
@@ -1848,7 +1872,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                     $power->setSubType('numeric');
                     $power->setOrder(4);
                     $power->save();
-                }
+                }*/
             $wifi_strength = $this->getCmd(null, 'wifi_strength');
             if (!is_object($wifi_strength)) {
                 self::loginfo( 'Create new information : wifi_strength');
@@ -1995,7 +2019,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             if (!is_object($battery)) {
                 self::loginfo( 'Create new information : battery');
                 $battery = new blink_cameraCmd();
-                $battery->setName(__('Pile (pourcentage)', __FILE__));
+                $battery->setName(__('Pile', __FILE__));
                 $battery->setTemplate('dashboard', 'badge');
                 $battery->setDisplay("showNameOndashboard", 1);
                 $battery->setConfiguration('historizeRound',"2");
@@ -2055,18 +2079,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
         if (is_object($download_local)) {
             $download_local->remove();
         }
-/*        $download_local = $this->getCmd(null, 'download_local');
-        if (!is_object($download_local)) {
-            self::loginfo( 'Create new action : download_local');
-            $download_local = new blink_cameraCmd();
-            $download_local->setName(__('(BETA) Download local storage videos', __FILE__));
-            $download_local->setEqLogic_id($this->getId());
-            $download_local->setLogicalId('download_local');
-            $download_local->setType('action');
-            $download_local->setSubType('other');
-            $download_local->useIconAndName();
-            $download_local->save();
-        }*/
+
         if ($typeDevice!="owl" and $typeDevice!="lotus") {
             $arm_camera = $this->getCmd(null, 'arm_camera');
             if (!is_object($arm_camera)) {
@@ -2343,7 +2356,6 @@ class blink_cameraCmd extends cmd
                 if ($bl_cam->isConfigured()) {
                 //blink_camera::logdebug('toHtml history : '.print_r(parent::toHtml($_version,$_options,$_cmdColor),true));
                 $result=parent::toHtml($_version,$_options,$_cmdColor);
-                $bl_cam=$this->getEqLogic();
                 
                 $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']\').off(\'click\').on(\'click\', function () {';
                 $result.='$(\'#md_modal\').dialog({title: "Historique '.$bl_cam->getName().'"});';
@@ -2355,6 +2367,16 @@ class blink_cameraCmd extends cmd
             } else {
                 return "";
             }
+
+        }else if ($this->getLogicalId() == 'battery') {
+            $result=parent::toHtml($_version,$_options,$_cmdColor);
+             blink_camera::logdebug('toHtml battery avant custo : '.print_r($result,true));
+               
+            $bl_cam=$this->getEqLogic();
+            if ($bl_cam->getConfiguration('noBatterieCheck', 0) == 1) {
+               //$result= '<span class="label label-primary" style="font-size : 1em;" title="{{Secteur}}"><i class="fa fa-plug"></i></span>';
+            }
+            return $result;
         }else if ($this->getType()!=='action') {
             $bl_cam=$this->getEqLogic();
             if ($this->getLogicalId()==='thumbnail' && !$bl_cam->isConnected() ) {
