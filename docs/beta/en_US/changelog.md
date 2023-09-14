@@ -1,7 +1,12 @@
 > 2023-08-12
   + V2.8.0 Beta
   + **Addition of the option "Widget width" in thumbnails size (config du plugin)
-  + **Download of local storage videos.
+  + **Download of local storage videos (USB support).
+  + **Addition of an "health" page
+  + **Addition of camera model names in the equiments list
+  + **Addition of a "template" for the "battery" info : Display a "plug" icon when plugin detect that camera is AC powered.
+  + **Addition of a "magnifying glass" in the "History" view if the thumbnail size have been reduce.
+  + **"History" view opening is faster (no new download of videos/images
 
 > 2023-07-04
   + V2.7.1 Beta

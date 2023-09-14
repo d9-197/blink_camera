@@ -62,6 +62,11 @@ try {
             if ($need_pin_verification=config::byKey('verif', 'blink_camera')==="false") {
                 $json='{"token":"verif"}';
             }
+        } else {
+            if (config::byKey('limit_login', 'blink_camera')==="true") {
+                $json='{"token":"limit"}';
+            }
+
         }
         //blink_camera::logdebug("test connexion : ".$json);
         $return=json_encode($json);

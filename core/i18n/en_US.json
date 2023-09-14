@@ -62,7 +62,9 @@
         "Type de stockage":"Storage",
         "Cloud":"Cloud",
         "Local":"Local",
-        "Largeur du widget":"Widget width"
+        "Largeur du widget":"Widget width",
+        "Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).":"The thumbnails of the videos are not available if you use a local storage(USB).",
+        "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Do not download videos/images when opening the view (faster loading)"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
@@ -97,7 +99,18 @@
         "URL vignette caméra":"Camera thumbnail URL",
         "Chemin vignette caméra":"Camera thumbnail path",
         "Mode hors ligne":"Warning the plugin is offline (check the plugin configuration)",
-        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Can not connect to Blink account. Check your identifiant and password in plugin configuration."
+        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Can not connect to Blink account. Check your identifiant and password in plugin configuration.",
+        "APImessage":"[Message from Blink servers] ",
+        "System is busy, please wait":"System is busy, please wait.",
+        "Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes.":"The connection limit on the Blink servers has been reached. The Jeedom plugin automatically disconnects (widgets and history view) but do not open the configuration page for 60 minutes.",
+        "Login attempted too quickly. Please try again in a few seconds.":"Login attempted too quickly. Please try again in a few seconds.",
+        "Invalid credentials":"Invalid credentials",
+        "xt":"Outdoor generation 1",
+        "catalina":"Outdoor generation 3",
+        "white" : "Indoor",
+        "owl": "Mini",
+        "lotus": "Doorbell",
+        "type_name_missing":"Camera model unknowed"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
