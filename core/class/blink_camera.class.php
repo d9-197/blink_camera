@@ -766,7 +766,8 @@ class blink_camera extends eqLogic
     /*     * *********************Méthodes d'instance************************* */
     public function getBlinkDeviceType() {
         $valeur = $this->getConfiguration("camera_type");
-        if ($valeur=="") {
+        self::logdebug('getBlinkDeviceType '.$this->getId().' TYPE DEVICE dans configuration='.$valeur);
+        if ($valeur=="" && $this->isConfigured()&& $this->isConnected()) {
             $datas=self::getHomescreenData("getBlinkDeviceType");
             $camera_id = $this->getConfiguration("camera_id");
             foreach ($datas['cameras'] as $device) {
@@ -784,11 +785,10 @@ class blink_camera extends eqLogic
                     $valeur=$device['type'];
                 }
             }
+            self::logdebug('getBlinkDeviceType '.$this->getId().' NEW TYPE DEVICE='.$valeur);
             $this->setConfiguration("camera_type",$valeur);
             $this->save();
         }
-        
-        //self::logdebug('TYPE DEVICE='.$valeur);
 		return $valeur;
     }
 
@@ -1798,9 +1798,21 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
     {
         $typeDevice=$this->getBlinkDeviceType();
         $this->setConfiguration("type",$typeDevice);
+        
+        /* NETTOYAGE */
+        $download_local = $this->getCmd(null, 'download_local');
+        if (is_object($download_local)) {
+            $download_local->remove();
+        }
+        $power = $this->getCmd(null, 'power');
+        if (is_object($power)) {
+            $power->remove();
+        }
+
+        /* COMMANDES COMMUNES A TOUS LES MODELES */
         $info = $this->getCmd(null, 'arm_status');
         if (!is_object($info)) {
-            self::loginfo( 'Create new information : arm_status');
+            self::loginfo( 'Create new information : arm_status (network)');
             $info = new blink_cameraCmd();
             $info->setName(__('Système armé ?', __FILE__));
             $info->setDisplay("showNameOndashboard", 1);
@@ -1814,83 +1826,6 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             $info->setConfiguration('generic_type',"LOCK_STATE");
             $info->setOrder(1);
             $info->save();
-        }
-        if ($typeDevice!="owl" and $typeDevice!="lotus") {
-            $arm_status_camera = $this->getCmd(null, 'arm_status_camera');
-            if (!is_object($arm_status_camera)) {
-                self::loginfo( 'Create new information : arm_status_camera');
-                $arm_status_camera = new blink_cameraCmd();
-                $arm_status_camera->setName(__('Caméra armée ?', __FILE__));
-                $arm_status_camera->setDisplay("showNameOndashboard", 1);
-                $arm_status_camera->setIsVisible(true);
-                $arm_status_camera->setLogicalId('arm_status_camera');
-                $arm_status_camera->setEqLogic_id($this->getId());
-                $arm_status_camera->setType('info');
-                $arm_status_camera->setTemplate('dashboard', 'lock');
-                $arm_status_camera->setTemplate('mobile', 'lock');
-                $arm_status_camera->setSubType('binary');
-                $arm_status_camera->setConfiguration('generic_type',"LOCK_STATE");
-                $arm_status_camera->setOrder(2);
-                $arm_status_camera->save();
-            }
-
-            $temperature = $this->getCmd(null, 'temperature');
-            if (!is_object($temperature)) {
-                self::loginfo( 'Create new information : temperature');
-                $temperature = new blink_cameraCmd();
-                $temperature->setName(__('Température', __FILE__));
-                $temperature->setTemplate('dashboard', 'badge');
-                $temperature->setDisplay("showNameOndashboard", 1);
-                $temperature->setConfiguration('generic_type',"TEMPERATURE");
-                $temperature->setConfiguration('historizeRound',"1");
-                $temperature->setUnite('°'.config::byKey('blink_tempUnit', 'blink_camera'));
-                $temperature->setIsVisible(true);
-                $temperature->setLogicalId('temperature');
-                $temperature->setEqLogic_id($this->getId());
-                $temperature->setType('info');
-                $temperature->setSubType('numeric');
-                $temperature->setOrder(3);
-                $temperature->save();
-            }
-            $power = $this->getCmd(null, 'power');
-            if (is_object($power)) {
-                $power->remove();
-            }
-             /*   if (!is_object($power)) {
-                    self::loginfo( 'Create new information : power');
-                    $power = new blink_cameraCmd();
-                    $power->setName(__('Pile', __FILE__));
-                    $power->setTemplate('dashboard', 'badge');
-                    $power->setDisplay("showNameOndashboard", 1);
-                    $power->setConfiguration('historizeRound',"2");
-                    $power->setConfiguration('historizeRound',"2");
-                    $power->setUnite('V');
-                    $power->setIsVisible(true);
-                    $power->setLogicalId('power');
-                    $power->setEqLogic_id($this->getId());
-                    $power->setType('info');
-                    $power->setSubType('numeric');
-                    $power->setOrder(4);
-                    $power->save();
-                }*/
-            $wifi_strength = $this->getCmd(null, 'wifi_strength');
-            if (!is_object($wifi_strength)) {
-                self::loginfo( 'Create new information : wifi_strength');
-                $wifi_strength = new blink_cameraCmd();
-                $wifi_strength->setName(__('Puissance Wifi', __FILE__));
-                $wifi_strength->setTemplate('dashboard', 'badge');
-                $wifi_strength->setDisplay("showNameOndashboard", 1);
-                $wifi_strength->setConfiguration('historizeRound',"0");
-                $wifi_strength->setConfiguration('historizeRound',"0");
-                $wifi_strength->setUnite('dB');
-                $wifi_strength->setIsVisible(true);
-                $wifi_strength->setLogicalId('wifi_strength');
-                $wifi_strength->setEqLogic_id($this->getId());
-                $wifi_strength->setType('info');
-                $wifi_strength->setSubType('numeric');
-                $wifi_strength->setOrder(5);
-                $wifi_strength->save();
-            }
         }
         $info = $this->getCmd(null, 'last_event');
         if (!is_object($info)) {
@@ -2014,25 +1949,6 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             $info->setOrder(11);
             $info->save();
         }
-        if ($typeDevice!="owl") {
-            $battery = $this->getCmd(null, 'battery');
-            if (!is_object($battery)) {
-                self::loginfo( 'Create new information : battery');
-                $battery = new blink_cameraCmd();
-                $battery->setName(__('Pile', __FILE__));
-                $battery->setTemplate('dashboard', 'badge');
-                $battery->setDisplay("showNameOndashboard", 1);
-                $battery->setConfiguration('historizeRound',"2");
-                $battery->setUnite('%');
-                $battery->setIsVisible(true);
-                $battery->setLogicalId('battery');
-                $battery->setEqLogic_id($this->getId());
-                $battery->setType('info');
-                $battery->setSubType('numeric');
-                $battery->setOrder(12);
-                $battery->save();
-            }
-        }
         $refresh = $this->getCmd(null, 'refresh');
         if (!is_object($refresh)) {
             self::loginfo( 'Create new action : refresh');
@@ -2075,42 +1991,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             $arm_network->useIconAndName();
             $arm_network->save();
         }
-        $download_local = $this->getCmd(null, 'download_local');
-        if (is_object($download_local)) {
-            $download_local->remove();
-        }
 
-        if ($typeDevice!="owl" and $typeDevice!="lotus") {
-            $arm_camera = $this->getCmd(null, 'arm_camera');
-            if (!is_object($arm_camera)) {
-                self::loginfo( 'Create new action : arm_camera');
-                $arm_camera = new blink_cameraCmd();
-                $arm_camera->setName(__('Armer la caméra', __FILE__));
-                $arm_camera->setEqLogic_id($this->getId());
-                $arm_camera->setLogicalId('arm_camera');
-                $arm_camera->setType('action');
-                $arm_camera->setSubType('other');
-                //$arm_camera->setOrder(103);
-                $arm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ferme"></i>'); 
-                $arm_camera->useIconAndName();
-                $arm_camera->save();
-            }
-            
-            $disarm_camera = $this->getCmd(null, 'disarm_camera');
-            if (!is_object($disarm_camera)) {
-                self::loginfo( 'Create new action : disarm_camera');
-                $disarm_camera = new blink_cameraCmd();
-                $disarm_camera->setName(__('Désarmer la caméra', __FILE__));
-                $disarm_camera->setEqLogic_id($this->getId());
-                $disarm_camera->setLogicalId('disarm_camera');
-                $disarm_camera->setType('action');
-                $disarm_camera->setSubType('other');
-                //$arm_camera->setOrder(104);
-                $disarm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ouvert"></i>'); 
-                $disarm_camera->useIconAndName();
-                $disarm_camera->save();
-            }
-        }
         $history = $this->getCmd(null, 'history');
         if (!is_object($history)) {
             self::loginfo( 'Create new action : history');
@@ -2169,7 +2050,180 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             //$force_download->setOrder(107);
             $force_download->save();
         }
-        if ($typeDevice=="lotus") {
+
+        /* COMMANDES NON DISPONIBLES SUR owl et lotus  */
+        if ($typeDevice!="" and $typeDevice!="owl" and $typeDevice!="lotus") {
+            $arm_status_camera = $this->getCmd(null, 'arm_status_camera');
+            if (!is_object($arm_status_camera)) {
+                self::loginfo( 'Create new information : arm_status_camera');
+                $arm_status_camera = new blink_cameraCmd();
+                $arm_status_camera->setName(__('Caméra armée ?', __FILE__));
+                $arm_status_camera->setDisplay("showNameOndashboard", 1);
+                $arm_status_camera->setIsVisible(true);
+                $arm_status_camera->setLogicalId('arm_status_camera');
+                $arm_status_camera->setEqLogic_id($this->getId());
+                $arm_status_camera->setType('info');
+                $arm_status_camera->setTemplate('dashboard', 'lock');
+                $arm_status_camera->setTemplate('mobile', 'lock');
+                $arm_status_camera->setSubType('binary');
+                $arm_status_camera->setConfiguration('generic_type',"LOCK_STATE");
+                $arm_status_camera->setOrder(2);
+                $arm_status_camera->save();
+            }
+
+            $temperature = $this->getCmd(null, 'temperature');
+            if (!is_object($temperature)) {
+                self::loginfo( 'Create new information : temperature');
+                $temperature = new blink_cameraCmd();
+                $temperature->setName(__('Température', __FILE__));
+                $temperature->setTemplate('dashboard', 'badge');
+                $temperature->setDisplay("showNameOndashboard", 1);
+                $temperature->setConfiguration('generic_type',"TEMPERATURE");
+                $temperature->setConfiguration('historizeRound',"1");
+                $temperature->setUnite('°'.config::byKey('blink_tempUnit', 'blink_camera'));
+                $temperature->setIsVisible(true);
+                $temperature->setLogicalId('temperature');
+                $temperature->setEqLogic_id($this->getId());
+                $temperature->setType('info');
+                $temperature->setSubType('numeric');
+                $temperature->setOrder(3);
+                $temperature->save();
+            }
+
+             /*   if (!is_object($power)) {
+                    self::loginfo( 'Create new information : power');
+                    $power = new blink_cameraCmd();
+                    $power->setName(__('Pile', __FILE__));
+                    $power->setTemplate('dashboard', 'badge');
+                    $power->setDisplay("showNameOndashboard", 1);
+                    $power->setConfiguration('historizeRound',"2");
+                    $power->setConfiguration('historizeRound',"2");
+                    $power->setUnite('V');
+                    $power->setIsVisible(true);
+                    $power->setLogicalId('power');
+                    $power->setEqLogic_id($this->getId());
+                    $power->setType('info');
+                    $power->setSubType('numeric');
+                    $power->setOrder(4);
+                    $power->save();
+                }*/
+            $wifi_strength = $this->getCmd(null, 'wifi_strength');
+            if (!is_object($wifi_strength)) {
+                self::loginfo( 'Create new information : wifi_strength');
+                $wifi_strength = new blink_cameraCmd();
+                $wifi_strength->setName(__('Puissance Wifi', __FILE__));
+                $wifi_strength->setTemplate('dashboard', 'badge');
+                $wifi_strength->setDisplay("showNameOndashboard", 1);
+                $wifi_strength->setConfiguration('historizeRound',"0");
+                $wifi_strength->setConfiguration('historizeRound',"0");
+                $wifi_strength->setUnite('dB');
+                $wifi_strength->setIsVisible(true);
+                $wifi_strength->setLogicalId('wifi_strength');
+                $wifi_strength->setEqLogic_id($this->getId());
+                $wifi_strength->setType('info');
+                $wifi_strength->setSubType('numeric');
+                $wifi_strength->setOrder(5);
+                $wifi_strength->save();
+            }
+      
+            $arm_camera = $this->getCmd(null, 'arm_camera');
+            if (!is_object($arm_camera)) {
+                self::loginfo( 'Create new action : arm_camera');
+                $arm_camera = new blink_cameraCmd();
+                $arm_camera->setName(__('Armer la caméra', __FILE__));
+                $arm_camera->setEqLogic_id($this->getId());
+                $arm_camera->setLogicalId('arm_camera');
+                $arm_camera->setType('action');
+                $arm_camera->setSubType('other');
+                //$arm_camera->setOrder(103);
+                $arm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ferme"></i>'); 
+                $arm_camera->useIconAndName();
+                $arm_camera->save();
+            }
+            
+            $disarm_camera = $this->getCmd(null, 'disarm_camera');
+            if (!is_object($disarm_camera)) {
+                self::loginfo( 'Create new action : disarm_camera');
+                $disarm_camera = new blink_cameraCmd();
+                $disarm_camera->setName(__('Désarmer la caméra', __FILE__));
+                $disarm_camera->setEqLogic_id($this->getId());
+                $disarm_camera->setLogicalId('disarm_camera');
+                $disarm_camera->setType('action');
+                $disarm_camera->setSubType('other');
+                //$arm_camera->setOrder(104);
+                $disarm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ouvert"></i>'); 
+                $disarm_camera->useIconAndName();
+                $disarm_camera->save();
+            }
+
+        } else {
+            $cmdToHide = $this->getCmd(null, 'arm_status_camera');
+            if (is_object($cmdToHide)) {
+                //$cmdToHide->remove();
+                $cmdToHide->setIsVisible(0);
+                $cmdToHide->save();
+            }
+            $cmdToHide = $this->getCmd(null, 'wifi_strength');
+            if (is_object($cmdToHide)) {
+                //$cmdToHide->remove();
+                $cmdToHide->setIsVisible(0);
+                $cmdToHide->save();
+            }
+            $cmdToHide = $this->getCmd(null, 'temperature');
+            if (is_object($cmdToHide)) {
+                //$cmdToHide->remove();
+                $cmdToHide->setIsVisible(0);
+                $cmdToHide->save();
+            }
+            $cmdToHide = $this->getCmd(null, 'arm_camera');
+            if (is_object($cmdToHide)) {
+                //$cmdToHide->remove();
+                $cmdToHide->setIsVisible(0);
+                $cmdToHide->save();
+            }
+            $cmdToHide = $this->getCmd(null, 'disarm_camera');
+            if (is_object($cmdToHide)) {
+                //$cmdToHide->remove();
+                $cmdToHide->setIsVisible(0);
+                $cmdToHide->save();
+            }
+        }
+        
+        /* COMMANDES NON DISPONIBLES SUR owl */
+        if ($typeDevice!="" && $typeDevice!="owlZZZ") {
+            $battery = $this->getCmd(null, 'battery');
+            if (!is_object($battery)) {
+                self::loginfo( 'Create new information : battery');
+                $battery = new blink_cameraCmd();
+                $battery->setName(__('Pile', __FILE__));
+                $battery->setTemplate('dashboard', 'badge');
+                $battery->setDisplay("showNameOndashboard", 1);
+                $battery->setConfiguration('historizeRound',"2");
+                $battery->setUnite('%');
+                $battery->setIsVisible(true);
+                $battery->setLogicalId('battery');
+                $battery->setEqLogic_id($this->getId());
+                $battery->setType('info');
+                $battery->setSubType('numeric');
+                $battery->setOrder(12);
+                $battery->save();
+            }
+        } else {
+            $cmdToHide = $this->getCmd(null, 'battery');
+            if (is_object($cmdToHide)) {
+                //$cmdToHide->remove();
+                $cmdToHide->setIsVisible(0);
+                $cmdToHide->save();
+            }
+            $cmdToHide = $this->getCmd(null, 'disarm_camera');
+            if (is_object($cmdToHide)) {
+                //$cmdToHide->remove();
+                $cmdToHide->setIsVisible(0);
+                $cmdToHide->save();
+            }
+        }
+        /* COMMANDES DISPONIBLES UNIQUEMENT SUR lotus (Doorbell) */
+        if ($typeDevice!="" && $typeDevice=="lotus") {
             $info = $this->getCmd(null, 'source_last_event');
             if (!is_object($info)) {
                 self::loginfo( 'Create new information : source_last_event');
@@ -2184,9 +2238,16 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                 $info->setSubType('string');
                 $info->save();
             }
-
+        } else {
+            $cmdToHide = $this->getCmd(null, 'source_last_event');
+            if (is_object($cmdToHide)) {
+                //$cmdToHide->remove();
+                $cmdToHide->setIsVisible(0);
+                $cmdToHide->save();
+            }
         }
 
+        /* construction des clés uniques pour les API Blink */
         $notification_key=config::byKey('notification_key', 'blink_camera');
         $unique_id=config::byKey('notification_key', 'blink_camera');
 
@@ -2200,13 +2261,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             $unique_id=self::genererIdAleatoire(16);
             config::save('unique_id', $unique_id, 'blink_camera');
         }
-/*
-        if (self::isConnected()) {
-            $this::refreshCameraInfos();
-            $this::getLastEventDate();
-            //$this::emptyCacheWidget();
-        }
-    */
+
     }
 
     public function preUpdate()
@@ -2215,11 +2270,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
 
     public function postUpdate()
     {
-		/*$cmd = $this->getCmd(null, 'refresh'); 
-		if (($this->getIsEnable() == 1) && is_object($cmd)) { 
-			 $cmd->execCmd();
-        }*/
-        //$this::refreshCacheWidget();
+
     }
 
     public function preRemove()
@@ -2266,14 +2317,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
 
     public static function postConfigOverall($value)
     {
-        /*
-        $eqLogics = self::byType('blink_camera', true);
-        foreach ($eqLogics as $blink_camera) {
-            if ($blink_camera->getIsEnable() == 1) {
-                $blink_camera->emptyCacheWidget();
-            }
-        }
-        */
+
     }
 	public static function templateWidget()
 	{

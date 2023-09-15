@@ -26,11 +26,12 @@ if (!isConnect()) {
 ?>
 <form class="form-horizontal">
     <div style ="float: right; width:300px;margin: 0px; border-radius: 5px; background-color: transparent; padding: 1em;border:0">
-    <span style ="vertical-align : top;"><a href="https://fr.tipeee.com/duke-9" target="_new">
-        <span style ="vertical-align : center;align:right"><img width="30px" src="plugins/blink_camera/plugin_info/tipeee_tip_btn.svg"/>&nbsp;&nbsp;Merci aux tipeurs qui soutiennent les développements:</span>
-        <iframe style ="margin: 0px; border-radius: 5px; background-color: transparent;padding: 1em;border:0" allowtransparency = "true" src="https://fr.tipeee.com/widgets/OwIPwBrn6nRpx3LOa74tH0tRSEHwZz7ULWeP24z6AU7oEpOFiSagO5NFo1erbqPm?api_key=E3ms55Lt3Mp826M7eSHhmLDH2oAd2KDcqMipf3H7XQ1G5QgRJLbsA6HKrZqmcgw3&v=1693497960833"></iframe>
+        <span style ="vertical-align : top;">
+            <a href="https://fr.tipeee.com/duke-9" target="_new">
+                <span style ="vertical-align : center;align:right"><img width="30px" src="plugins/blink_camera/plugin_info/tipeee_tip_btn.svg"/>&nbsp;&nbsp;Merci aux tipeurs qui soutiennent les développements</span>
+                <!--iframe style ="margin: 0px; border-radius: 5px; background-color: transparent;padding: 1em;border:0" allowtransparency = "true" src="https://fr.tipeee.com/widgets/OwIPwBrn6nRpx3LOa74tH0tRSEHwZz7ULWeP24z6AU7oEpOFiSagO5NFo1erbqPm?api_key=E3ms55Lt3Mp826M7eSHhmLDH2oAd2KDcqMipf3H7XQ1G5QgRJLbsA6HKrZqmcgw3&v=1693497960833"></iframe-->
             </a>
-            </span>
+        </span>
     </div>
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>

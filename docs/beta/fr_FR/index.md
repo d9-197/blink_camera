@@ -1,5 +1,3 @@
-[**&rarr; Lien vers GITHUB de ce plugin gratuit**](https://github.com/d9-197/blink_camera)
-
 # Description
 
 Plugin dédié aux caméras Blink.
