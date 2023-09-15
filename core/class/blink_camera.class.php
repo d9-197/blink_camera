@@ -1774,9 +1774,9 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
 
   	public static function backupExclude() {
         $pathToExclude= array();
-        $pathToExclude[]="medias";
-        $pathToExclude[]="test";
-        $pathToExclude[]="../afficheur";
+        if (!(boolean)config::byKey('include_medias_in_backup', 'blink_camera')) {
+            $pathToExclude[]="medias";
+        }
         return $pathToExclude;
     }
     public function preInsert()

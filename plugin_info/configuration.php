@@ -159,7 +159,13 @@ if (!isConnect()) {
                 </select>
             </div>
         </div>
-
+        <h4 class="icon_blue"><i class="fa fa-lock"></i> {{Sauvegarde}}</h4>
+        <div class="form-group" id="medias_security">
+            <label class="col-lg-5 control-label">{{Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?}}</label>
+            <div class="col-lg-1">
+                <input  type="checkbox"class="configKey form-control" data-l1key="include_medias_in_backup"/>
+            </div>
+        </div>
   </fieldset>
 </form>
 <script>
