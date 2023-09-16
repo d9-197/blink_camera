@@ -149,6 +149,9 @@ class blink_camera extends eqLogic
         }
     }
 
+    private static function startwith(string $text,string $criteria) {
+        return substr( $text, 0, strlen($criteria)) === $criteria;
+    }
     public static function isOpenMediasAccess() {
         return !config::byKey('medias_security', 'blink_camera');
     }
@@ -245,7 +248,7 @@ class blink_camera extends eqLogic
             $responseJson = json_decode($response->getBody()->getContents(),true);
             if (isset($responseJson['message'])) {
                 self::logDebugBlinkResponse($responseJson['message']);
-                if (str_starts_with(strtolower($responseJson['message']),"Login limit exceeded")) {
+                if (startwith(strtolower($responseJson['message']),"Login limit exceeded")) {
                     config::save('limit_login', 'true', 'blink_camera');
                 }
             }
