@@ -248,7 +248,7 @@ class blink_camera extends eqLogic
             $responseJson = json_decode($response->getBody()->getContents(),true);
             if (isset($responseJson['message'])) {
                 self::logDebugBlinkResponse($responseJson['message']);
-                if (startwith(strtolower($responseJson['message']),"Login limit exceeded")) {
+                if (self::startwith(strtolower($responseJson['message']),"Login limit exceeded")) {
                     config::save('limit_login', 'true', 'blink_camera');
                 }
             }
