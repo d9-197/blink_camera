@@ -96,7 +96,7 @@ if ($nbMax <= 0) {
 }
 $cptVideo=0;
 if ($thumbFilter=='') {
-    if ($storage!='local' && $blink_camera->isConnected() && $blink_camera->getToken() && ((boolean) config::byKey('offline_history', 'blink_camera'))===false) {
+    if ($storage!='local' && $blink_camera->isConnected() && blink_camera_api::getToken() && ((boolean) config::byKey('offline_history', 'blink_camera'))===false) {
         $blink_camera->forceCleanup(true);
     }
     log::add('blink_camera','debug','History['.$blink_camera->getId().'] Avant scandir');
