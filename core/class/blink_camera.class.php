@@ -93,38 +93,42 @@ class blink_camera extends eqLogic
     /* Every 10 minutes, check and download last event video (named last.mp4 in Jeedom) */
     public static function cron10($_eqLogic_id = null)
     {
-        if ($_eqLogic_id == null) {
-            $eqLogics = self::byType('blink_camera', true);
-        } else {
-            $eqLogics = array(self::byId($_eqLogic_id));
-        }
-        foreach ($eqLogics as $cam) {
-            if ($cam->getIsEnable() == 1  && $cam->getToken()) {
-                $last_event=$cam->getLastEvent(false);
-                if (isset($last_event)) { 
-                    $info = $cam->getCmd(null, 'source_last_event');
-                    if (is_object($info)) {
-                        $cam->checkAndUpdateCmd('source_last_event', $last_event['source']);
+        if (self::isConnected()) {
+            if ($_eqLogic_id == null) {
+                $eqLogics = self::byType('blink_camera', true);
+            } else {
+                $eqLogics = array(self::byId($_eqLogic_id));
+            }
+            foreach ($eqLogics as $cam) {
+                if ($cam->getIsEnable() == 1) {
+                    $last_event=$cam->getLastEvent(false);
+                    if (isset($last_event)) { 
+                        $info = $cam->getCmd(null, 'source_last_event');
+                        if (is_object($info)) {
+                            $cam->checkAndUpdateCmd('source_last_event', $last_event['source']);
+                        }
+                    //self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                     }
-                   //self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
+                    $cam->refreshCameraInfos("cron10");
                 }
-                $cam->refreshCameraInfos("cron10");
             }
         }
     }
     public static function cron($_eqLogic_id = null)
     {
-        if ($_eqLogic_id == null) {
-            $eqLogics = self::byType('blink_camera', true);
-        } else {
-            $eqLogics = array(self::byId($_eqLogic_id));
-        }
-        foreach ($eqLogics as $cam) {
-            self::logdebug('blink_camera->cron() '.$cam->getId());
-            if ($cam->getIsEnable() == 1 && $cam->isConnected()) {
-                self::logdebug('blink_camera->cron() '.$cam->getId().' camera active');
-                $cam->getLastEventDate();
-                //$cam->refreshCameraInfos();
+        if (self::isConnected()) {
+            if ($_eqLogic_id == null) {
+                $eqLogics = self::byType('blink_camera', true);
+            } else {
+                $eqLogics = array(self::byId($_eqLogic_id));
+            }
+            foreach ($eqLogics as $cam) {
+                self::logdebug('blink_camera->cron() '.$cam->getId());
+                if ($cam->getIsEnable() == 1) {
+                    self::logdebug('blink_camera->cron() '.$cam->getId().' camera active');
+                    $cam->getLastEventDate();
+                    //$cam->refreshCameraInfos();
+                }
             }
         }
     }
@@ -133,22 +137,26 @@ class blink_camera extends eqLogic
     public static function cronHourly($_eqLogic_id = null)
     {
         // self::logdebug('blink_camera->cronHourly()');
-           
-        if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
-            $eqLogics = self::byType('blink_camera', true);
-        } else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
-            $eqLogics = array(self::byId($_eqLogic_id));
-        }
-    
-        foreach ($eqLogics as $cam) {//parcours tous les équipements du plugin blink_camera
-            if ($cam->getIsEnable() == 1  && $cam->getToken(true)) {//vérifie que l'équipement est acitf
-                $cam->forceCleanup(true);
-               // $cam->getLastEventDate(true);
-                //$cam->refreshCameraInfos("cronHourly");
+        if (self::isConnected()) {
+            if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
+                $eqLogics = self::byType('blink_camera', true);
+            } else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
+                $eqLogics = array(self::byId($_eqLogic_id));
+            }
+            foreach ($eqLogics as $cam) {//parcours tous les équipements du plugin blink_camera
+                if ($cam->getIsEnable() == 1) {//vérifie que l'équipement est acitf
+                    $cam->forceCleanup(true);
+                    // $cam->getLastEventDate(true);
+                    //$cam->refreshCameraInfos("cronHourly");
+                }
             }
         }
     }
-
+    public static function cronDayly($_eqLogic_id = null)
+    {
+        self::getToken(true);
+    }
+    
     private static function startwith(string $text,string $criteria) {
         return substr( $text, 0, strlen($criteria)) === $criteria;
     }
@@ -396,16 +404,27 @@ class blink_camera extends eqLogic
     }
     public static function getToken(bool $forceReinit=false )
     {
-        //self::logdebug('getToken() START');
+        $argu='FALSE';
+        if ($forceReinit) {
+            $argu='TRUE';
+        }
+        $updFlag=$argu;
+        self::logdebug('getToken('.$argu.') START');
+
         $date = date_create();
         $tstamp1=date_timestamp_get($date);
         $email=config::byKey('param1', 'blink_camera');
         $pwd=config::byKey('param2', 'blink_camera');
         $email_prev=config::byKey('param1_prev', 'blink_camera');
         $pwd_prev=config::byKey('param2_prev', 'blink_camera');
+              
         if (!$forceReinit) {
             $forceReinit=($email!==$email_prev || $pwd!==$pwd_prev);
+            if (!$forceReinit) {
+                $updFlag='FALSE';
+            }
         }
+        self::logdebug('getToken('.$argu.') '.$updFlag);
 
         /* Test de validité du token deja existant */
         $need_new_token=false;
@@ -454,7 +473,7 @@ class blink_camera extends eqLogic
         $_regionBlink=config::byKey('region', 'blink_camera');
         if ($_tokenBlink=="" && $_accountBlink=="" && $_regionBlink=="") {
             
-            //self::logdebug('getToken() - Nouveau TOKEN');
+            self::logdebug('getToken('.$argu.') '.$updFlag. ' : Nouveau TOKEN');
             config::save('param1_prev', $email, 'blink_camera');
             config::save('param2_prev', $pwd, 'blink_camera');
             $notification_key=config::byKey('notification_key', 'blink_camera');
@@ -609,7 +628,7 @@ class blink_camera extends eqLogic
         return $jsonstr;
     }
     public function getAccountConfigDatas2($force_json_string=false,$forceReinitToken=false) {
-        if (self::getToken($forceReinitToken)) {
+        if (self::isConnected()) {
             $datas=self::getHomescreenData("getAccountConfigDatas2");
             if ($datas==null) 
                 $datas=[];
@@ -770,7 +789,7 @@ class blink_camera extends eqLogic
     public function getBlinkDeviceType() {
         $valeur = $this->getConfiguration("camera_type");
         self::logdebug('getBlinkDeviceType '.$this->getId().' TYPE DEVICE dans configuration='.$valeur);
-        if ($valeur=="" && $this->isConfigured()&& $this->isConnected()) {
+        if ($valeur=="" && $this->isConfigured()&& self::isConnected()) {
             $datas=self::getHomescreenData("getBlinkDeviceType");
             $camera_id = $this->getConfiguration("camera_id");
             foreach ($datas['cameras'] as $device) {
