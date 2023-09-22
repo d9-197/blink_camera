@@ -217,7 +217,13 @@ public static function queryGet(string $url) {
     }*/
     public static function getToken(bool $forceReinit=false )
     {
-        //blink_camera::logdebug('getToken() START');
+        
+        $argu='FALSE';
+        if ($forceReinit) {
+            $argu='TRUE';
+        }
+        $updFlag=$argu;
+        blink_camera::logdebug('blink_camera_api::getToken('.$argu.') START');
         $date = date_create();
         $tstamp1=date_timestamp_get($date);
         $email=config::byKey('param1', 'blink_camera');
@@ -226,7 +232,11 @@ public static function queryGet(string $url) {
         $pwd_prev=config::byKey('param2_prev', 'blink_camera');
         if (!$forceReinit) {
             $forceReinit=($email!==$email_prev || $pwd!==$pwd_prev);
+            if (!$forceReinit) {
+                $updFlag='FALSE';
+            }
         }
+        blink_camera::logdebug('blink_camera_api::getToken('.$argu.') '.$updFlag);
 
         /* Test de validité du token deja existant */
         $need_new_token=false;
@@ -275,7 +285,7 @@ public static function queryGet(string $url) {
         $_regionBlink=config::byKey('region', 'blink_camera');
         if ($_tokenBlink=="" && $_accountBlink=="" && $_regionBlink=="") {
             
-            //blink_camera::logdebug('getToken() - Nouveau TOKEN');
+            blink_camera::logdebug('blink_camera_api::getToken('.$argu.') '.$updFlag. ' : Nouveau TOKEN');
             config::save('param1_prev', $email, 'blink_camera');
             config::save('param2_prev', $pwd, 'blink_camera');
             $notification_key=config::byKey('notification_key', 'blink_camera');
@@ -681,7 +691,7 @@ public static function queryGet(string $url) {
         return $jsonstr;
     }
     public static function getAccountConfigDatas2($force_json_string=false,$forceReinitToken=false) {
-        if (self::getToken($forceReinitToken)) {
+        if (blink_camera::isConnected()) {
             $datas=self::getHomescreenData("getAccountConfigDatas2");
             if ($datas==null) 
                 $datas=[];

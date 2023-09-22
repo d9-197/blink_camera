@@ -95,39 +95,43 @@ class blink_camera extends eqLogic
 
     /* Every 10 minutes, check and download last event video (named last.mp4 in Jeedom) */
     public static function cron10($_eqLogic_id = null)
-    {
-        if ($_eqLogic_id == null) {
-            $eqLogics = self::byType('blink_camera', true);
-        } else {
-            $eqLogics = array(self::byId($_eqLogic_id));
-        }
-        foreach ($eqLogics as $cam) {
-            if ($cam->getIsEnable() == 1  && blink_camera_api::getToken()) {
-                $last_event=$cam->getLastEvent(false);
-                if (isset($last_event)) { 
-                    $info = $cam->getCmd(null, 'source_last_event');
-                    if (is_object($info)) {
-                        $cam->checkAndUpdateCmd('source_last_event', $last_event['source']);
+    {<
+        if (blink_camera::isConnected()) {
+            if ($_eqLogic_id == null) {
+                $eqLogics = self::byType('blink_camera', true);
+            } else {
+                $eqLogics = array(self::byId($_eqLogic_id));
+            }
+            foreach ($eqLogics as $cam) {
+                if ($cam->getIsEnable() == 1) {
+                    $last_event=$cam->getLastEvent(false);
+                    if (isset($last_event)) { 
+                        $info = $cam->getCmd(null, 'source_last_event');
+                        if (is_object($info)) {
+                            $cam->checkAndUpdateCmd('source_last_event', $last_event['source']);
+                        }
+                    //self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                     }
-                   //self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
+                    $cam->refreshCameraInfos("cron10");
                 }
-                $cam->refreshCameraInfos("cron10");
             }
         }
     }
     public static function cron($_eqLogic_id = null)
     {
-        if ($_eqLogic_id == null) {
-            $eqLogics = self::byType('blink_camera', true);
-        } else {
-            $eqLogics = array(self::byId($_eqLogic_id));
-        }
-        foreach ($eqLogics as $cam) {
-            self::logdebug('blink_camera->cron() '.$cam->getId());
-            if ($cam->getIsEnable() == 1 && blink_camera::isConnected()) {
-                self::logdebug('blink_camera->cron() '.$cam->getId().' camera active');
-                $cam->getLastEventDate();
-                //$cam->refreshCameraInfos();
+        if (blink_camera::isConnected()) {
+            if ($_eqLogic_id == null) {
+                $eqLogics = self::byType('blink_camera', true);
+            } else {
+                $eqLogics = array(self::byId($_eqLogic_id));
+            }
+            foreach ($eqLogics as $cam) {
+                self::logdebug('blink_camera->cron() '.$cam->getId());
+                if ($cam->getIsEnable() == 1) {
+                    self::logdebug('blink_camera->cron() '.$cam->getId().' camera active');
+                    $cam->getLastEventDate();
+                    //$cam->refreshCameraInfos();
+                }
             }
         }
     }
@@ -136,22 +140,26 @@ class blink_camera extends eqLogic
     public static function cronHourly($_eqLogic_id = null)
     {
         // self::logdebug('blink_camera->cronHourly()');
-           
-        if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
-            $eqLogics = self::byType('blink_camera', true);
-        } else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
-            $eqLogics = array(self::byId($_eqLogic_id));
-        }
-    
-        foreach ($eqLogics as $cam) {//parcours tous les équipements du plugin blink_camera
-            if ($cam->getIsEnable() == 1  && blink_camera_api::getToken(true)) {//vérifie que l'équipement est acitf
-                $cam->forceCleanup(true);
-               // $cam->getLastEventDate(true);
-                //$cam->refreshCameraInfos("cronHourly");
+        if (blink_camera::isConnected()) {   
+            if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
+                $eqLogics = self::byType('blink_camera', true);
+            } else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
+                $eqLogics = array(self::byId($_eqLogic_id));
+            }
+        
+            foreach ($eqLogics as $cam) {//parcours tous les équipements du plugin blink_camera
+                if ($cam->getIsEnable() == 1 ) {//vérifie que l'équipement est acitf
+                    $cam->forceCleanup(true);
+                // $cam->getLastEventDate(true);
+                    //$cam->refreshCameraInfos("cronHourly");
+                }
             }
         }
     }
-
+    public static function cronDayly($_eqLogic_id = null)
+    {
+        self::getToken(true);
+    }
 
     public static function isOpenMediasAccess() {
         return !config::byKey('medias_security', 'blink_camera');
