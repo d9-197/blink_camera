@@ -138,6 +138,7 @@ class blink_camera extends eqLogic
     {
         // self::logdebug('blink_camera->cronHourly()');
         if (self::isConnected()) {
+            self::getToken(true);
             if ($_eqLogic_id == null) { // La fonction n’a pas d’argument donc on recherche tous les équipements du plugin
                 $eqLogics = self::byType('blink_camera', true);
             } else {// La fonction a l’argument id(unique) d’un équipement(eqLogic
@@ -152,9 +153,9 @@ class blink_camera extends eqLogic
             }
         }
     }
-    public static function cronDayly($_eqLogic_id = null)
+    public static function cronDaily($_eqLogic_id = null)
     {
-        self::getToken(true);
+       //self::getToken(true);
     }
     
     private static function startwith(string $text,string $criteria) {
