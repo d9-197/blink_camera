@@ -24,9 +24,12 @@
         "Recharger la configuration": "Reload configuration",
         "Paramètres": "Paramètres",
         "Options": "Options",
-        "Actions": "Actions"
+        "Actions": "Actions",
+        "Ajouter toutes les caméras":"Ajouter toutes les caméras"
+
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
+        "Ajout des caméras":"Ajout des caméras",
         "Choisir": "Choisir"
     },
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
@@ -75,6 +78,14 @@
         "Vidéos": "Vidéos",
         "Vignettes de la caméra": "Vignettes de la caméra",
         "Vignettes des vidéos": "Vignettes des vidéos"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.scan.php": {
+        "Erreur de connexion à votre compte Blink":"Erreur de connexion à votre compte Blink",
+        "Recherche des caméras...":"Recherche des caméras...",
+        "caméra ajoutée":"La caméra a été ajoutée",
+        "caméra existe déja":"La caméra existe déja",
+        "caméra(s)":"caméra(s)",
+        "Fermer":"Retour"
     },
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Système armé ?": "Système armé ?",
