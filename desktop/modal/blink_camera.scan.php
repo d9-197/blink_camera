@@ -41,7 +41,7 @@ $('.bt_return_cfg').on('click', function (e) {
 <fieldset>
 <?php
    
-    $eqLogics = blink_camera::byType('blink_camera', true);
+    $eqLogics = blink_camera::byType('blink_camera', false);
     $config = blink_camera::getAccountConfigDatas2(false,false);
     if ($config==null) {
         throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
