@@ -7,6 +7,7 @@
   + Addition of a "template" for the "battery" info : Display a "plug" icon when plugin detect that camera is AC powered.
   + Addition of a "magnifying glass" in the "History" view if the thumbnail size have been reduce.
   + **"History" view opening is faster (no new download of videos/images**
+  + **Addition of a button to automaticaly add all the cameras**
 
 > 2023-07-04
   + V2.7.1 Beta

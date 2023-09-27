@@ -7,6 +7,7 @@
   + Ajout d'un "template" pour l'info "battery" : affiche une icone "prise" lorsque le plugin détecte que la caméra est sur secteur
   + Ajout d'une loupe dans la vue "Historique" si la vignette a été réduite.
   + **L'ouverture de la vue historique est plus rapide (pas de retéléchargement des vidéos/images)**
+  + **Ajout d'un bouton permettant d'ajouter toutes les caméras automatiquement**
 
 > 2023-07-04
   + V2.7.1

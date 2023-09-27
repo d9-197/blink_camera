@@ -1,3 +1,11 @@
+$('.eqLogicAction[data-action=scan]').on('click', function() {
+  $('#md_modal').dialog({
+    title: "{{Ajout des caméras}}"
+  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.scan').dialog('open')
+  //index.php?v=d&plugin=blink_camera&modal=
+
+})
+
 /**
  * Fonction de rÃ©cupÃ©ration des donnÃ©es correspondant au critÃ¨re de recherche
  * @param   {String} condition - Chaine indiquant la condition Ã  remplir
