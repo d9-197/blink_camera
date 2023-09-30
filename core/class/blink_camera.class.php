@@ -53,17 +53,17 @@ class blink_camera extends eqLogic
     ));
 
     public static function logDebugBlinkAPIRequest($message) {
-        //if (!config::byKeys('log::level::blink_camera_api')) {
-        //   config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
-        //}
-        //log::add('blink_camera_api','debug',$message);
+        if (!config::byKeys('log::level::blink_camera_api')) {
+           config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
+        }
+        log::add('blink_camera_api','debug',$message);
         return;
     }
     public static function logDebugBlinkAPIResponse($message) {
-        //if (!config::byKeys('log::level::blink_camera_api')) {
-        //    config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
-        //}
-        //log::add('blink_camera_api','debug',$message);
+        if (!config::byKeys('log::level::blink_camera_api')) {
+            config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
+        }
+        log::add('blink_camera_api','debug',$message);
         return;
     }
     private static function logDebugBlinkResponse($message) {
@@ -173,7 +173,7 @@ class blink_camera extends eqLogic
         $jsonrep=null;
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
             $lock=self::checkAndGetLock('getQuery');
-            self::logDebugBlinkAPIRequest("CALL[queryGet]: ".$url);
+            self::logDebugBlinkAPIRequest("CALL[queryGet]: ".'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url);
             $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
             $r = $client->request('GET', $url, [
                 //['http_errors' => false],
@@ -436,13 +436,17 @@ class blink_camera extends eqLogic
             // Check if a new token is required
             //TODO : don't check if pin code verification is required
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
-                $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
+               /* $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
                 try {
                     self::logDebugBlinkAPIRequest("CALL[queryToken] -->");
                     $jsonrep=self::queryGet($url);
                 }
                 catch (TransferException $e) {
                     self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
+                    $need_new_token=true;
+                }*/
+                $reponseHomescreen=self::getHomescreenData("getToken");
+                if ($reponseHomescreen['message']) {
                     $need_new_token=true;
                 }
             } else {
@@ -768,7 +772,7 @@ class blink_camera extends eqLogic
         $jsonrep=json_decode('{"message":"error"}',true);
         if (self::isConnected()) {
             $_accountBlink=config::byKey('account', 'blink_camera');
-            $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
+            $url='/api/v4/accounts/'.$_accountBlink.'/homescreen';
             try {
                 self::logDebugBlinkAPIRequest("CALL[getHomescreenData from ".$callOrig."] -->");
                 $jsonrep=self::queryGet($url);
