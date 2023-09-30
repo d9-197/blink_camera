@@ -247,13 +247,17 @@ public static function queryGet(string $url) {
             // Check if a new token is required
             //TODO : don't check if pin code verification is required
             if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
-                $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
+                /*$url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
                 try {
                     blink_camera::logDebugBlinkAPIRequest("CALL[queryToken] -->");
                     $jsonrep=self::queryGet($url);
                 }
                 catch (TransferException $e) {
                     blink_camera::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
+                    $need_new_token=true;
+                }*/
+                $reponseHomescreen=self::getHomescreenData("getToken");
+                if ($reponseHomescreen['message']) {
                     $need_new_token=true;
                 }
             } else {
@@ -830,7 +834,7 @@ public static function queryGet(string $url) {
         $jsonrep=json_decode('{"message":"error"}',true);
         if (blink_camera::isConnected()) {
             $_accountBlink=config::byKey('account', 'blink_camera');
-            $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
+            $url='/api/v4/accounts/'.$_accountBlink.'/homescreen';
             try {
                 blink_camera::logDebugBlinkAPIRequest("CALL[getHomescreenData from ".$callOrig."] -->");
                 $jsonrep=self::queryGet($url);
