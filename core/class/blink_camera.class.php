@@ -1522,8 +1522,8 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             $datas=self::getHomescreenData("refreshCameraInfos - ".$callOrig);
             if (!$datas['message']) {
                 foreach($datas['cameras'] as $camera) {
-                    //self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
-                    if ($camera['id']==$this->getConfiguration('camera_id')) {
+                     if ($camera['id']==$this->getConfiguration('camera_id')) {
+                        self::logdebug('refreshCameraInfos() CAMERA '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
                         if ($camera['enabled']===true) {
                             $this->checkAndUpdateCmd('arm_status_camera', 1);
                             $this->setConfiguration('camera_status',true);
@@ -1548,8 +1548,8 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                     }
                 }
                 foreach($datas['owls'] as $camera) {
-                    //self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
                     if ($camera['id']==$this->getConfiguration('camera_id')) {
+                        self::logdebug('refreshCameraInfos() OWL '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
                         /*if ($camera['enabled']===true) {
                             $this->checkAndUpdateCmd('arm_status_camera', 1);
                             $this->setConfiguration('camera_status',true);
@@ -1565,8 +1565,8 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                     }
                 }
                 foreach($datas['doorbells'] as $camera) {
-                    //self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - doorbells - '.print_r($camera,true));
                     if ($camera['id']==$this->getConfiguration('camera_id')) {
+                        self::logdebug('refreshCameraInfos() DOORBELLS '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
                         if ($camera['enabled']===true) {
                             $this->checkAndUpdateCmd('arm_status_camera', 1);
                             $this->setConfiguration('camera_status',true);
@@ -1595,6 +1595,8 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                 }
                 foreach($datas['networks'] as $network) {
                     if ($network['id']==$this->getConfiguration('network_id')) {
+                        self::logdebug('refreshCameraInfos() NETWORKS '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($network,true));
+
                         if ($network['armed']===true) {
                             $this->checkAndUpdateCmd('arm_status', 1);
                         } else 
@@ -1609,14 +1611,14 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                 }
                 foreach($datas['sync_modules'] as $syncMod) {
                     if ($syncMod['network_id']==$this->getConfiguration('network_id')) {
-                        //self::logdebug('refreshCameraInfos: '.$this->getName().' sync module: '.print_r($syncMod,true));
-                        //self::logdebug('refreshCameraInfos: '.$this->getName().' sync module - local_storage_enabled='.$syncMod['local_storage_enabled'].' - local_storage_compatible='.$syncMod['local_storage_compatible'].' - local_storage_status='.$syncMod['local_storage_status']);
+                        self::logdebug('refreshCameraInfos() SYNC_MODULES '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($network,true));
+                        self::logdebug('refreshCameraInfos: '.$this->getName().' sync module - local_storage_enabled='.$syncMod['local_storage_enabled'].' - local_storage_compatible='.$syncMod['local_storage_compatible'].' - local_storage_status='.$syncMod['local_storage_status']);
                         $this->setConfiguration('storage', 'cloud');
                         if ($syncMod['local_storage_enabled'] && $syncMod['local_storage_compatible'] && $syncMod['local_storage_status']==='active') {
                             $this->setConfiguration('storage', 'local');
-                            //self::logdebug('refreshCameraInfos: storage=local');
+                            self::logdebug('refreshCameraInfos: storage=local');
                         } else {
-                            //self::logdebug('refreshCameraInfos: storage=cloud');
+                            self::logdebug('refreshCameraInfos: storage=cloud');
                         }
                         $this->setConfiguration('sync_id',$syncMod['id']);
                         break;
