@@ -958,7 +958,31 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             return $jsonrep;
         }
 	}
+    public function getCameraInfo2() {
+        $jsonrep=json_decode('{"message":erreur"}',true);
+        if (self::isConnected() && $this->isConfigured()) {
+            
+           // $url='/events/network/'.$this->getConfiguration('network_id');
+           // OK ALL : $url ='/api/v1/camera/usage';
+           // OK - OWL : $url='/api/v1/accounts/'.config::byKey('account', 'blink_camera').'/networks/'.$this->getConfiguration('network_id').'/owls/'.$this->getConfiguration('camera_id').'/config';
+           // OK - CAMERA : $url='/api/v2/accounts/'.config::byKey('account', 'blink_camera').'/networks/'.$this->getConfiguration('network_id').'/cameras/'.$this->getConfiguration('camera_id').'/config';
+           // THEORIQUEMENT OK - DOORBELL : $url='/api/v2/accounts/'.config::byKey('account', 'blink_camera').'/networks/'.$this->getConfiguration('network_id').'/doorbells/'.$this->getConfiguration('camera_id').'/config';
+           // OK : $url= '/api/v4/accounts/'.config::byKey('account', 'blink_camera').'/media_settings';
+           // OK - renvoi une erreur si pas de stockage local $url='/api/v1/accounts/'.config::byKey('account', 'blink_camera').'/networks/'.$this->getConfiguration('network_id').'/sync_modules/'.$this->getConfiguration('sync_id').'/local_storage/status';
 
+           try {
+               self::logDebugBlinkAPIRequest("CALL[getCameraInfo2] -->");
+               $jsonrep=self::queryGet($url);
+               #$folderJson=__DIR__.'/../../medias/getCameraInfoOwl.json';
+                #file_put_contents($folderJson,json_encode($jsonrep));
+            } catch (TransferException $e) {
+                self::logdebug('getCameraInfo2 (type device='.$this->getBlinkDeviceType().')- An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                return $jsonrep;
+            }
+            self::logdebug('getCameraInfo2  '.$url. ' - response:'.print_r($jsonrep, true));
+            return $jsonrep;
+        }
+	}
 	public function getCameraThumbnail($forceDownload=false) {
         self::logdebug('blink_camera->getCameraThumbnail() '.$this->getId().' START ' );
 
@@ -1046,12 +1070,13 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
     {
         $network_id = $this->getConfiguration("network_id");
         $camera_id = $this->getConfiguration("camera_id");
+        $camera_name = $this->getConfiguration("camera_name");
         $jsonstr="erreur_cloud";
         if (self::isConnected() && $this->isConfigured()) {
             $_tokenBlink=config::byKey('token', 'blink_camera');
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
-            $url='/api/v1/accounts/'.$_accountBlink.'/media/changed?since=2019-04-19T23:11:20+0000&page='.$page;
+            $url='/api/v2/accounts/'.$_accountBlink.'/media/changed?since=2021-04-19T00:00:00+0000&page='.$page;
             
             try {
                 self::logDebugBlinkAPIRequest("CALL[getVideoListCloud] -->");
@@ -1465,6 +1490,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
 		if ($this->isConfigured()&& $this->isConnected()) {
             $this->getCameraThumbnail();
             //$this->emptyCacheWidget();
+            //$datas2=$this->getCameraInfo2();
             if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
                 $datas=$this->getCameraInfo();
                 if (!$datas['message']) {
@@ -2443,7 +2469,7 @@ class blink_cameraCmd extends cmd
 
         }else if ($this->getLogicalId() == 'battery') {
             $result=parent::toHtml($_version,$_options,$_cmdColor);
-             blink_camera::logdebug('toHtml battery avant custo : '.print_r($result,true));
+            // blink_camera::logdebug('toHtml battery avant custo : '.print_r($result,true));
                
             $bl_cam=$this->getEqLogic();
             if ($bl_cam->getConfiguration('noBatterieCheck', 0) == 1) {
