@@ -1,5 +1,5 @@
 > 2023-08-12
-  + V2.8.0 Beta
+  + V2.8.0
   + Addition of the option "Widget width" in thumbnails size (config du plugin)
   + **Download of local storage videos (USB support).**
   + Addition of an "health" page

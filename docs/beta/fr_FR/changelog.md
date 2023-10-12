@@ -1,5 +1,5 @@
 > 2023-08-12
-  + V2.8.0 Beta
+  + V2.8.0
   + Ajout de l'option "Largeur du widget" dans le choix de la taille de la vignette (config du plugin)
   + **Ajout du téléchargement des vidéos stockées localement.**
   + Ajout d'une page "santé"
