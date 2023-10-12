@@ -1,0 +1,54 @@
+<div class="cmd cmd-widget #history#" data-type="info" data-subtype="binary" data-template="tmplicon" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#">
+  <div class="title #hide_name#">
+    <div class="cmdName">#name_display#</div>
+  </div>
+  <div class="content-sm btn bouton">
+    <span class="iconCmd"></span>
+  </div>
+  <div class="value">
+    <span class="timeCmd label label-default #history#" data-type="info"></span>
+  </div>
+  <template>
+    <div>time : date ({{Affiche l'info time sous forme de date}})</div>
+  </template>
+  <script>
+      //bouton#id#='on';
+      jeedom.cmd.addUpdateFunction('#id#',function(_options) {
+      let cmd = $('.cmd[data-cmd_id=#id#]')
+      // suppress on and off command
+      $('.cmd[data-cmd_id=#cmd_on_id#]').remove();
+      $('.cmd[data-cmd_id=#cmd_off_id#]').remove();
+
+      if ('#_time_widget_#' == '1') {
+        jeedom.cmd.displayDuration(_options.valueDate, cmd.find('.timeCmd'), '#time#')
+      } else {
+        cmd.find('.timeCmd').parent().remove()
+      }
+      cmd.attr('title', '{{Date de valeur}} : '+_options.valueDate+'<br/>{{Date de collecte}} : '+_options.collectDate)
+      if (_options.display_value == '1') {
+        cmd.find('.iconCmd').empty().append("#_icon_on_#");
+        bouton#id#='on';
+      } else {
+        cmd.find('.iconCmd').empty().append("#_icon_off_#");
+        bouton#id#='off';
+      }
+      });
+      $('.cmd[data-cmd_id=#id#] .bouton').off().on('click', function (event) {
+        //alert(bouton#id#);
+        if (bouton#id#=='off'){
+          jeedom.cmd.execute({id: '#cmd_on_id#', notify: false});
+          jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}]);
+          bouton#id#='on';
+        } else{
+          jeedom.cmd.execute({id: '#cmd_off_id#', notify: false});
+          jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}]);
+          bouton#id#='off';
+        }
+        event.preventDefault()
+        event.stopPropagation()
+      });
+
+
+    jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}])
+  </script>
+</div>

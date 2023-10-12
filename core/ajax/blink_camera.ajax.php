@@ -55,20 +55,25 @@ try {
 		ajax::success($return);
     }
     if (init('action') == 'test_blink') {
-        $status = blink_camera::getToken(true);
+        $status = blink_camera::getToken(false);
         $json='{"token":"false"}';
         if ($status===true) {
             $json='{"token":"true"}';
             if ($need_pin_verification=config::byKey('verif', 'blink_camera')==="false") {
                 $json='{"token":"verif"}';
             }
+        } else {
+            if (config::byKey('limit_login', 'blink_camera')==="true") {
+                $json='{"token":"limit"}';
+            }
+
         }
         //blink_camera::logdebug("test connexion : ".$json);
         $return=json_encode($json);
 		ajax::success($return);
     }
     if (init('action') == 'reinitConfig') {
-        $status = blink_camera::getToken(true);
+        $status = blink_camera::getToken(false);
         $json='{"reinit":"KO"}';
         config::save('token', '', 'blink_camera');
         config::save('account', '', 'blink_camera');

@@ -1,7 +1,20 @@
-[**&rarr; Lien pour soutenir les développements de ce plugin gratuit**](https://fr.tipeee.com/duke-9)
+> 2023-08-12
+  + V2.8.0 Beta
+  + Ajout de l'option "Largeur du widget" dans le choix de la taille de la vignette (config du plugin)
+  + **Ajout du téléchargement des vidéos stockées localement.**
+  + Ajout d'une page "santé"
+  + **Ajout des noms des modèles de caméra dans la liste des équipements,**
+  + Ajout d'un "template" pour l'info "battery" : affiche une icone "prise" lorsque le plugin détecte que la caméra est sur secteur
+  + Ajout d'une loupe dans la vue "Historique" si la vignette a été réduite.
+  + **L'ouverture de la vue historique est plus rapide (pas de retéléchargement des vidéos/images)**
+  + **Ajout d'un bouton permettant d'ajouter toutes les caméras automatiquement**
+
+> 2023-07-04
+  + V2.7.1
+  + Fix sécurité
 
 > 2023-04-14
-  + V2.7.0 Beta
+  + V2.7.0
   + **Ajout d'un widget spécial pour les commandes "Statut","Armer" et "Désarmer" des caméras ou systèmes.** Voir la documentation plus de détail.
 
 > 2023-03-23

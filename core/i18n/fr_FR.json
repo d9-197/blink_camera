@@ -20,13 +20,16 @@
         " Système ": " Système ",
         " Caméra ": " Caméra ",
         "Nom": "Nom",
-        "Liste de commandes": "Liste de commandes",
+        "Liste de commandes": "Id logique",
         "Recharger la configuration": "Reload configuration",
         "Paramètres": "Paramètres",
         "Options": "Options",
-        "Actions": "Actions"
+        "Actions": "Actions",
+        "Ajouter toutes les caméras":"Ajouter toutes les caméras"
+
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
+        "Ajout des caméras":"Ajout des caméras",
         "Choisir": "Choisir"
     },
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
@@ -57,7 +60,15 @@
         "Sauvegarder et tester la connexion Blink":"Sauvegarder et tester la connexion Blink",
         "Sécurité": "Sécurité",
         "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?",
-        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\"."
+        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".",
+        "Type de stockage":"Type de stockage",
+        "Cloud":"Cloud",
+        "Local":"Local",
+        "Largeur du widget":"Largeur du widget",
+        "Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).":"Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).",
+        "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)",
+        "Sauvegarde":"Sauvegarde",
+        "Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?":"Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?<br><span style='color:#F00;'>ATTENTION DANGER !</span><BR><span style='color:#F00;'>Attention la taille des sauvegardes Jeedom peut devenir très importante</span>"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Rechercher"
@@ -67,6 +78,14 @@
         "Vidéos": "Vidéos",
         "Vignettes de la caméra": "Vignettes de la caméra",
         "Vignettes des vidéos": "Vignettes des vidéos"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.scan.php": {
+        "Erreur de connexion à votre compte Blink":"Erreur de connexion à votre compte Blink",
+        "Recherche des caméras...":"Recherche des caméras...",
+        "caméra ajoutée":"La caméra a été ajoutée",
+        "caméra existe déja":"La caméra existe déja",
+        "caméra(s)":"caméra(s)",
+        "Fermer":"Retour"
     },
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Système armé ?": "Système armé ?",
@@ -92,7 +111,18 @@
         "URL vignette caméra":"URL vignette caméra",
         "Chemin vignette caméra":"Chemin vignette caméra",
         "Mode hors ligne":"Attention le plugin est hors ligne (vérifiez la configuration du plugin)",
-        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe dans la configuration du plugin."
+        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe dans la configuration du plugin.",
+        "APImessage":"[Message des serveurs Blink] ",
+        "System is busy, please wait":"Le système est occupé, Merci de patienter.",
+        "Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes.":"La limite de connexion sur les serveurs Blink est atteinte. Le plugin Jeedom se déconnecte automatiquement (widgets et vue historique) mais n'ouvrez plus la page de configuration pendant 60 minutes.",
+        "Login attempted too quickly. Please try again in a few seconds.":"Tentative de connexion trop rapide. Veuillez réessayer dans quelques secondes.",
+        "Invalid credentials":"Votre compte ou votre mot de passe n'est pas valide",
+        "xt":"Outdoor génération 1",
+        "catalina":"Outdoor génération 3",
+        "white" : "Indoor",
+        "owl": "Mini",
+        "lotus": "Doorbell",
+        "type_name_missing":"Modèle de caméra inconnu"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",

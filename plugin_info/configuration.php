@@ -22,8 +22,17 @@ if (!isConnect()) {
     include_file('desktop', '404', 'php');
     die();
 }
+
 ?>
 <form class="form-horizontal">
+    <div style ="float: right; width:300px;margin: 0px; border-radius: 5px; background-color: transparent; padding: 1em;border:0">
+        <span style ="vertical-align : top;">
+            <a href="https://fr.tipeee.com/duke-9" target="_new">
+                <span style ="vertical-align : center;align:right"><img width="30px" src="plugins/blink_camera/plugin_info/tipeee_tip_btn.svg"/>&nbsp;&nbsp;Merci aux tipeurs qui soutiennent les développements</span>
+                <!--iframe style ="margin: 0px; border-radius: 5px; background-color: transparent;padding: 1em;border:0" allowtransparency = "true" src="https://fr.tipeee.com/widgets/OwIPwBrn6nRpx3LOa74tH0tRSEHwZz7ULWeP24z6AU7oEpOFiSagO5NFo1erbqPm?api_key=E3ms55Lt3Mp826M7eSHhmLDH2oAd2KDcqMipf3H7XQ1G5QgRJLbsA6HKrZqmcgw3&v=1693497960833"></iframe-->
+            </a>
+        </span>
+    </div>
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
         <div class="form-group">
@@ -34,9 +43,6 @@ if (!isConnect()) {
             <div class="col-lg-3">
                 <a id="bt_test_blink" class="btn btn-success btn-xs">{{Sauvegarder et tester la connexion Blink}}</a>
             </div>
-            <!--div class="col-lg-3">
-                <a id="bt_reinit_blink" class="btn btn-success btn-xs">{{Réinitialiser la config Blink du plugin}}</a>
-            </div-->
         </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Mot de passe}}</label>
@@ -80,6 +86,16 @@ if (!isConnect()) {
                 <input  type="checkbox"class="configKey form-control" data-l1key="medias_security"/>
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
+            <div class="col-lg-3">
+                <select  class="configKey form-control" data-l1key="blink_base_url">
+                    <option value="internal">{{Interne}}</option>
+                    <option value="external">{{Externe}}</option>
+                </select>
+            </div>
+        </div>
+
         <h4 class="icon_blue"><i class="fa fa-eye"></i> {{Widget}}</h4>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Contenu de la vignette}}</label>
@@ -94,27 +110,22 @@ if (!isConnect()) {
         <div class="form-group" id="fallback_thumb">
             <label class="col-lg-5 control-label">{{Afficher la vignette de caméra s'il n'y a pas de vidéo ?}}</label>
             <div class="col-lg-1">
-                <input  type="checkbox"class="configKey form-control" data-l1key="fallback_to_thumbnail"/>
+                <input  id='fallback_checkbox' type="checkbox"class="configKey form-control" data-l1key="fallback_to_thumbnail"/>
+            </div>
+            <div id="warning_thumb" class="warning ">
+            {{Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).}}
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Taille de la vignette}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_size_thumbnail">
+                    <option value="-1.0">{{Largeur du widget}}</option>
                     <option value="0.1">10%</option>
                     <option value="0.2">20%</option>
                     <option value="0.3">30%</option>
                     <option value="0.4">40%</option>
                     <option value="0.5">50%</option>
-                </select>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-lg-3 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
-            <div class="col-lg-3">
-                <select  class="configKey form-control" data-l1key="blink_base_url">
-                    <option value="internal">{{Interne}}</option>
-                    <option value="external">{{Externe}}</option>
                 </select>
             </div>
         </div>
@@ -125,7 +136,12 @@ if (!isConnect()) {
                 <input type="number" class="configKey form-control" data-l1key="nb_max_video" min="0" />
             </div>
         </div>
-
+        <div class="form-group" id="offline_history">
+            <label class="col-lg-5 control-label">{{Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)}}</label>
+            <div class="col-lg-1">
+                <input  id='offline_history' type="checkbox"class="configKey form-control" data-l1key="offline_history"/>
+            </div>
+        </div>
         <div class="form-group">
             <label class="col-lg-3 control-label">{{Taille des aperçus des vidéos}}</label>
             <div class="col-lg-3">
@@ -135,18 +151,23 @@ if (!isConnect()) {
                     <option value="0.3">30%</option>
                     <option value="0.4">40%</option>
                     <option value="0.5">50%</option>
-                    <!--option value="0.6">60%</option>
+                    <option value="0.6">60%</option>
                     <option value="0.7">70%</option>
                     <option value="0.8">80%</option>
                     <option value="0.9">90%</option>
-                    <option value="1">100%</option-->
+                    <option value="1">100%</option>
                 </select>
             </div>
         </div>
-
+        <h4 class="icon_blue"><i class="fa fa-lock"></i> {{Sauvegarde}}</h4>
+        <div class="form-group" id="medias_security">
+            <label class="col-lg-5 control-label">{{Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?}}</label>
+            <div class="col-lg-1">
+                <input  type="checkbox"class="configKey form-control" data-l1key="include_medias_in_backup"/>
+            </div>
+        </div>
   </fieldset>
 </form>
-
 <script>
     function checkConnexionBlink() {
         $.ajax({
@@ -171,6 +192,11 @@ if (!isConnect()) {
                             $.fn.showAlert({message: "{{Connexion à votre compte Blink OK mais un code de vérification est nécessaire}}", level: 'warning'});
                             //$.fn.showAlert({message: "{{Connexion à votre compte Blink OK - Email de vérification nécessaire}}", level: 'info'});
                             $('#verifdiv').show();
+                        } else if ($res.token == "limit") {
+                            $.fn.showAlert({message: "{{limite connexion}}", level: 'danger'});
+                            $('#verifdiv').hide();
+                            //$.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
+                            $('.blink_cfg').hide();
                         } else {
                             $.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
                             $('#verifdiv').hide();
@@ -235,6 +261,12 @@ if (!isConnect()) {
             $(fallback_thumb).show();
         } else {
             $(fallback_thumb).hide();
+        }
+        if ($('#thumb_type_select').val()==2 ) {
+            $(warning_thumb).show();
+            $(fallback_checkbox).prop( "checked", true );
+        } else {
+            $(warning_thumb).hide();
         }
     })
     checkConnexionBlink();

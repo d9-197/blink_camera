@@ -1,5 +1,3 @@
-[&rarr; Lien pour soutenir les développements de ce plugin gratuit](https://fr.tipeee.com/duke-9)
-
 > 2023-03-23
   + V2.6.0
   + **Ajout d'un mode "hors ligne"** : quand les serveurs Blink sont inaccessibles ou quand le mot de passe a expiré, le plugin utilise les vidéos, photos et infos déjà présentes dans Jeedom.
