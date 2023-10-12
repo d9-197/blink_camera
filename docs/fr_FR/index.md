@@ -26,7 +26,7 @@ Les informations liées à la caméra sont également disponibles :
 
 **Cas du stockage local**\
 Il existe 3 modes de stockage pour les vidéos/images des caméras
-- "CLoud" Le stockage dans le Cloud Blink
+- "Cloud" Le stockage dans le Cloud Blink
 - "Local" Le stockage en local sur clé USB : nécessite un module de synchronisation v2
 - "Pas de stockage" (ni Cloud, ni clé USB sur un module de synchronisation v2.
 
