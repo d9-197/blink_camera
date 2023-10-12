@@ -53,16 +53,12 @@ class blink_camera extends eqLogic
     ));
 
     public static function logDebugBlinkAPIRequest($message) {
-        if (!config::byKeys('log::level::blink_camera_api')) {
-           config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
-        }
+        config::save('log::level::blink_camera_api', config::byKey('log::level::blink_camera'));
         log::add('blink_camera_api','debug',$message);
         return;
     }
     public static function logDebugBlinkAPIResponse($message) {
-        if (!config::byKeys('log::level::blink_camera_api')) {
-            config::save('log::level::blink_camera_api', '{"100":"1","200":"0","300":"0","400":"0","1000":"0","debug":"0"}');
-        }
+        config::save('log::level::blink_camera_api', config::byKey('log::level::blink_camera'));
         log::add('blink_camera_api','debug',$message);
         return;
     }
