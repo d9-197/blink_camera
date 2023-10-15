@@ -727,7 +727,7 @@ class blink_camera extends eqLogic
                     $filename='thumb.png';
                 }
                 $folderBase=__DIR__.'/../../medias/'.$equipement_id.'/';
-            if ((!file_exists($folderBase.$filename) || $overwrite) && self::isConnected()) {
+            if (($filename=="last" || !file_exists($folderBase.$filename) || $overwrite) && self::isConnected()) {
                 //self::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : $filename");
                 if (!empty($_tokenBlink) && !empty($_accountBlink) && !empty($_regionBlink)) {
                     if (!file_exists($folderBase)) {
@@ -873,7 +873,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
 //$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph3.json';
 //file_put_contents($folderJson,json_encode($jsonrep));
                                     jeedomUtils.sleep(1);
-                                    return self::getMediaForce($url_media, $cam->getId(), $filename,'mp4',true);
+                                    return self::getMediaForce($url_media, $cam->getId(), $filename,'mp4',false);
                                 }
                             }
                         }
@@ -1003,7 +1003,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                         } else {
                             $timestamp_thumb="";
                         }
-                        $path=self::getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail".$timestamp_thumb,"jpg",true);
+                        $path=self::getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail".$timestamp_thumb,"jpg",false);
                     }
                 }	  
                 foreach ($datas['owls'] as $device) {
@@ -1016,7 +1016,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                         } else {
                             $timestamp_thumb="";
                         }
-                        $path=self::getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail".$timestamp_thumb,"jpg",true);
+                        $path=self::getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail".$timestamp_thumb,"jpg",false);
                     }
                 }
                 foreach ($datas['doorbells'] as $device) {
@@ -1029,7 +1029,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                         } else {
                             $timestamp_thumb="";
                         }
-                        $path=self::getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail".$timestamp_thumb,"jpg",true);
+                        $path=self::getMediaForce($device['thumbnail'].'.jpg', $this->getId(),"thumbnail".$timestamp_thumb,"jpg",false);
                     }
                 }
 
@@ -1365,6 +1365,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             }
             if (isset($last_event)) {
                 self::logdebug('blink_camera->getLastEvent() '.$this->getName().' return an event:'.$last_event['created_at']);
+                self::logdebug('blink_camera->getLastEvent() '.$this->getName().' return an event:'.$last_event['media']);
                 self::getMedia($last_event['media'], $this->getId(), 'last','mp4');
                 return $last_event;
             } else {
