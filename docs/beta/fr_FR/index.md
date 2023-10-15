@@ -1,5 +1,3 @@
-[**&rarr; Lien vers GITHUB de ce plugin gratuit**](https://github.com/d9-197/blink_camera)
-
 # Description
 
 Plugin dédié aux caméras Blink.
@@ -25,6 +23,15 @@ Les informations liées à la caméra sont également disponibles :
 * [Doorbell uniquement] Source du dernier évenement ("pir" pour la détection, "button_press" pour la sonette)
 
 >**Dans le plugin, les caméras Blink Mini et les Doorbell n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini, il n'est pas possible d'activer/désactiver la détection d'une Doorbell**
+
+**Cas du stockage local**\
+Il existe 3 modes de stockage pour les vidéos/images des caméras
+- "Cloud" Le stockage dans le Cloud Blink
+- "Local" Le stockage en local sur clé USB : nécessite un module de synchronisation v2
+- "Pas de stockage" (ni Cloud, ni clé USB sur un module de synchronisation v2.
+
+Les modes "Cloud" et "Local" permettent de récupérer les évenements (toutes les minutes : ce n'est pas instantané).
+Le mode "pas de stockage" ne permet pas de récupérer le dernier évènement, ni les vidéos/images. Ce plugin n'a donc que peu d'interêt si vous en mode "pas de stockage"   
 
 
 # Configuration du plugin
@@ -80,6 +87,10 @@ Pour cela, vous devez cliquer sur le bouton "Ajouter" ayant l'icône "+".
 Vous pouvez alors renseigner un nom pour l'équipement.
 
 La fenêtre de configuration de l'équipement s'ouvre ensuite.
+
+## Ajout automatique de toutes les caméras associées à votre compte Blink
+Lorsque vous cliquez sur ce bouton, le plugin va tenter d'ajouter les caméras associées à votre compte qui ne seraient pas déjà présentes dans Jeedom.
+
 
 ## Configuration d'un équipement
 

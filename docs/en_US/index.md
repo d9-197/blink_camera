@@ -4,6 +4,8 @@ Plugin dedicated to Blink cameras.
 
 It allows you to display videos from different cameras.
 
+[**&rarr; Link to GITHUB for this free plugin**](https://github.com/d9-197/blink_camera)
+
 The following actions are available (depending on the camera model):
 - to arm/disarm the motion detection of a system
 - to arm/disarm the motion detection of a camera.
@@ -21,6 +23,15 @@ Camera information is also available:
 * [Doorbell only] Source of the last evebt ("pir" for IR detection, "button_press" pour the button)
 
 >**In the plugin, Blink Mini cameras and Doorbell do not have the same capabilities as other Blink XT, Outdoor cameras, etc.<br> For example, camera thumbnails are not implemented for Mini**
+
+**Case of the local storage**\
+There are 3 storage configurations for camera videos/images.
+- "Cloud": Storage on the Blink Cloud
+- "Local": Storage on a USB key : a synchronisation module v2 is required
+- "No storage": no Cloud, no USB key.
+
+The "Cloud" and "Local" configurations allow the plugin to obtain the last event (every minutes : it is not instantaneous).
+The "No storage" configuration does not allow obtaining the last event and does not allow obtaining videos/images. In this case, this plugin is not very useful.   
 
 # Configuration of the plugin
 
@@ -42,11 +53,13 @@ In the plugin configuration screen the following options are available:
 
 * Widget
   + Thumbnail content: allows you to choose what is displayed in the widget
+    + If you choose "Last video", a checkbox is displayed to choose whether to display (or not) the thumbnail of the camera if there are no videos.
+
   + Thumbnail size: allows you to define the reduction to be applied (as a percentage of the initial size).
     
 * Historical view
   + This view is accessible from the widget
-  + It displays the latest videos available
+  + It displays the latest videos/thumbnails available
   + The maximum number of downloaded videos allows you to limit the amount of data to download when opening the historical view
   + The size of the video previews can also be configured.
 
@@ -98,12 +111,18 @@ The "Display" checkboxes allow you to choose the information or commands that wi
 
 ![Onglet commandes](..\assets\images\cfg_commands.png "Commandes")
 
+>**Special widget for "Camera armed?" and "System armed?" commands.**<br>
+By default, these commands show the detection status of the camera/system.<br>
+ It is possible to modify the display of these commands in order to have only one button for the 3 commands "Camera armed?", "Arm the camera", "Disarm the camera" (and for the 3 System commands).<br>In this case, the icon of the button which indicates the state (open padlock: no detection, closed padlock: detection) and by clicking on it you can change the state.<br>
+ To activate this operating mode, you must use the "Blink_camera/Camera or System status" widget in the advanced configuration of the "Camera armed?" commands and/or "System armed?":<br>
+>![Open advanced configuration of commands](..\assets\images\cfg_command_switch_1.png "Commands config")<br>
+>![select the widget](..\assets\images\cfg_command_switch_2.png "Select widget")
 
 Historical view
 ===
 The history view is accessible from the camera widget. (History command)
 
-This view gives you access to the latest videos from the camera.
+This view gives you access to the latest videos or lastest thumbnails from the camera.
 
 The number of videos displayed as well as the size of the thumbnails is configurable on the plugin: see [Configuration du plugin](#-Configuration-du-plugin)
 

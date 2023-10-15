@@ -55,7 +55,7 @@ try {
 		ajax::success($return);
     }
     if (init('action') == 'test_blink') {
-        $status = blink_camera::getToken(true);
+        $status = blink_camera::getToken(false);
         $json='{"token":"false"}';
         if ($status===true) {
             $json='{"token":"true"}';
@@ -73,7 +73,7 @@ try {
 		ajax::success($return);
     }
     if (init('action') == 'reinitConfig') {
-        $status = blink_camera::getToken(true);
+        $status = blink_camera::getToken(false);
         $json='{"reinit":"KO"}';
         config::save('token', '', 'blink_camera');
         config::save('account', '', 'blink_camera');

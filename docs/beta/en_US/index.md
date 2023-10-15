@@ -24,6 +24,15 @@ Camera information is also available:
 
 >**In the plugin, Blink Mini cameras and Doorbell do not have the same capabilities as other Blink XT, Outdoor cameras, etc.<br> For example, camera thumbnails are not implemented for Mini**
 
+**Case of the local storage**\
+There are 3 storage configurations for camera videos/images.
+- "Cloud": Storage on the Blink Cloud
+- "Local": Storage on a USB key : a synchronisation module v2 is required
+- "No storage": no Cloud, no USB key.
+
+The "Cloud" and "Local" configurations allow the plugin to obtain the last event (every minutes : it is not instantaneous).
+The "No storage" configuration does not allow obtaining the last event and does not allow obtaining videos/images. In this case, this plugin is not very useful.   
+
 # Configuration of the plugin
 
 In the plugin configuration screen the following options are available:

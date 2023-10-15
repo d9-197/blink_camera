@@ -24,9 +24,11 @@
         "Recharger la configuration": "Reload configuration",
         "Paramètres": "Settings",
         "Options": "Options",
-        "Actions": "Actions"
+        "Actions": "Actions",
+        "Ajouter toutes les caméras":"Add all cameras"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
+        "Ajout des caméras":"Search for cameras",
         "Choisir": "Select"
     },
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
@@ -64,7 +66,10 @@
         "Local":"Local",
         "Largeur du widget":"Widget width",
         "Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).":"The thumbnails of the videos are not available if you use a local storage(USB).",
-        "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Do not download videos/images when opening the view (faster loading)"
+        "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Do not download videos/images when opening the view (faster loading)",
+        "Sauvegarde":"Backup",
+        "Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?":"Include videos/images of cameras in the Jeedom backup ?<br><span style='color:#F00;'>WARNING !</span><BR><span style='color:#F00;'>Be carefull : size of Jeedom backups can be very important</span>"
+
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
@@ -74,6 +79,14 @@
 		"Vidéos": "Videos",
         "Vignettes de la caméra": "Camera thumbnails",
         "Vignettes des vidéos": "Videos thumbnails"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.scan.php": {
+        "Erreur de connexion à votre compte Blink":"Error during Blink account connection",
+        "Recherche des caméras...":"Search for cameras...",
+        "caméra ajoutée":"The camera has been added",
+        "caméra existe déja":"The camera already exists",
+        "caméra(s)":"camera(s)",
+        "Fermer":"Back"
     },
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Système armé ?": "Armed system?",

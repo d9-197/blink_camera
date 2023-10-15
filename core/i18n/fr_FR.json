@@ -24,9 +24,12 @@
         "Recharger la configuration": "Reload configuration",
         "Paramètres": "Paramètres",
         "Options": "Options",
-        "Actions": "Actions"
+        "Actions": "Actions",
+        "Ajouter toutes les caméras":"Ajouter toutes les caméras"
+
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
+        "Ajout des caméras":"Ajout des caméras",
         "Choisir": "Choisir"
     },
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
@@ -63,7 +66,9 @@
         "Local":"Local",
         "Largeur du widget":"Largeur du widget",
         "Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).":"Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).",
-        "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)"
+        "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)",
+        "Sauvegarde":"Sauvegarde",
+        "Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?":"Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?<br><span style='color:#F00;'>ATTENTION DANGER !</span><BR><span style='color:#F00;'>Attention la taille des sauvegardes Jeedom peut devenir très importante</span>"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Rechercher"
@@ -73,6 +78,14 @@
         "Vidéos": "Vidéos",
         "Vignettes de la caméra": "Vignettes de la caméra",
         "Vignettes des vidéos": "Vignettes des vidéos"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.scan.php": {
+        "Erreur de connexion à votre compte Blink":"Erreur de connexion à votre compte Blink",
+        "Recherche des caméras...":"Recherche des caméras...",
+        "caméra ajoutée":"La caméra a été ajoutée",
+        "caméra existe déja":"La caméra existe déja",
+        "caméra(s)":"caméra(s)",
+        "Fermer":"Retour"
     },
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Système armé ?": "Système armé ?",

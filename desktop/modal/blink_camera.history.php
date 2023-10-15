@@ -19,7 +19,7 @@ log::add('blink_camera','debug','History['.$blink_camera->getId().'] START');
 
 
 if (blink_camera::isConnected() && $blink_camera->isConfigured()) {
-    $cameraConnected=false;
+    $cameraConnected=true;
 }
 
 $storage=$blink_camera->getConfiguration('storage');
