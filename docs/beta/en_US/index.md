@@ -40,6 +40,13 @@ In the plugin configuration screen the following options are available:
 * Blink account
   + Area to enter the email, password and pin code associated with your Blink account. (The pin code entry field is only displayed when the connection is not yet validated)
 
+>**Important point about the PIN code sent by Blink:**\
+>Blink regularly asks you to re-enter the PIN code (the duration between 2 requests is variable - and independent of the plugin). When this happens, you then receive a PIN code from Blink but the plugin does not have the information that a new code must be entered. In this case, it is likely that the PIN code field is not displayed in the plugin.\
+**You must then force a PIN code request from the plugin** (and therefore the redisplay of the field). To do this, enter a __bad__ email or password then save (at this stage you will have an error: which is normal since the email or password are not correct), then enter the correct email and password and save .\
+**A new PIN code is then sent to you by Blink.**
+The PIN code entry field will appear in the plugin config.\
+[**&rarr; Video guide request a pin code**](https://youtu.be/mDud775DjYQ)
+
 * Security
   + _"Block access to video and image URLs without being authenticated in Jeedom?"_
     - If the box is checked, the URLs of the videos (and images) can only be opened if the user is already connected to Jeedom
