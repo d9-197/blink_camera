@@ -834,7 +834,7 @@ self::logdebug('getMediaLocal syncId=: '.$syncId);
             $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
             $url_manifest_req=$url_manifest.'/request';
             try {
-//                self::checkAndGetLock('syncId-'.$syncId);
+                self::checkAndGetLock('getmedialocal-syncId-'.$syncId,10);
                 $jsonrep=self::queryPost($url_manifest_req);
             } catch (TransferException $e) {
                 self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -1110,11 +1110,21 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                 $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                 $url_manifest_req=$url_manifest.'/request';
                 try {
+                    self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,10);
                     $jsonrep=self::queryPost($url_manifest_req);
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
+                    $response = $e->getResponse();
+                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                    if($responseJson['code']===307) {
+                        sleep(5);
+                        self::releaseLock('getVideoListLocal-syncId-'.$syncId);
+                        self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,10);
+                        $jsonrep=self::queryPost($url_manifest_req);
+                    };
                     return $result;
                 }
+                self::releaseLock('getVideoListLocal-syncId-'.$syncId);
                 if (isset($jsonrep)) {
     //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
     //file_put_contents($folderJson,json_encode($jsonrep));
