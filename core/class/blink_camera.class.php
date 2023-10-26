@@ -829,29 +829,35 @@ class blink_camera extends eqLogic
         $_accountBlink=config::byKey('account', 'blink_camera');
         $netId=$cam->getConfiguration('network_id');
         $syncId=$cam->getConfiguration('sync_id');
+        $lastManifest=$this->getConfiguration('manifest');
         if (!$syncId =="") {
-self::logdebug('getMediaLocal syncId=: '.$syncId);
-            $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
-            $url_manifest_req=$url_manifest.'/request';
-            try {
-                self::checkAndGetLock('getmedialocal-syncId-'.$syncId,10);
-                $jsonrep=self::queryPost($url_manifest_req);
-            } catch (TransferException $e) {
-                self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
-                return self::ERROR_IMG;
+self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
+            if (!isset($lastManifest) || $lastManifest=='') {
+                self::requestNewManifest($_accountBlink,$netId,$syncId);
             }
-            if (isset($jsonrep)) {
-//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph1.json';
+            $lastManifest=$this->getConfiguration('manifest');
+            if (isset($lastManifest)) {
+//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph1.json';
 //file_put_contents($folderJson,json_encode($jsonrep));
 jeedomUtils.sleep(1);
-self::logdebug('getMediaLocal Phase 1 : '.print_r($jsonrep,true));
-                $manifest_req_id=$jsonrep['id'];
-                $url=$url_manifest_req.'/'.$manifest_req_id;
-                $jsonrep=self::queryGet($url);
+self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r($lastManifest,true));
+                $url=$url_manifest_req.'/'.$lastManifest;
+                try {
+                    $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase2-syncId-'.$syncId,10);
+                    $jsonrep=self::queryGet($url);
+                    self::releaseLock($flagToRelease);
+                } catch (TransferException $e) {
+                    self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
+                    self::releaseLock($flagToRelease);
+                    self::requestNewManifest($_accountBlink,$network_id,$syncId);
+                    $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase2-syncId-'.$syncId,10);
+                    $jsonrep=self::queryGet($url);
+                    self::releaseLock($flagToRelease);
+                }
                 if (isset($jsonrep)) {
-//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph2.json';
-//file_put_contents($folderJson,json_encode($jsonrep));
-self::logdebug('getMediaLocal Phase 2 : '.print_r($jsonrep,true));
+$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph2.json';
+file_put_contents($folderJson,json_encode($jsonrep));
+self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($jsonrep,true));
                     $manifest_id=$jsonrep['manifest_id'];
                     if (isset($manifest_id)) {
                         foreach ($jsonrep['clips'] as $clips) {
@@ -860,20 +866,25 @@ self::logdebug('getMediaLocal Phase 2 : '.print_r($jsonrep,true));
                                 $camera_name=$clips['camera_name'];
                                 $clip_date=$clips['created_at'];
                                 $filename=$clip_id.'-'.self::getDateJeedomTimezone($clip_date);
-self::logdebug('getMediaLocal clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$cam->getName().') - created_at : ' .$clip_date);
+self::logdebug('getMediaLocal PHASE 2 - syncId=: '.$syncId.' - clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$cam->getName().') - created_at : ' .$clip_date);
                                 if (strtolower($camera_name)===strtolower($cam->getName())) {
                                     $url_media=$url_manifest.'/'.$manifest_id.'/clip/request/'.$clip_id;
-self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                                     try {
+                                        $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase3-syncId-'.$syncId,100);
                                         $jsonrep=self::queryPost($url_media);
-                                    } catch (TransferException $e) {
+                                        self::releaseLock($flagToRelease);
+                                    } catch (Exception $e) {
                                         self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_media. ' - ERROR:'.print_r($e->getMessage(), true));
+                                        self::releaseLock($flagToRelease);
                                         return self::ERROR_IMG;
                                     }
-//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'/localStorage_ph3.json';
-//file_put_contents($folderJson,json_encode($jsonrep));
-                                    jeedomUtils.sleep(1);
-                                    return self::getMediaForce($url_media, $cam->getId(), $filename,'mp4',false);
+                                    self::logdebug('getMediaLocal PHASE 3 - syncId=: '.$syncId.' - result : '.$jsonrep);
+$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph3.json';
+file_put_contents($folderJson,json_encode($jsonrep));
+                                    $flagToRelease=self::checkAndGetLock('getMediaLocal-getMediaForce-syncId-'.$syncId.'-clip_id-'.$clip_id,10);
+                                    $resultMedia= self::getMediaForce($url_media, $cam->getId(), $filename,'mp4',false);
+                                    self::releaseLock($flagToRelease);
+                                    return $resultMedia;
                                 }
                             }
                         }
@@ -1054,6 +1065,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
     public function getVideoList(int $page=1)
     {
         if ($this->getConfiguration('storage')=='local') {
+
             $result=$this->getVideoListLocal($page);
         } else {
             $result=$this->getVideoListCloud($page);
@@ -1101,42 +1113,26 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             $_accountBlink=config::byKey('account', 'blink_camera');
             $_regionBlink=config::byKey('region', 'blink_camera');
             $syncId=$this->getConfiguration('sync_id');
+            $lastManifest=$this->getConfiguration('manifest');
             $cameraApiName=$this->getConfiguration('camera_name');
 
-
             if (!$syncId =="") {
-    self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
-//                self::checkAndGetLock('syncId-'.$syncId);
-                $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
-                $url_manifest_req=$url_manifest.'/request';
-                try {
-                    self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,10);
-                    $jsonrep=self::queryPost($url_manifest_req);
-                } catch (TransferException $e) {
-                    self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
-                    $response = $e->getResponse();
-                    $responseJson = json_decode($response->getBody()->getContents(),true);
-                    if($responseJson['code']===307) {
-                        sleep(5);
-                        self::releaseLock('getVideoListLocal-syncId-'.$syncId);
-                        self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,10);
-                        $jsonrep=self::queryPost($url_manifest_req);
-                    };
-                    return $result;
+                self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
+                if (!isset($lastManifest) || $lastManifest=='') {
+                    self::requestNewManifest($_accountBlink,$network_id,$syncId);
                 }
-                self::releaseLock('getVideoListLocal-syncId-'.$syncId);
-                if (isset($jsonrep)) {
-    //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
-    //file_put_contents($folderJson,json_encode($jsonrep));
+                $lastManifest=$this->getConfiguration('manifest');
+                if (isset($lastManifest)) {
     jeedomUtils.sleep(1);
-    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($jsonrep,true));
-                    $manifest_req_id=$jsonrep['id'];
+    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($jsonReqManisfest,true));
+                    $manifest_req_id=$jsonReqManisfest['id'];
                     $url=$url_manifest_req.'/'.$manifest_req_id;
                     try {
                         $jsonrep=self::queryGet($url);
                     } catch (TransferException $e) {
-                        self::logdebug('An error occured during Blink Cloud call GET : '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
-                        return $result;
+                        self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
+                        self::requestNewManifest($_accountBlink,$network_id,$syncId);
+                        $jsonrep=self::queryGet($url);
                     }
                     if (isset($jsonrep)) {
     //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
@@ -1182,6 +1178,33 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
         }
         return json_encode($result);
     }
+
+    function requestNewManifest($_accountBlink,$network_id,$syncId) {
+        $flagToRelease=self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,240);
+        $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
+        $url_manifest_req=$url_manifest.'/request';
+        try {
+            $jsonReqManisfest=self::queryPost($url_manifest_req);
+            //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
+            //file_put_contents($folderJson,json_encode($jsonReqManisfest));
+            $this->setConfiguration('manifest',$jsonReqManisfest['id']);
+            self::releaseLock($flagToRelease);
+        } catch (TransferException $e) {
+            self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
+            if (method_exists($e,'getResponse')) {
+                $response = $e->getResponse();
+                $responseJson = json_decode($response->getBody()->getContents(),true);
+                if($responseJson['code']===307) {
+    //                        sleep(5);
+    //                        self::releaseLock('getVideoListLocal-syncId-'.$syncId);
+    //                        self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,10);
+    //                        $jsonReqManisfest=self::queryPost($url_manifest_req);
+                };
+            }
+            self::releaseLock($flagToRelease);
+        }
+    }
+
     public function requestNewMediaCamera($type="clip")
     {
         return $this->requestNewMedia($type,"camera");
@@ -1554,6 +1577,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
             }
             $datas=self::getHomescreenData("refreshCameraInfos - ".$callOrig);
             if (!$datas['message']) {
+                $this->setConfiguration('storage', 'cloud');
                 foreach($datas['cameras'] as $camera) {
                      if ($camera['id']==$this->getConfiguration('camera_id')) {
                         self::logdebug('refreshCameraInfos() CAMERA '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
