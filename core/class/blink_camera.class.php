@@ -841,6 +841,7 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
 //file_put_contents($folderJson,json_encode($jsonrep));
 jeedomUtils.sleep(1);
 self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r($lastManifest,true));
+                $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                 $url=$url_manifest_req.'/'.$lastManifest;
                 try {
                     $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase2-syncId-'.$syncId,10);
@@ -1125,7 +1126,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 if (isset($lastManifest)) {
     jeedomUtils.sleep(1);
     self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($lastManifest,true));
-                  
+                    $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                     $url=$url_manifest_req.'/'.$lastManifest;
                     try {
                         $jsonrep=self::queryGet($url);
