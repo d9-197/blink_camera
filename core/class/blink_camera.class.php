@@ -1124,13 +1124,13 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $lastManifest=$this->getConfiguration('manifest');
                 if (isset($lastManifest)) {
     jeedomUtils.sleep(1);
-    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($jsonReqManisfest,true));
-                    $manifest_req_id=$jsonReqManisfest['id'];
-                    $url=$url_manifest_req.'/'.$manifest_req_id;
+    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($lastManifest,true));
+                  
+                    $url=$url_manifest_req.'/'.$lastManifest;
                     try {
                         $jsonrep=self::queryGet($url);
                     } catch (TransferException $e) {
-                        self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
+                        self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
                         self::requestNewManifest($_accountBlink,$network_id,$syncId);
                         $jsonrep=self::queryGet($url);
                     }
@@ -1180,6 +1180,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
     }
 
     function requestNewManifest($_accountBlink,$network_id,$syncId) {
+        self::logdebug('REQUEST NEW MANISFEST for syncId: '.$syncId);
         $flagToRelease=self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,240);
         $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
         $url_manifest_req=$url_manifest.'/request';
