@@ -836,7 +836,7 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
                 $this->requestNewManifest($_accountBlink,$netId,$syncId);
             }
             $lastManifest=$this->getConfiguration('manifest');
-            if (isset($lastManifest)) {
+            if (isset($lastManifest) && $lastManifest!=='') {
 //$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph1.json';
 //file_put_contents($folderJson,json_encode($jsonrep));
 jeedomUtils.sleep(1);
@@ -1124,7 +1124,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                 }
                 $lastManifest=$this->getConfiguration('manifest');
-                if (isset($lastManifest)) {
+                if (isset($lastManifest) && $lastManifest!=='') {
     jeedomUtils.sleep(1);
     self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($lastManifest,true));
                     $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';

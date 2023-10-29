@@ -25,7 +25,8 @@
         "Paramètres": "Settings",
         "Options": "Options",
         "Actions": "Actions",
-        "Ajouter toutes les caméras":"Add all cameras"
+        "Ajouter toutes les caméras":"Add all cameras",
+        "Stockage":"Storage"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
         "Ajout des caméras":"Search for cameras",
