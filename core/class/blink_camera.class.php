@@ -833,7 +833,7 @@ class blink_camera extends eqLogic
         if (!$syncId =="") {
 self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
             if (!isset($lastManifest) || $lastManifest=='') {
-                self::requestNewManifest($_accountBlink,$netId,$syncId);
+                $this->requestNewManifest($_accountBlink,$netId,$syncId);
             }
             $lastManifest=$this->getConfiguration('manifest');
             if (isset($lastManifest)) {
@@ -851,7 +851,7 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
                     self::releaseLock($flagToRelease);
-                    self::requestNewManifest($_accountBlink,$network_id,$syncId);
+                    $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                     $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase2-syncId-'.$syncId,10);
                     $jsonrep=self::queryGet($url);
                     self::releaseLock($flagToRelease);
@@ -1121,7 +1121,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             if (!$syncId =="") {
                 self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
                 if (!isset($lastManifest) || $lastManifest=='') {
-                    self::requestNewManifest($_accountBlink,$network_id,$syncId);
+                    $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                 }
                 $lastManifest=$this->getConfiguration('manifest');
                 if (isset($lastManifest)) {
@@ -1134,7 +1134,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                         $jsonrep=self::queryGet($url);
                     } catch (TransferException $e) {
                         self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
-                        self::requestNewManifest($_accountBlink,$network_id,$syncId);
+                        $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                         $jsonrep=self::queryGet($url);
                     }
                     if (isset($jsonrep)) {
