@@ -841,7 +841,7 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
 //file_put_contents($folderJson,json_encode($jsonrep));
 jeedomUtils.sleep(1);
 self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r($lastManifest,true));
-                $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
+                $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
                 $url_manifest_req=$url_manifest.'/request';
                 $url=$url_manifest_req.'/'.$lastManifest;
                 try {
