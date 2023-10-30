@@ -829,13 +829,13 @@ class blink_camera extends eqLogic
         $_accountBlink=config::byKey('account', 'blink_camera');
         $netId=$cam->getConfiguration('network_id');
         $syncId=$cam->getConfiguration('sync_id');
-        $lastManifest=$this->getConfiguration('manifest');
+        $lastManifest=$cam->getConfiguration('manifest');
         if (!$syncId =="") {
 self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
             if (!isset($lastManifest) || $lastManifest=='') {
-                $this->requestNewManifest($_accountBlink,$netId,$syncId);
+                $cam->requestNewManifest($_accountBlink,$netId,$syncId);
             }
-            $lastManifest=$this->getConfiguration('manifest');
+            $lastManifest=$cam->getConfiguration('manifest');
             if (isset($lastManifest) && $lastManifest!=='') {
 //$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph1.json';
 //file_put_contents($folderJson,json_encode($jsonrep));
@@ -851,7 +851,7 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
                     self::releaseLock($flagToRelease);
-                    $this->requestNewManifest($_accountBlink,$network_id,$syncId);
+                    $cam->requestNewManifest($_accountBlink,$network_id,$syncId);
                     $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase2-syncId-'.$syncId,10);
                     $jsonrep=self::queryGet($url);
                     self::releaseLock($flagToRelease);
