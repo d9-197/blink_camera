@@ -852,6 +852,8 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r
                     self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
                     self::releaseLock($flagToRelease);
                     $cam->requestNewManifest($_accountBlink,$netId,$syncId);
+                    $lastManifest=$cam->getConfiguration('manifest');
+                    $url=$url_manifest_req.'/'.$lastManifest;
                     $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase2-syncId-'.$syncId,10);
                     $jsonrep=self::queryGet($url);
                     self::releaseLock($flagToRelease);
@@ -1135,6 +1137,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     } catch (TransferException $e) {
                         self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
                         $this->requestNewManifest($_accountBlink,$network_id,$syncId);
+                        $lastManifest=$cam->getConfiguration('manifest');
+                        $url=$url_manifest_req.'/'.$lastManifest;
                         $jsonrep=self::queryGet($url);
                     }
                     if (isset($jsonrep)) {
