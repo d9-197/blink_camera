@@ -1137,7 +1137,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     } catch (TransferException $e) {
                         self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
                         $this->requestNewManifest($_accountBlink,$network_id,$syncId);
-                        $lastManifest=$cam->getConfiguration('manifest');
+                        $lastManifest=$this->getConfiguration('manifest');
                         $url=$url_manifest_req.'/'.$lastManifest;
                         $jsonrep=self::queryGet($url);
                     }
@@ -1681,14 +1681,12 @@ file_put_contents($folderJson,json_encode($jsonrep));
                         $this->setConfiguration('storage', 'cloud');
                         if ($syncMod['local_storage_enabled'] && $syncMod['local_storage_compatible'] && $syncMod['local_storage_status']==='active') {
                             $this->setConfiguration('storage', 'local');
-                            self::logdebug('refreshCameraInfos: storage=local');
-                        } else {
-                            self::logdebug('refreshCameraInfos: storage=cloud');
                         }
                         $this->setConfiguration('sync_id',$syncMod['id']);
                         break;
                     }
                 }
+                self::logdebug('refreshCameraInfos: storage='.$this->getConfiguration('storage'););
                 $this->setConfiguration('account_storage',$datas['video_stats']['storage']);
                 $this->setConfiguration('account_auto_delete_days', $datas['video_stats']['auto_delete_days']);
                 $this->save();
