@@ -1137,7 +1137,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     } catch (TransferException $e) {
                         self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
                         $this->requestNewManifest($_accountBlink,$network_id,$syncId);
-                        $lastManifest=$cam->getConfiguration('manifest');
+                        $lastManifest=$this->getConfiguration('manifest');
                         $url=$url_manifest_req.'/'.$lastManifest;
                         $jsonrep=self::queryGet($url);
                     }
