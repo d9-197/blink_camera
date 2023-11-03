@@ -1615,14 +1615,14 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 foreach($datas['owls'] as $camera) {
                     if ($camera['id']==$this->getConfiguration('camera_id')) {
                         self::logdebug('refreshCameraInfos() OWL '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
-                        /*if ($camera['enabled']===true) {
+                        if ($camera['enabled']===true) {
                             $this->checkAndUpdateCmd('arm_status_camera', 1);
                             $this->setConfiguration('camera_status',true);
                         } else 
                         {
                             $this->checkAndUpdateCmd('arm_status_camera', 0);
                             $this->setConfiguration('camera_status',false);
-                        }*/
+                        }
                         $this->setConfiguration('camera_type',$camera['type']);
                         $this->setConfiguration('camera_name',$camera['name']);
                         //$this->setConfiguration('camera_battery_status',$camera['battery']);
@@ -1743,9 +1743,20 @@ file_put_contents($folderJson,json_encode($jsonrep));
     public function cameraArm()
     {
         if (self::isConnected() && $this->isConfigured()) {
-            $url="/network/".$this->getConfiguration('network_id')."/camera/".$this->getConfiguration('camera_id')."/enable";
+            $account_id=config::byKey('account', 'blink_camera');
+            $network_id=$this->getConfiguration('network_id');
+            $camera_id=$this->getConfiguration('camera_id');
+            $datas = "{\"enabled\":true}";
+            if ($this->getBlinkDeviceType()=='owl') {
+                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
+            } else if ($this->getBlinkDeviceType()=='doorbell') {
+                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
+            } else {
+                $url="/network/".$network_id."/camera/".$camera_id."/enable";
+                $datas = "{}";
+            }
             try {
-                self::queryPost($url);
+                self::queryPost($url,$datas);
                 jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("cameraArm");
                 return true;
@@ -1763,9 +1774,20 @@ file_put_contents($folderJson,json_encode($jsonrep));
     public function cameraDisarm()
     {
         if (self::isConnected() && $this->isConfigured()) {
-            $url="/network/".$this->getConfiguration('network_id')."/camera/".$this->getConfiguration('camera_id')."/disable";
+            $account_id=config::byKey('account', 'blink_camera');
+            $network_id=$this->getConfiguration('network_id');
+            $camera_id=$this->getConfiguration('camera_id');
+            $datas = "{\"enabled\":false}";
+            if ($this->getBlinkDeviceType()=='owl') {
+                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
+            } else if ($this->getBlinkDeviceType()=='doorbell') {
+                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
+            } else {
+                $url="/network/".$network_id."/camera/".$camera_id."/disable";
+                $datas = "{}";
+            }
             try {
-                self::queryPost($url);
+                self::queryPost($url,$datas);
                 jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("cameraDisarm");
                 return true;
@@ -1776,7 +1798,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 self::logDebugBlinkResponse($responseJson['message']);
                 return false;
             }
-       }
+        }
         return false;
     }
 
@@ -2143,9 +2165,74 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $force_download->save();
         }
 
+        $arm_camera = $this->getCmd(null, 'arm_camera');
+        if (!is_object($arm_camera)) {
+            self::loginfo( 'Create new action : arm_camera');
+            $arm_camera = new blink_cameraCmd();
+            $arm_camera->setName(__('Armer la caméra', __FILE__));
+            $arm_camera->setEqLogic_id($this->getId());
+            $arm_camera->setLogicalId('arm_camera');
+            $arm_camera->setType('action');
+            $arm_camera->setSubType('other');
+            //$arm_camera->setOrder(103);
+            $arm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ferme"></i>'); 
+            $arm_camera->useIconAndName();
+            $arm_camera->save();
+        }
+        
+        $disarm_camera = $this->getCmd(null, 'disarm_camera');
+        if (!is_object($disarm_camera)) {
+            self::loginfo( 'Create new action : disarm_camera');
+            $disarm_camera = new blink_cameraCmd();
+            $disarm_camera->setName(__('Désarmer la caméra', __FILE__));
+            $disarm_camera->setEqLogic_id($this->getId());
+            $disarm_camera->setLogicalId('disarm_camera');
+            $disarm_camera->setType('action');
+            $disarm_camera->setSubType('other');
+            //$arm_camera->setOrder(104);
+            $disarm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ouvert"></i>'); 
+            $disarm_camera->useIconAndName();
+            $disarm_camera->save();
+        }
+        $arm_status_camera = $this->getCmd(null, 'arm_status_camera');
+        if (!is_object($arm_status_camera)) {
+            self::loginfo( 'Create new information : arm_status_camera');
+            $arm_status_camera = new blink_cameraCmd();
+            $arm_status_camera->setName(__('Caméra armée ?', __FILE__));
+            $arm_status_camera->setDisplay("showNameOndashboard", 1);
+            $arm_status_camera->setIsVisible(true);
+            $arm_status_camera->setLogicalId('arm_status_camera');
+            $arm_status_camera->setEqLogic_id($this->getId());
+            $arm_status_camera->setType('info');
+            $arm_status_camera->setTemplate('dashboard', 'lock');
+            $arm_status_camera->setTemplate('mobile', 'lock');
+            $arm_status_camera->setSubType('binary');
+            $arm_status_camera->setConfiguration('generic_type',"LOCK_STATE");
+            $arm_status_camera->setOrder(2);
+            $arm_status_camera->save();
+        }
+        $battery = $this->getCmd(null, 'battery');
+        if (!is_object($battery)) {
+            self::loginfo( 'Create new information : battery');
+            $battery = new blink_cameraCmd();
+            $battery->setName(__('Pile', __FILE__));
+            $battery->setTemplate('dashboard', 'badge');
+            $battery->setDisplay("showNameOndashboard", 1);
+            $battery->setConfiguration('historizeRound',"2");
+            $battery->setUnite('%');
+            $battery->setIsVisible(false);
+            $battery->setLogicalId('battery');
+            $battery->setEqLogic_id($this->getId());
+            $battery->setType('info');
+            $battery->setSubType('numeric');
+            $battery->setOrder(12);
+            $battery->save();
+        }
+
+
         /* COMMANDES NON DISPONIBLES SUR owl et lotus  */
         if ($typeDevice!="" and $typeDevice!="owl" and $typeDevice!="lotus") {
-            $arm_status_camera = $this->getCmd(null, 'arm_status_camera');
+           /* $arm_status_camera = $this->getCmd(null, 'arm_status_camera');
             if (!is_object($arm_status_camera)) {
                 self::loginfo( 'Create new information : arm_status_camera');
                 $arm_status_camera = new blink_cameraCmd();
@@ -2161,7 +2248,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $arm_status_camera->setConfiguration('generic_type',"LOCK_STATE");
                 $arm_status_camera->setOrder(2);
                 $arm_status_camera->save();
-            }
+            }*/
 
             $temperature = $this->getCmd(null, 'temperature');
             if (!is_object($temperature)) {
@@ -2217,7 +2304,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $wifi_strength->setOrder(5);
                 $wifi_strength->save();
             }
-      
+      /*
             $arm_camera = $this->getCmd(null, 'arm_camera');
             if (!is_object($arm_camera)) {
                 self::loginfo( 'Create new action : arm_camera');
@@ -2247,14 +2334,14 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $disarm_camera->useIconAndName();
                 $disarm_camera->save();
             }
-
+*/
         } else {
-            $cmdToHide = $this->getCmd(null, 'arm_status_camera');
+            /*$cmdToHide = $this->getCmd(null, 'arm_status_camera');
             if (is_object($cmdToHide)) {
                 //$cmdToHide->remove();
                 $cmdToHide->setIsVisible(0);
                 $cmdToHide->save();
-            }
+            }*/
             $cmdToHide = $this->getCmd(null, 'wifi_strength');
             if (is_object($cmdToHide)) {
                 //$cmdToHide->remove();
@@ -2267,6 +2354,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $cmdToHide->setIsVisible(0);
                 $cmdToHide->save();
             }
+            /*
             $cmdToHide = $this->getCmd(null, 'arm_camera');
             if (is_object($cmdToHide)) {
                 //$cmdToHide->remove();
@@ -2278,28 +2366,12 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 //$cmdToHide->remove();
                 $cmdToHide->setIsVisible(0);
                 $cmdToHide->save();
-            }
+            }*/
         }
         
         /* COMMANDES NON DISPONIBLES SUR owl */
         if ($typeDevice!="" && $typeDevice!="owlZZZ") {
-            $battery = $this->getCmd(null, 'battery');
-            if (!is_object($battery)) {
-                self::loginfo( 'Create new information : battery');
-                $battery = new blink_cameraCmd();
-                $battery->setName(__('Pile', __FILE__));
-                $battery->setTemplate('dashboard', 'badge');
-                $battery->setDisplay("showNameOndashboard", 1);
-                $battery->setConfiguration('historizeRound',"2");
-                $battery->setUnite('%');
-                $battery->setIsVisible(true);
-                $battery->setLogicalId('battery');
-                $battery->setEqLogic_id($this->getId());
-                $battery->setType('info');
-                $battery->setSubType('numeric');
-                $battery->setOrder(12);
-                $battery->save();
-            }
+//
         } else {
             $cmdToHide = $this->getCmd(null, 'battery');
             if (is_object($cmdToHide)) {
