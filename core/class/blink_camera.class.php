@@ -33,8 +33,11 @@ class blink_camera extends eqLogic
     const BLINK_CLIENT_NAME="Jeedom";
     const BLINK_DEVICE_IDENTIFIER="Jeedom";
     /*     * *************************Attributs****************************** */
-    const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;//2019-07-15T18:40:44+00:00
-    const FORMAT_DATETIME_OUT="Y-m-d_His" ;//2019-07-15T18:40:44+00:00
+    const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;
+    const FORMAT_DATETIME_OUT="Y-m-d_His" ;
+    const FORMAT_DATETIME_OUT_FR="d/m/Y H:i:s" ;
+    const FORMAT_DATE_OUT="Y-m-d" ;
+    const FORMAT_DATE_OUT_FR="d/m/Y" ;
     const ERROR_IMG="/plugins/blink_camera/img/error.png";
     const NO_EVENT_IMG="/plugins/blink_camera/img/no_event.png";
     const GET_RESOURCE="/plugins/blink_camera/core/php/getResource.php?file=";
@@ -54,12 +57,12 @@ class blink_camera extends eqLogic
 
     public static function logDebugBlinkAPIRequest($message) {
         config::save('log::level::blink_camera_api', config::byKey('log::level::blink_camera'));
-        log::add('blink_camera_api','debug',$message);
+        //log::add('blink_camera_api','debug',$message);
         return;
     }
     public static function logDebugBlinkAPIResponse($message) {
         config::save('log::level::blink_camera_api', config::byKey('log::level::blink_camera'));
-        log::add('blink_camera_api','debug',$message);
+        //log::add('blink_camera_api','debug',$message);
         return;
     }
     private static function logDebugBlinkResponse($message) {
@@ -68,7 +71,10 @@ class blink_camera extends eqLogic
         }
         self::logdebug(__('APImessage', __FILE__). __($message, __FILE__));
     }
-
+    public static function cleanSpecialCharacters($string) {
+        $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
+        return preg_replace('/[^A-Za-z0-9\-]/', '_', $string); // Removes special chars.
+     }
     public static function logdebug($message) {
         log::add('blink_camera','debug',$message);
         return;
@@ -688,6 +694,22 @@ class blink_camera extends eqLogic
             $dtim=date_add($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
         }
         return date_format($dtim, self::FORMAT_DATETIME_OUT);
+    }
+    public static function getDatetimeLocaleJeedom($valeur, $_format = self::FORMAT_DATETIME_OUT)
+    {
+            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR'){
+                $dtim = date_create_from_format($_format, $valeur);
+                return date_format($dtim, self::FORMAT_DATETIME_OUT_FR);
+            }
+            return $valeur;
+    }
+    public static function getDateLocaleJeedom($valeur, $_format = self::FORMAT_DATE_OUT)
+    {
+            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR'){
+                $dtim = date_create_from_format($_format, $valeur);
+                return date_format($dtim, self::FORMAT_DATE_OUT_FR);
+            }
+            return $valeur;
     }
 
 
@@ -1447,13 +1469,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 if (is_object($infoCmd) && isset($event)) {
                     $previous=$infoCmd->execCmd();
                     self::logdebug('blink_camera->getLastEventDate() '.$this->getId().' previous='.$previous);
-                    $dtim = date_create_from_format(self::FORMAT_DATETIME, $event['created_at']);
-                    if (getTZoffsetMin()<0) {
-                        $dtim=date_sub($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
-                    } else {
-                        $dtim=date_add($dtim, new DateInterval("PT".abs(getTZoffsetMin())."M"));  
-                    }
-                    $new=date_format($dtim, self::FORMAT_DATETIME_OUT);
+                    $new=self::getDateJeedomTimezone($event['created_at']);
                     self::logdebug('blink_camera->getLastEventDate() '.$this->getId().' new='.$new);
                     if (isset($new) && $new!="" && ($new>$previous || $ignorePrevious)) {
                         self::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
@@ -2482,6 +2498,16 @@ class blink_cameraCmd extends cmd
                //$result= '<span class="label label-primary" style="font-size : 1em;" title="{{Secteur}}"><i class="fa fa-plug"></i></span>';
             }
             return $result;
+        } else if ($this->getLogicalId()==='last_event') {
+            //blink_camera::logdebug('toHtml last_event avant custo : '.print_r($result,true));
+            $valeurLastEvent=$this->execCmd();
+            $params = array(
+                state => blink_camera::getDatetimeLocaleJeedom($valeurLastEvent)
+            );
+            $this->setDisplay('parameters',$params);
+
+            return parent::toHtml($_version,$_options,$_cmdColor);
+            //return str_replace($result,$valeurLastEvent,blink_camera::getDatetimeLocaleJeedom($valeurLastEvent));
         }else if ($this->getType()!=='action') {
             $bl_cam=$this->getEqLogic();
             if ($this->getLogicalId()==='thumbnail' && !$bl_cam->isConnected() ) {

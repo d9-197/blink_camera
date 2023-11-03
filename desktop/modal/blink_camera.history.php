@@ -163,7 +163,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
     echo '<div class="div_dayContainer">';
     echo '<legend>';
     echo ' <a class="btn btn-xs btn-default toggleList"><i class="fa fa-chevron-down"></i></a> ';
-    echo '<span class="blink_cameraHistoryDate spacer-left-5">'.$date.'</span>';
+    echo '<span class="blink_cameraHistoryDate spacer-left-5">'.blink_camera::getDateLocaleJeedom($date).'</span>';
     echo '<a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/'.$archiver.'.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'.*'.$date.'.*'.$formatMedia).'&archive='.urlencode($blink_camera->getName().'-'.$date).'" ><i class="fas fa-download"></i></a>';
     echo '</legend>';
     if ($cptDate==1) {

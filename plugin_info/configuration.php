@@ -245,8 +245,9 @@ if (!isConnect()) {
     });
     $('#bt_test_blink').on('click', function() {
             $('#div_test_blink_result').hideAlert();
-            jeeFrontEnd.plugin.savePluginConfig();
-            jeedomUtils.sleep(1000);
+            //savePluginConfig();
+			jeeFrontEnd.plugin.savePluginConfig();
+            sleep(1000);
             checkConnexionBlink();
 
     })
