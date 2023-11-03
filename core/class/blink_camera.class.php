@@ -1749,7 +1749,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $datas = "{\"enabled\":true}";
             if ($this->getBlinkDeviceType()=='owl') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
-            } else if ($this->getBlinkDeviceType()=='doorbell') {
+            } else if ($this->getBlinkDeviceType()=='lotus') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
             } else {
                 $url="/network/".$network_id."/camera/".$camera_id."/enable";
