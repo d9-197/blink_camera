@@ -1,3 +1,7 @@
+> 2023-11-03
+  + V2.8.1
+  + Addition of actions "Arm camera" et "Disarm camera" for the "Mini" and "Doorbell"
+
 > 2023-08-12
   + V2.8.0
   + Addition of the option "Widget width" in thumbnails size (config du plugin)
