@@ -2220,7 +2220,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $battery->setDisplay("showNameOndashboard", 1);
             $battery->setConfiguration('historizeRound',"2");
             $battery->setUnite('%');
-            $battery->setIsVisible(false);
+            $battery->setIsVisible(0);
             $battery->setLogicalId('battery');
             $battery->setEqLogic_id($this->getId());
             $battery->setType('info');
