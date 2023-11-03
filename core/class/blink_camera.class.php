@@ -1458,11 +1458,13 @@ file_put_contents($folderJson,json_encode($jsonrep));
             self::logdebug('blink_camera->getLastEventDate() POST getLastEvent');
             if (!isset($event)) {
                 self::logdebug('blink_camera->getLastEventDate() '.$this->getId().' pas d\'event');
+                /*
                 $this->checkAndUpdateCmd('last_event', "-");
                 $this->checkAndUpdateCmd('thumb_path',"-");
                 $this->checkAndUpdateCmd('thumb_url',"-");
                 $this->checkAndUpdateCmd('clip_path',"-");
                 $this->checkAndUpdateCmd('clip_url',"-");
+                */
             } else {
                 self::logdebug('blink_camera->getLastEventDate() '.$this->getId().' event trouvé');
                 $infoCmd=$this->getCmd(null, 'last_event');
