@@ -121,12 +121,12 @@ foreach ($eqLogics as $eqLogic) {
 		</div>
 	</div>
 
-    <div class="form-group">
+    <!--div class="form-group">
         <label class="col-sm-3 " ></label>
         <div class="col-sm-3">
             <button type="button" class="btn btn-default" id="bt_refresh_blink_cfg">{{Recharger la configuration}}</button>
         </div>
-    </div>
+    </div-->
     <div class="form-group blink_cfg">
         <label class="col-sm-3 control-label" >{{ Système }}</label>
         <div id="liste" class="col-sm-3">

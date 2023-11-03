@@ -31,7 +31,7 @@ Il existe 3 modes de stockage pour les vidéos/images des caméras
 - "Pas de stockage" (ni Cloud, ni clé USB sur un module de synchronisation v2.
 
 Les modes "Cloud" et "Local" permettent de récupérer les évenements (toutes les minutes : ce n'est pas instantané).
-Le mode "pas de stockage" ne permet pas de récupérer le dernier évènement, ni les vidéos/images. Ce plugin n'a donc que peu d'interêt si vous en mode "pas de stockage"   
+Le mode "pas de stockage" ne permet pas de récupérer le dernier évènement, ni les vidéos/images. Ce plugin n'a donc que peu d'interêt si vous êtes en mode "pas de stockage"   
 
 
 # Configuration du plugin

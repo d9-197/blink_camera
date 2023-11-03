@@ -2232,23 +2232,6 @@ file_put_contents($folderJson,json_encode($jsonrep));
 
         /* COMMANDES NON DISPONIBLES SUR owl et lotus  */
         if ($typeDevice!="" and $typeDevice!="owl" and $typeDevice!="lotus") {
-           /* $arm_status_camera = $this->getCmd(null, 'arm_status_camera');
-            if (!is_object($arm_status_camera)) {
-                self::loginfo( 'Create new information : arm_status_camera');
-                $arm_status_camera = new blink_cameraCmd();
-                $arm_status_camera->setName(__('Caméra armée ?', __FILE__));
-                $arm_status_camera->setDisplay("showNameOndashboard", 1);
-                $arm_status_camera->setIsVisible(true);
-                $arm_status_camera->setLogicalId('arm_status_camera');
-                $arm_status_camera->setEqLogic_id($this->getId());
-                $arm_status_camera->setType('info');
-                $arm_status_camera->setTemplate('dashboard', 'lock');
-                $arm_status_camera->setTemplate('mobile', 'lock');
-                $arm_status_camera->setSubType('binary');
-                $arm_status_camera->setConfiguration('generic_type',"LOCK_STATE");
-                $arm_status_camera->setOrder(2);
-                $arm_status_camera->save();
-            }*/
 
             $temperature = $this->getCmd(null, 'temperature');
             if (!is_object($temperature)) {
@@ -2269,23 +2252,6 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $temperature->save();
             }
 
-             /*   if (!is_object($power)) {
-                    self::loginfo( 'Create new information : power');
-                    $power = new blink_cameraCmd();
-                    $power->setName(__('Pile', __FILE__));
-                    $power->setTemplate('dashboard', 'badge');
-                    $power->setDisplay("showNameOndashboard", 1);
-                    $power->setConfiguration('historizeRound',"2");
-                    $power->setConfiguration('historizeRound',"2");
-                    $power->setUnite('V');
-                    $power->setIsVisible(true);
-                    $power->setLogicalId('power');
-                    $power->setEqLogic_id($this->getId());
-                    $power->setType('info');
-                    $power->setSubType('numeric');
-                    $power->setOrder(4);
-                    $power->save();
-                }*/
             $wifi_strength = $this->getCmd(null, 'wifi_strength');
             if (!is_object($wifi_strength)) {
                 self::loginfo( 'Create new information : wifi_strength');
@@ -2304,44 +2270,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $wifi_strength->setOrder(5);
                 $wifi_strength->save();
             }
-      /*
-            $arm_camera = $this->getCmd(null, 'arm_camera');
-            if (!is_object($arm_camera)) {
-                self::loginfo( 'Create new action : arm_camera');
-                $arm_camera = new blink_cameraCmd();
-                $arm_camera->setName(__('Armer la caméra', __FILE__));
-                $arm_camera->setEqLogic_id($this->getId());
-                $arm_camera->setLogicalId('arm_camera');
-                $arm_camera->setType('action');
-                $arm_camera->setSubType('other');
-                //$arm_camera->setOrder(103);
-                $arm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ferme"></i>'); 
-                $arm_camera->useIconAndName();
-                $arm_camera->save();
-            }
-            
-            $disarm_camera = $this->getCmd(null, 'disarm_camera');
-            if (!is_object($disarm_camera)) {
-                self::loginfo( 'Create new action : disarm_camera');
-                $disarm_camera = new blink_cameraCmd();
-                $disarm_camera->setName(__('Désarmer la caméra', __FILE__));
-                $disarm_camera->setEqLogic_id($this->getId());
-                $disarm_camera->setLogicalId('disarm_camera');
-                $disarm_camera->setType('action');
-                $disarm_camera->setSubType('other');
-                //$arm_camera->setOrder(104);
-                $disarm_camera->setDisplay('icon','<i class="jeedom jeedom-lock-ouvert"></i>'); 
-                $disarm_camera->useIconAndName();
-                $disarm_camera->save();
-            }
-*/
         } else {
-            /*$cmdToHide = $this->getCmd(null, 'arm_status_camera');
-            if (is_object($cmdToHide)) {
-                //$cmdToHide->remove();
-                $cmdToHide->setIsVisible(0);
-                $cmdToHide->save();
-            }*/
             $cmdToHide = $this->getCmd(null, 'wifi_strength');
             if (is_object($cmdToHide)) {
                 //$cmdToHide->remove();
@@ -2354,39 +2283,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $cmdToHide->setIsVisible(0);
                 $cmdToHide->save();
             }
-            /*
-            $cmdToHide = $this->getCmd(null, 'arm_camera');
-            if (is_object($cmdToHide)) {
-                //$cmdToHide->remove();
-                $cmdToHide->setIsVisible(0);
-                $cmdToHide->save();
-            }
-            $cmdToHide = $this->getCmd(null, 'disarm_camera');
-            if (is_object($cmdToHide)) {
-                //$cmdToHide->remove();
-                $cmdToHide->setIsVisible(0);
-                $cmdToHide->save();
-            }*/
         }
         
-        /* COMMANDES NON DISPONIBLES SUR owl */
-        if ($typeDevice!="" && $typeDevice!="owlZZZ") {
-//
-        } else {
-            $cmdToHide = $this->getCmd(null, 'battery');
-            if (is_object($cmdToHide)) {
-                //$cmdToHide->remove();
-                $cmdToHide->setIsVisible(0);
-                $cmdToHide->save();
-            }
-            $cmdToHide = $this->getCmd(null, 'disarm_camera');
-            if (is_object($cmdToHide)) {
-                //$cmdToHide->remove();
-                $cmdToHide->setIsVisible(0);
-                $cmdToHide->save();
-            }
-        }
-        /* COMMANDES DISPONIBLES UNIQUEMENT SUR lotus (Doorbell) */
+         /* COMMANDES DISPONIBLES UNIQUEMENT SUR lotus (Doorbell) */
         if ($typeDevice!="" && $typeDevice=="lotus") {
             $info = $this->getCmd(null, 'source_last_event');
             if (!is_object($info)) {
@@ -2560,14 +2459,12 @@ class blink_cameraCmd extends cmd
             return $result;
         } else if ($this->getLogicalId()==='history') {
             $bl_cam=$this->getEqLogic();
-            //if ($bl_cam->isConnected() && $bl_cam->isConfigured()) {
                 if ($bl_cam->isConfigured()) {
-                //blink_camera::logdebug('toHtml history : '.print_r(parent::toHtml($_version,$_options,$_cmdColor),true));
                 $result=parent::toHtml($_version,$_options,$_cmdColor);
                 
                 $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']\').off(\'click\').on(\'click\', function () {';
                 $result.='$(\'#md_modal\').dialog({title: "Historique '.$bl_cam->getName().'"});';
-#                $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'&mode='.$bl_cam->getConfigHistory().'\').dialog(\'open\');});';
+#               $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'&mode='.$bl_cam->getConfigHistory().'\').dialog(\'open\');});';
                 $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'\').dialog(\'open\');});';
                 $result.="</script>";
 
