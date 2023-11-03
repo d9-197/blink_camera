@@ -78,7 +78,12 @@ if ('<?=$storage?>'=='local') {
 <div id='div_blink_cameraRecordAlert' style="display: none;"></div>
 <?php
 echo '<div>';
-echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'*'.$formatMedia).'&archive='.urlencode('blink_all').'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
+$archiver="downloadFilesZip";
+if (!extension_loaded('zip')) {
+    $archiver="downloadFiles";
+}
+echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/'.$archiver.'.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'*'.$formatMedia).'&archive='.urlencode($blink_camera->getName()).'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
+
 echo '</div>';
 
 ?>
@@ -159,7 +164,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
     echo '<legend>';
     echo ' <a class="btn btn-xs btn-default toggleList"><i class="fa fa-chevron-down"></i></a> ';
     echo '<span class="blink_cameraHistoryDate spacer-left-5">'.$date.'</span>';
-    echo '<a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'*'.$date.'*'.$formatMedia).'&archive='.urlencode($date).'" ><i class="fas fa-download"></i></a>';
+    echo '<a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/'.$archiver.'.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'.*'.$date.'.*'.$formatMedia).'&archive='.urlencode($blink_camera->getName().'-'.$date).'" ><i class="fas fa-download"></i></a>';
     echo '</legend>';
     if ($cptDate==1) {
         echo '<div class="blink_cameraThumbnailContainer blink_cameraThumbnailContainer_'.$cptDate.'" >';
