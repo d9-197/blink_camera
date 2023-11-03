@@ -1,3 +1,7 @@
+> 2023-11-03
+  + V2.8.1
+  + Ajout des actions "Armer caméra" et "Désarmer caméra" sur les caméras de types "Mini" et "Doorbell"
+
 > 2023-08-12
   + V2.8.0
   + Ajout de l'option "Largeur du widget" dans le choix de la taille de la vignette (config du plugin)
