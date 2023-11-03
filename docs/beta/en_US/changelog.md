@@ -1,6 +1,7 @@
 > 2023-11-03
   + V2.8.1
   + Addition of actions "Arm camera" et "Disarm camera" for the "Mini" and "Doorbell"
+  + For the "last event" info and the dates in the "history" view: The dates are displayed in French format if Jeedom is configured in French (otherwise the usual Jeedom date format is displayed)
 
 > 2023-08-12
   + V2.8.0
