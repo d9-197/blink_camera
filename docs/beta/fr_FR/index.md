@@ -22,7 +22,7 @@ Les informations liées à la caméra sont également disponibles :
 * Etat des piles,
 * [Doorbell uniquement] Source du dernier évenement ("pir" pour la détection, "button_press" pour la sonette)
 
->**Dans le plugin, les caméras Blink Mini et les Doorbell n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini, il n'est pas possible d'activer/désactiver la détection d'une Doorbell**
+>**Dans le plugin, les différents types de caméras n'ont pas toutes les mêmes capacités. Certaines fonctions ou informations ne sont donc pas disponibles dans le plugin pour certaines caméras.**
 
 **Cas du stockage local**\
 Il existe 3 modes de stockage pour les vidéos/images des caméras
