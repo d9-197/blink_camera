@@ -809,8 +809,10 @@ class blink_camera extends eqLogic
                 }
             }
             self::logdebug('getBlinkDeviceType '.$this->getId().' NEW TYPE DEVICE='.$valeur);
-            $this->setConfiguration("camera_type",$valeur);
-            $this->save();
+            if ($valeur!=="") {
+                $this->setConfiguration("camera_type",$valeur);
+                $this->save();
+            }
         }
 		return $valeur;
     }
