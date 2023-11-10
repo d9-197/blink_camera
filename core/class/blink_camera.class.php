@@ -103,7 +103,7 @@ class blink_camera extends eqLogic
             }
             foreach ($eqLogics as $cam) {
                 if ($cam->getIsEnable() == 1) {
-                    $last_event=$cam->getLastEvent(false);
+                    /*  $last_event=$cam->getLastEvent(false);
                     if (isset($last_event)) { 
                         $info = $cam->getCmd(null, 'source_last_event');
                         if (is_object($info)) {
@@ -111,6 +111,7 @@ class blink_camera extends eqLogic
                         }
                     //self::getMediaForce($last_event['media'], $cam->getId(), 'last','mp4',true);
                     }
+                    */
                     $cam->refreshCameraInfos("cron10");
                 }
             }
@@ -1163,7 +1164,13 @@ file_put_contents($folderJson,json_encode($jsonrep));
                         $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                         $lastManifest=$this->getConfiguration('manifest');
                         $url=$url_manifest_req.'/'.$lastManifest;
-                        $jsonrep=self::queryGet($url);
+                        try {
+                            jeedomUtils.sleep(5);
+                            $jsonrep=self::queryGet($url);
+                        } catch (TransferException $e) {
+                            self::logdebug('An error occured during RETRY OF GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
+                            unset($jsonrep);
+                        }
                     }
                     if (isset($jsonrep)) {
     //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
