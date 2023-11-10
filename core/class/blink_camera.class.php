@@ -1310,11 +1310,12 @@ file_put_contents($folderJson,json_encode($jsonrep));
             }
             for ($page=1;$page<=$pageMax;$page++) {
                 $videosJson=$this->getVideoList($page);
-                self::logdebug( 'blink_camera->forceCleanup() list videos  : '. print_r($videosJson,true));            
-                    
+                if (isset($videosJson)) {
+                    self::logdebug( 'blink_camera->forceCleanup() list videos  : '. print_r($videosJson,true));            
+                }
                 $existVideoInPage=false;
-                // Si en cherchant des videos on a rencontré 50 pages vides, on arrete de rechercher (perfo)
-                if ($pageVide>=10) {
+                // Si en cherchant des videos on a rencontré 10 pages vides, on arrete de rechercher (perfo)
+                if ($pageVide>=5) {
                     break;
                 }
                 foreach ($videosJson as $videoApi) {
