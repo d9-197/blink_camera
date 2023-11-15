@@ -1220,7 +1220,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
 
     function requestNewManifest($_accountBlink,$network_id,$syncId) {
         self::logdebug('REQUEST NEW MANISFEST for syncId: '.$syncId);
-        $flagToRelease=self::checkAndGetLock('requestNewManifest-syncId-'.$syncId,240);
+        $flagToRelease=self::checkAndGetLock('requestNewManifest-syncId-'.$syncId);
         $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
         $url_manifest_req=$url_manifest.'/request';
         try {
@@ -1228,6 +1228,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
             //file_put_contents($folderJson,json_encode($jsonReqManisfest));
             $this->setConfiguration('manifest',$jsonReqManisfest['id']);
+            self::logdebug('FOUND NEW MANISFEST for syncId: '.$syncId.' New manisfest id: '.$jsonReqManisfest['id']);
             self::releaseLock($flagToRelease);
         } catch (Exception $e) {
             self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
