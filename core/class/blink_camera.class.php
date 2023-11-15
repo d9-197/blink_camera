@@ -129,6 +129,7 @@ class blink_camera extends eqLogic
                 self::logdebug('blink_camera->cron() '.$cam->getId());
                 if ($cam->getIsEnable() == 1) {
                     self::logdebug('blink_camera->cron() '.$cam->getId().' camera active');
+                    $cam->refreshCameraInfos();
                     $cam->getLastEventDate();
                     //$cam->refreshCameraInfos();
                 }
@@ -1228,7 +1229,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             //file_put_contents($folderJson,json_encode($jsonReqManisfest));
             $this->setConfiguration('manifest',$jsonReqManisfest['id']);
             self::releaseLock($flagToRelease);
-        } catch (TransferException $e) {
+        } catch (Exception $e) {
             self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
             if (method_exists($e,'getResponse')) {
                 $response = $e->getResponse();
@@ -1704,13 +1705,14 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 }
                 foreach($datas['sync_modules'] as $syncMod) {
                     if ($syncMod['network_id']==$this->getConfiguration('network_id')) {
-                        self::logdebug('refreshCameraInfos() SYNC_MODULES '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($network,true));
+                        self::logdebug('refreshCameraInfos() SYNC_MODULES '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($syncMod,true));
                         self::logdebug('refreshCameraInfos: '.$this->getName().' sync module - local_storage_enabled='.$syncMod['local_storage_enabled'].' - local_storage_compatible='.$syncMod['local_storage_compatible'].' - local_storage_status='.$syncMod['local_storage_status']);
                         $this->setConfiguration('storage', 'cloud');
                         if ($syncMod['local_storage_enabled'] && $syncMod['local_storage_compatible'] && $syncMod['local_storage_status']==='active') {
                             $this->setConfiguration('storage', 'local');
                         }
                         $this->setConfiguration('sync_id',$syncMod['id']);
+                        self::logdebug('refreshCameraInfos: sync_id='.$syncMod['id']);
                         break;
                     }
                 }
