@@ -1526,7 +1526,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 $clipUrlCmd=$this->getCmd(null, 'clip_path');
                 $urlFile=$clipUrlCmd->execCmd();
                 //On affiche la video
-                $urlLine ='<video class="displayVideo vignette" '. $hauteurVignette.' controls loop data-src="#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="#urlFile#">Your browser does not support the video tag.</video>';
+                $urlLine ='<video class="displayVideo vignette" '. $hauteurVignette.' controls data-src="#urlFile#" style="display:block;padding:5px;cursor:pointer"><source src="#urlFile#">Your browser does not support the video tag.</video>';
             } else  {
                 $thumbUrlCmd=$this->getCmd(null, 'thumb_path');
                 $urlFile=$thumbUrlCmd->execCmd();
@@ -1729,7 +1729,9 @@ file_put_contents($folderJson,json_encode($jsonrep));
     {
         return __DIR__.'/../../medias/'.$this->getId();
     }
-
+    public static function lazyLoadVideo() {
+        return (boolean) config::byKey('lazyLoadVideo', 'blink_camera');
+    }
     public function networkArm()
     {
         if (self::isConnected() && $this->isConfigured()) {

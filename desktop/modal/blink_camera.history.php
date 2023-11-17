@@ -74,6 +74,8 @@ if ('<?=$storage?>'=='local') {
     $('#btn-jpg').remove();
 }
 
+
+
 </script>
 <div id='div_blink_cameraRecordAlert' style="display: none;"></div>
 <?php
@@ -209,12 +211,44 @@ foreach ($videoFiltered as $date => $videoByDate) {
         echo '<div style="padding:auto !important ;">';
         echo '<center style="margin-top:5px;">';
         if (strpos($file, '.mp4')) {
-            $strVideo= '<video class="displayVideo"';
-            if ($cptDate==1) {
-                $strVideo.= ' preload ';
+            $strVideo="";
+            if (blink_camera::lazyLoadVideo()) {
+                $strVideo.="<div id=\"video-overlay-".$cptVideo."\">";
+                $strVideo.="<img height=\"".$newHeight."\" src=\"core/php/downloadFile.php?pathfile=" . urlencode($dir . '/' . str_replace(".mp4",".jpg",$file))."\"/>";
+                $strVideo.="</div>";
             }
-            $strVideo.= ' height="'.$newHeight.'" controls loop data-src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '" style="cursor:pointer"><source src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '">Your browser does not support the video tag.</video>';
+            $strVideo.= "<video id=\"video-".$cptVideo."\" class=\"displayVideo\"";
+            if (blink_camera::lazyLoadVideo()) {
+                $strVideo.= " preload=\"none\" poster=\"core/php/downloadFile.php?pathfile=" . urlencode($dir . '/' . str_replace(".mp4",".jpg",$file)) . "\" ";
+            }
+            $strVideo.=" height=\"".$newHeight."\" controls loop data-src=\"core/php/downloadFile.php?pathfile=".urlencode($dir . '/' . $file)."\" style=\"cursor:pointer\"><source src=\"core/php/downloadFile.php?pathfile=".urlencode($dir.'/'.$file)."\">Your browser does not support the video tag.</video>";
             echo $strVideo;
+            if (blink_camera::lazyLoadVideo()) {
+?>
+             <script>
+                    var overlay<?=$cptVideo?>         = document.getElementById('video-overlay-<?=$cptVideo?>'),
+                    video<?=$cptVideo?>         = document.getElementById('video-<?=$cptVideo?>'),
+                    videoPlaying<?=$cptVideo?>    = false;
+                    function hideOverlay<?=$cptVideo?>() {
+                        overlay<?=$cptVideo?>.style.display = "none";
+                        video<?=$cptVideo?>.style.display = "block";
+                        videoPlaying<?=$cptVideo?> = true;
+                        video<?=$cptVideo?>.play();
+                    }
+                    function showOverlay<?=$cptVideo?>() {
+                        // this check is to differentiate seek and actual pause 
+                        if (video<?=$cptVideo?>.readyState === 4) {
+                            overlay<?=$cptVideo?>.style.display = "block";
+                            videoPlaying<?=$cptVideo?> = true;
+                        }
+                        video<?=$cptVideo?>.style.display = "none";
+                    }
+                    video<?=$cptVideo?>.style.display = "none";
+                    video<?=$cptVideo?>.addEventListener('pause', showOverlay<?=$cptVideo?>);
+                    overlay<?=$cptVideo?>.addEventListener('click', hideOverlay<?=$cptVideo?>);
+                </script>
+<?php
+            }
         } else {
             list($width, $height, $type, $attr) = getimagesize($dir . '/' . $file);
             if ($height<=200) {

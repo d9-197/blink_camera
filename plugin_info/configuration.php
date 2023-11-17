@@ -136,6 +136,12 @@ if (!isConnect()) {
                 <input type="number" class="configKey form-control" data-l1key="nb_max_video" min="0" />
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-lg-5 control-label">{{Mode éco : Ne pas télécharger automatiquement les vidéos}}</label>
+            <div class="col-lg-1">
+                <input  id='fallback_checkbox' type="checkbox"class="configKey form-control" data-l1key="lazyLoadVideo"/>
+            </div>
+        </div>
         <div class="form-group" id="offline_history">
             <label class="col-lg-5 control-label">{{Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)}}</label>
             <div class="col-lg-1">
