@@ -215,6 +215,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
             if (blink_camera::lazyLoadVideo()) {
                 $strVideo.="<div id=\"video-overlay-".$cptVideo."\">";
                 $strVideo.="<img height=\"".$newHeight."\" src=\"core/php/downloadFile.php?pathfile=" . urlencode($dir . '/' . str_replace(".mp4",".jpg",$file))."\"/>";
+                $strVideo.="<span style=\" position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\"><i style=\"font-size:3em;\" class=\"icon font-awesome-play-circle icon_blue\"></i></span>";
                 $strVideo.="</div>";
             }
             $strVideo.= "<video id=\"video-".$cptVideo."\" class=\"displayVideo\"";
