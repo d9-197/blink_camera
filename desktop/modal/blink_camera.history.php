@@ -245,7 +245,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
                         video<?=$cptVideo?>.style.display = "none";
                     }
                     video<?=$cptVideo?>.style.display = "none";
-                    video<?=$cptVideo?>.addEventListener('pause', showOverlay<?=$cptVideo?>);
+                    //video<?=$cptVideo?>.addEventListener('pause', showOverlay<?=$cptVideo?>);
                     overlay<?=$cptVideo?>.addEventListener('click', hideOverlay<?=$cptVideo?>);
                 </script>
 <?php
