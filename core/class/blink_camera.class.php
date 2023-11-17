@@ -1729,8 +1729,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
     {
         return __DIR__.'/../../medias/'.$this->getId();
     }
-    public static function lazyLoadVideo() {
-        return (boolean) config::byKey('lazyLoadVideo', 'blink_camera');
+    public static function isModeEco() {
+        return (boolean) config::byKey('mode_eco', 'blink_camera');
     }
     public function networkArm()
     {
