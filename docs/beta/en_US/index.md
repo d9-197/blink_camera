@@ -65,13 +65,19 @@ The PIN code entry field will appear in the plugin config.\
   + Thumbnail size: allows you to define the reduction to be applied (as a percentage of the initial size).
     
 * Historical view
-  + This view is accessible from the widget
-  + It displays the latest videos/thumbnails available
+  > This view is accessible from the widget. It displays the latest videos/thumbnails available
   + The maximum number of downloaded videos allows you to limit the amount of data to download when opening the historical view
+  + Eco mode: This mode limits the quantity of data exchanged:
+    + between Jeedom and your browser: a video is downloaded to your browser only when you click on it.
+    + between the Blink and Jeedom servers: only data already present on Jeedom is displayed.
   + The size of the video previews can also be configured.
 
     *Warning: If you configure a large size and a large number of videos, this can cause slowness in the historical view*
 
+* Backup
+  + This option allows you to include videos and images in Jeedom backups.
+  
+  **CAUTION: this option will cause a significant increase in the size of the Jeedom backup**
 
 >**Don't forget to click on the "Save" button**
 
