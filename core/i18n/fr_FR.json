@@ -68,7 +68,8 @@
         "Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).":"Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).",
         "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)",
         "Sauvegarde":"Sauvegarde",
-        "Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?":"Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?<br><span style='color:#F00;'>ATTENTION DANGER !</span><BR><span style='color:#F00;'>Attention la taille des sauvegardes Jeedom peut devenir très importante</span>"
+        "Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?":"Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?<br><span style='color:#F00;'>ATTENTION DANGER !</span><BR><span style='color:#F00;'>Attention la taille des sauvegardes Jeedom peut devenir très importante</span>",
+        "Mode éco : Ne pas télécharger automatiquement les vidéos":"Mode éco : Ne pas télécharger automatiquement les vidéos"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Rechercher"
