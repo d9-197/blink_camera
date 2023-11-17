@@ -3,6 +3,7 @@
   + Ajout des actions "Armer caméra" et "Désarmer caméra" sur les caméras de types "Mini" et "Doorbell"
   + Pour l'info "dernier évenement" et les dates dans la vue "historique" : Les dates sont affichées au format français si Jeedom est configuré en français (sinon le format des dates Jeedom habituel est affiché)
   + Vue historique : Ajout d'une option permettant de ne charger la vidéo que si on clique dessus.
+  + [**&rarr; Voir la documentation**](https://d9-197.github.io/blink_camera/beta/fr_FR/?theme=dark)
 
 > 2023-08-12
   + V2.8.0
