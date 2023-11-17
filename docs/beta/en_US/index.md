@@ -147,4 +147,4 @@ You can trigger a scenario by directly activating the information "Last event"
 
 > See "Event" field in the image below
 
-![Utilisation dans des scénarios](..\assets\images\scenario.png "Utilisation dans des scénarios")
+![Utilisation dans des scénarios](..\assets\images\scenario2.png "Utilisation dans des scénarios")

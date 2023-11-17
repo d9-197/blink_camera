@@ -152,4 +152,4 @@ Vous pouvez déclencher un scénario en mettant directement comme déclencheur l
 
 > Voir champ "Evénement" dans l'image ci-dessous
 
-![Utilisation dans des scénarios](..\assets\images\scenario.png "Utilisation dans des scénarios")
+![Utilisation dans des scénarios](..\assets\images\scenario2.png "Utilisation dans des scénarios")
