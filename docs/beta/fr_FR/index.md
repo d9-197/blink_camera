@@ -68,13 +68,14 @@ Le champs de saisi du code PIN apparaitra dans la config du plugin.\
 * Vue historique
   > Cette vue est accessible depuis le widget. Elle affiche les dernières vidéos/vignettes disponibles
   + Le nombre maximum de vidéos téléchargées permet de limiter la quantité de données à télécharger à l'ouverture de la vue historique
+  + La taille des aperçus des vidéos peut également être confirgurée.
+
+    *Attention : Si vous configurez une taille importante et un nombre important de vidéos, cela peut entrainer des lenteurs dans la vue historique. Dans ce cas utilisez le "mode éco"*
   + Mode éco : Ce mode permet de limiter la quantité de données échangée :
     + entre Jeedom et votre navigateur : une vidéo est téléchargée sur votre navigateur que lorsque vous cliquez sur celle ci.
     + entre les serveurs Blink et Jeedom : seules les données déjà présentes sur Jeedom sont affichées.
-  + La taille des aperçus des vidéos peut également être confirgurée.
-
-    *Attention : Si vous configurez une taille importante et un nombre important de vidéos, cela peut entrainer des lenteurs dans la vue historique*
-
+  
+  
 * Sauvegarde
   + Cette option vous permet d'inclure les vidéos et images dans les sauvegardes Jeedom. 
   
