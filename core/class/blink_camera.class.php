@@ -1174,16 +1174,16 @@ file_put_contents($folderJson,json_encode($jsonrep));
                         if (null !=$e->getMessage())
                         {
                             $jsonException=json_decode($e->getMessage());
-                            if (isset($jsonException['code']) && $jsonException['code']=='2102') {
+                            if (isset($jsonException['code']) && $jsonException['code']==2102) {
                                 self::logdebug('MANIFEST STALE (syncId: '.$syncId.'): '.$manifest_req_id);
-                            } else if (isset($jsonException['code']) && $jsonException['code']=='1700') {
+                                $this->requestNewManifest($_accountBlink,$network_id,$syncId);
+                                $lastManifest=$this->getConfiguration('manifest');
+                            } else if (isset($jsonException['code']) && $jsonException['code']==1700) {
                                 self::logdebug('MANIFEST RETRIEVAL ERROR (syncId: '.$syncId.'): '.$manifest_req_id);
                             } else {
                                 self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
                             }
                         }             
-                        $this->requestNewManifest($_accountBlink,$network_id,$syncId);
-                        $lastManifest=$this->getConfiguration('manifest');
                         $url=$url_manifest_req.'/'.$lastManifest;
                         try {
                             jeedomUtils.sleep(5);
