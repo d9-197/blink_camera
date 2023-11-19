@@ -875,7 +875,17 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r
                     $jsonrep=self::queryGet($url);
                     self::releaseLock($flagToRelease);
                 } catch (TransferException $e) {
-                    self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
+                    if (null !=$e->getMessage())
+                    {
+                        $jsonException=json_decode($e->getMessage());
+                        if (isset($jsonException['code']) && $jsonException['code']=='2102') {
+                            self::logdebug('MANIFEST STALE (syncId: '.$syncId.'): '.$manifest_req_id);
+                        } else if (isset($jsonException['code']) && $jsonException['code']=='1700') {
+                            self::logdebug('MANIFEST RETRIEVAL ERROR (syncId: '.$syncId.'): '.$manifest_req_id);
+                        } else {
+                            self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
+                        }
+                    }
                     self::releaseLock($flagToRelease);
                     $cam->requestNewManifest($_accountBlink,$netId,$syncId);
                     $lastManifest=$cam->getConfiguration('manifest');
@@ -1161,7 +1171,17 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     try {
                         $jsonrep=self::queryGet($url);
                     } catch (TransferException $e) {
-                        self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
+                        if (null !=$e->getMessage())
+                        {
+                            $jsonException=json_decode($e->getMessage());
+                            if (isset($jsonException['code']) && $jsonException['code']=='2102') {
+                                self::logdebug('MANIFEST STALE (syncId: '.$syncId.'): '.$manifest_req_id);
+                            } else if (isset($jsonException['code']) && $jsonException['code']=='1700') {
+                                self::logdebug('MANIFEST RETRIEVAL ERROR (syncId: '.$syncId.'): '.$manifest_req_id);
+                            } else {
+                                self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
+                            }
+                        }             
                         $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                         $lastManifest=$this->getConfiguration('manifest');
                         $url=$url_manifest_req.'/'.$lastManifest;
@@ -1229,6 +1249,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
             //file_put_contents($folderJson,json_encode($jsonReqManisfest));
             $this->setConfiguration('manifest',$jsonReqManisfest['id']);
             self::logdebug('FOUND NEW MANISFEST for syncId: '.$syncId.' New manisfest id: '.$jsonReqManisfest['id']);
+            self::propagateManifest($syncId,$jsonReqManisfest['id']);
             self::releaseLock($flagToRelease);
         } catch (Exception $e) {
             self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -1243,6 +1264,15 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 };
             }
             self::releaseLock($flagToRelease);
+        }
+    }
+    public static function propagateManifest($syncId,$newManisfetId) {
+        $eqLogics = self::byType('blink_camera', true);
+        foreach ($eqLogics as $cam) {
+            if ($syncId==$cam->getConfiguration('sync_id')) {
+                $cam->setConfiguration('manifest',$newManisfetId);
+                self::logdebug('NEW MANISFEST PROPAGATED TO: '.$cam->getName().' - '.$cam->getId().' - New manisfest id: '.$jsonReqManisfest['id']);
+            }
         }
     }
 
