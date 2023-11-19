@@ -878,12 +878,12 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r
                     if (null !=$e->getMessage())
                     {
                         $jsonException=json_decode($e->getMessage());
-                        if (isset($jsonException['code']) && $jsonException['code']=='2102') {
-                            self::logdebug('MANIFEST STALE (syncId: '.$syncId.'): '.$manifest_req_id);
-                        } else if (isset($jsonException['code']) && $jsonException['code']=='1700') {
-                            self::logdebug('MANIFEST RETRIEVAL ERROR (syncId: '.$syncId.'): '.$manifest_req_id);
+                        if (isset($jsonException['code']) && $jsonException['code']==2102) {
+                            self::logdebug('MANIFEST STALE (syncId: '.$syncId.'): '.$lastManifest);
+                        } else if (isset($jsonException['code']) && $jsonException['code']==1700) {
+                            self::logdebug('MANIFEST RETRIEVAL ERROR (syncId: '.$syncId.'): '.$lastManifest);
                         } else {
-                            self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
+                            self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
                         }
                     }
                     self::releaseLock($flagToRelease);
@@ -1175,13 +1175,13 @@ file_put_contents($folderJson,json_encode($jsonrep));
                         {
                             $jsonException=json_decode($e->getMessage());
                             if (isset($jsonException['code']) && $jsonException['code']==2102) {
-                                self::logdebug('MANIFEST STALE (syncId: '.$syncId.'): '.$manifest_req_id);
+                                self::logdebug('MANIFEST STALE (syncId: '.$syncId.'): '.$lastManifest);
                                 $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                                 $lastManifest=$this->getConfiguration('manifest');
                             } else if (isset($jsonException['code']) && $jsonException['code']==1700) {
-                                self::logdebug('MANIFEST RETRIEVAL ERROR (syncId: '.$syncId.'): '.$manifest_req_id);
+                                self::logdebug('MANIFEST RETRIEVAL ERROR (syncId: '.$syncId.'): '.$lastManifest);
                             } else {
-                                self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$manifest_req_id. ' - ERROR:'.print_r($e->getMessage(), true));
+                                self::logdebug('An error occured during GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
                             }
                         }             
                         $url=$url_manifest_req.'/'.$lastManifest;
@@ -1271,7 +1271,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
         foreach ($eqLogics as $cam) {
             if ($syncId==$cam->getConfiguration('sync_id')) {
                 $cam->setConfiguration('manifest',$newManisfetId);
-                self::logdebug('NEW MANISFEST PROPAGATED TO: '.$cam->getName().' - '.$cam->getId().' - New manisfest id: '.$jsonReqManisfest['id']);
+                self::logdebug('NEW MANISFEST PROPAGATED TO: '.$cam->getName().' - '.$cam->getId().' - New manisfest id: '.$newManisfetId);
             }
         }
     }
