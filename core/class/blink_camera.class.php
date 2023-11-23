@@ -71,9 +71,9 @@ class blink_camera extends eqLogic
         }
         self::logdebug(__('APImessage', __FILE__). __($message, __FILE__));
     }
-    public static function cleanSpecialCharacters($string) {
+    public static function cleanSpecialCharacters($string, $replacement='_') {
         $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
-        return preg_replace('/[^A-Za-z0-9\-]/', '_', $string); // Removes special chars.
+        return preg_replace('/[^A-Za-z0-9\-]/', $replacement, $string); // Removes special chars.
      }
     public static function logdebug($message) {
         log::add('blink_camera','debug',$message);
@@ -907,7 +907,8 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                                 $clip_date=$clips['created_at'];
                                 $filename=$clip_id.'-'.self::getDateJeedomTimezone($clip_date);
 self::logdebug('getMediaLocal PHASE 2 - syncId=: '.$syncId.' - clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$cam->getName().') - created_at : ' .$clip_date);
-                                if (strtolower($camera_name)===strtolower($cam->getName())) {
+                                $cameraApiName=$cam->getConfiguration('camera_name');
+                                if (strtolower($camera_name)===self::cleanSpecialCharacters(str_replace(" ","",strtolower($cameraApiName)),'')) {
                                     $url_media=$url_manifest.'/'.$manifest_id.'/clip/request/'.$clip_id;
                                     try {
                                         $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase3-syncId-'.$syncId,100);
@@ -1196,13 +1197,13 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     if (isset($jsonrep)) {
     //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
     //file_put_contents($folderJson,json_encode($jsonrep));
-    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 2 : '.print_r($jsonrep,true));
+    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') ('.self::cleanSpecialCharacters(str_replace(" ","",strtolower($cameraApiName)),'').') Phase 2 : '.print_r($jsonrep,true));
                         $manifest_id=$jsonrep['manifest_id'];
                         if (isset($manifest_id)) {
                             $result= array();
                             $idx=0;
                             foreach ($jsonrep['clips'] as $clip) {
-                                if (strtolower($clip['camera_name'])===strtolower($cameraApiName)) {
+                                if (strtolower($clip['camera_name'])===self::cleanSpecialCharacters(str_replace(" ","",strtolower($cameraApiName)),'')) {
                                     $clip['media']=$clip['id'];
                                     $clip['thumbnail']=$clip['id'];
                                     $clip['deleted']=(bool) 0;
@@ -1214,8 +1215,8 @@ file_put_contents($folderJson,json_encode($jsonrep));
                                 }
                             }
                             if ($idx>0) {
-//                                $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_result.json';
-//                                file_put_contents($folderJson,json_encode($result));
+                                //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_result.json';
+                                //file_put_contents($folderJson,json_encode($result));
                                 self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') result  : '.print_r($result,true));
                                 return json_encode($result);
                             } else {

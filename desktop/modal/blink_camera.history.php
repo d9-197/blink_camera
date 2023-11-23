@@ -214,15 +214,18 @@ foreach ($videoFiltered as $date => $videoByDate) {
             $strVideo="";
             if (blink_camera::isModeEco()) {
                 $strVideo.="<div id=\"video-overlay-".$cptVideo."\">";
-                $strVideo.="<img height=\"".$newHeight."\" src=\"core/php/downloadFile.php?pathfile=" . urlencode($dir . '/' . str_replace(".mp4",".jpg",$file))."\"/>";
+                if (file_exists($dir . '/' . str_replace(".mp4",".jpg",$file))) {
+                    $overlay=$dir . '/' . str_replace(".mp4",".jpg",$file);
+                } else {
+                    $overlay="/plugins/blink_camera/img/play.png";
+                }
+                $strVideo.="<img height=\"".$newHeight."\" src=\"". blink_camera::GET_RESOURCE . urlencode($overlay)."\"/>";
                 $strVideo.="<span style=\" position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\"><i style=\"font-size:5em;\" class=\"icon font-awesome-play-circle icon_green\"></i></span>";
                 $strVideo.="</div>";
             }
             $strVideo.= "<video id=\"video-".$cptVideo."\" class=\"displayVideo\"";
-            if (blink_camera::isModeEco()) {
-                $strVideo.= " preload=\"none\" poster=\"core/php/downloadFile.php?pathfile=" . urlencode($dir . '/' . str_replace(".mp4",".jpg",$file)) . "\" ";
-            }
-            $strVideo.=" height=\"".$newHeight."\" controls loop data-src=\"core/php/downloadFile.php?pathfile=".urlencode($dir . '/' . $file)."\" style=\"cursor:pointer\"><source src=\"core/php/downloadFile.php?pathfile=".urlencode($dir.'/'.$file)."\">Your browser does not support the video tag.</video>";
+            $strVideo.= " preload=\"none\" poster=\"". blink_camera::GET_RESOURCE . urlencode($overlay) . "\" ";
+            $strVideo.=" height=\"".$newHeight."\" controls loop data-src=\"". blink_camera::GET_RESOURCE.urlencode($dir . '/' . $file)."\" style=\"cursor:pointer\"><source src=\"". blink_camera::GET_RESOURCE.urlencode($dir.'/'.$file)."\">Your browser does not support the video tag.</video>";
             echo $strVideo;
             if (blink_camera::isModeEco()) {
 ?>
@@ -262,7 +265,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
             $newHeight=$height*$facteurImg;
             $newWidth=$width*$facteurImg;
             echo '<!--ORIG HEIGHT: '.$height.' ORIG WIDTH: '.$width.' factor: '.$facteurImg.' HEIGTH: '.$newHeight.' WIDTH: '.$newWidth. ' -->';
-            echo '<div><img '.$idIMG.' class="displayImage" loading="eager" src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) .  '" height="'.$newHeight.'" width="'.$newWidth.'"/></div>';
+            echo '<div><img '.$idIMG.' class="displayImage" loading="eager" src="'. blink_camera::GET_RESOURCE . urlencode($dir . '/' . $file) .  '" height="'.$newHeight.'" width="'.$newWidth.'"/></div>';
         }
         echo '</center>';
         echo '</div>';

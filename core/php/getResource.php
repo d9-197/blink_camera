@@ -12,23 +12,35 @@ if (!isConnect() && !blink_camera::isOpenMediasAccess()) {
 
 $file=init('file');
 $file_root="/plugins/blink_camera/medias/";
-if (substr($file,0,strlen($file_root))!==$file_root || strpos($file, '..') !== false) {
-	#blink_camera::logerror('blink_camera getResource.php - Access attempt denied: '.$file);
-	header("Statut: 404 Page non trouvée");
-	header('HTTP/1.0 404 Not Found');
-	$_SERVER['REDIRECT_STATUS'] = 404;
-	echo "<h1>404 Not found</h1>";
-	echo "Page not found.";
-	die();
+$file_root_plugin="/plugins/blink_camera/";
+if (substr($file,0,strlen($file_root_plugin))==$file_root_plugin) {
+	$file = dirname(__FILE__) . '/../../../../' . $file;
+} else if (substr($file,0,strlen($file_root))==$file_root && strpos($file, '..') == false) {
+	$file = dirname(__FILE__) . '/../../../../' . $file;
+} else if (substr($file,0,1)=='/' && strpos($file, $file_root_plugin) !== false)  {
+	$file=$file;
+} else  {
+		#blink_camera::logerror('blink_camera getResource.php - Access attempt denied: '.$file);
+		header("Statut: 404 Page non trouvée");
+		header('HTTP/1.0 404 Not Found');
+		$_SERVER['REDIRECT_STATUS'] = 404;
+		echo "<h1>404 Not found</h1>";
+		echo "Page not found.";
+		die();
 }
-$file = dirname(__FILE__) . '/../../../../' . $file;
-#blink_camera::logdebug('blink_camera getResource.php '.$file);
+
+//blink_camera::logdebug('blink_camera getResource.php '.$file);
 $pathinfo = pathinfo($file);
-if ($pathinfo['extension'] != 'jpg' && $pathinfo['extension'] != 'mp4') {
+if ($pathinfo['extension'] != 'jpg' && $pathinfo['extension'] != 'png' && $pathinfo['extension'] != 'mp4') {
 	die();
 }
 if (file_exists($file)) {
 	switch ($pathinfo['extension']) {
+		case 'png':
+		$contentType = 'image/png';
+		$md5 = init('md5');
+		$etagFile = ($md5 == '') ? md5_file($file) : $md5;
+		break;
 		case 'jpg':
 		$contentType = 'image/jpeg';
 		$md5 = init('md5');
@@ -54,4 +66,12 @@ if (file_exists($file)) {
 	}
 	echo file_get_contents($file);
 	exit;
+} else {
+	header("Statut: 404 Page non trouvée");
+	header('HTTP/1.0 404 Not Found');
+	$_SERVER['REDIRECT_STATUS'] = 404;
+	echo "<h1>404 Not found - RESOURCE NOT FOUND $file</h1>";
+	echo "Page not found.";
+	die();
+
 }
