@@ -865,7 +865,7 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
             if (isset($lastManifest) && $lastManifest!=='') {
 //$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph1.json';
 //file_put_contents($folderJson,json_encode($jsonrep));
-jeedomUtils.sleep(1);
+//jeedomUtils.sleep(1);
 self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r($lastManifest,true));
                 $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$netId.'/sync_modules/'.$syncId.'/local_storage/manifest';
                 $url_manifest_req=$url_manifest.'/request';
@@ -895,21 +895,23 @@ self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId.' - result: '.print_r
                     self::releaseLock($flagToRelease);
                 }
                 if (isset($jsonrep)) {
-$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph2.json';
-file_put_contents($folderJson,json_encode($jsonrep));
+//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph2.json';
+//file_put_contents($folderJson,json_encode($jsonrep));
 self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($jsonrep,true));
                     $manifest_id=$jsonrep['manifest_id'];
                     if (isset($manifest_id)) {
                         foreach ($jsonrep['clips'] as $clips) {
                             $clip_id=$clips['id'];
+                            self::logdebug('getMediaLocal PHASE 3 - syncId=: '.$syncId.' - clip_id_req : '.$clip_id_req.' VERSUS clip_id : '.$clip_id);
                             if ($clip_id_req=="" || $clip_id_req==$clip_id) {
                                 $camera_name=$clips['camera_name'];
                                 $clip_date=$clips['created_at'];
                                 $filename=$clip_id.'-'.self::getDateJeedomTimezone($clip_date);
-self::logdebug('getMediaLocal PHASE 2 - syncId=: '.$syncId.' - clip_id : '.$clip_id.' - camera_name : '.$camera_name.' ('.$cam->getName().') - created_at : ' .$clip_date);
                                 $cameraApiName=$cam->getConfiguration('camera_name');
+                                self::logdebug('getMediaLocal PHASE 3 - syncId=: '.$syncId.' - clip_id : '.$clip_id.' - camera_name : '.strtolower($camera_name).' ('.self::cleanSpecialCharacters(str_replace(" ","",strtolower($cameraApiName)),'').') - created_at : ' .$clip_date);
                                 if (strtolower($camera_name)===self::cleanSpecialCharacters(str_replace(" ","",strtolower($cameraApiName)),'')) {
                                     $url_media=$url_manifest.'/'.$manifest_id.'/clip/request/'.$clip_id;
+                                    self::logdebug('getMediaLocal PHASE 3 - syncId=: '.$syncId.' - clip_id : '.$clip_id.' will be downloaded');
                                     try {
                                         $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase3-syncId-'.$syncId,100);
                                         $jsonrep=self::queryPost($url_media);
@@ -920,8 +922,8 @@ self::logdebug('getMediaLocal PHASE 2 - syncId=: '.$syncId.' - clip_id : '.$clip
                                         return self::ERROR_IMG;
                                     }
                                     self::logdebug('getMediaLocal PHASE 3 - syncId=: '.$syncId.' - result : '.$jsonrep);
-$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph3.json';
-file_put_contents($folderJson,json_encode($jsonrep));
+//$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph3.json';
+//file_put_contents($folderJson,json_encode($jsonrep));
                                     $flagToRelease=self::checkAndGetLock('getMediaLocal-getMediaForce-syncId-'.$syncId.'-clip_id-'.$clip_id,10);
                                     $resultMedia= self::getMediaForce($url_media, $cam->getId(), $filename,'mp4',false);
                                     self::releaseLock($flagToRelease);
@@ -1158,10 +1160,13 @@ file_put_contents($folderJson,json_encode($jsonrep));
             $cameraApiName=$this->getConfiguration('camera_name');
 
             if (!$syncId =="") {
-                self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId);
-                if (!isset($lastManifest) || $lastManifest=='') {
+                self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId .' - lastManifest:'.$lastManifest);
+                //if (!isset($lastManifest) || $lastManifest=='') {
+                $lastRequestTime=$this->getConfiguration('manifest_timestamp');
+                if ((date_timestamp_get(date_create())-$lastRequestTime) > 120) {
                     $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                 }
+                //}
                 $lastManifest=$this->getConfiguration('manifest');
                 if (isset($lastManifest) && $lastManifest!=='') {
     jeedomUtils.sleep(1);
@@ -1197,7 +1202,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                     if (isset($jsonrep)) {
     //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
     //file_put_contents($folderJson,json_encode($jsonrep));
-    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') ('.self::cleanSpecialCharacters(str_replace(" ","",strtolower($cameraApiName)),'').') Phase 2 : '.print_r($jsonrep,true));
+                        self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') ('.self::cleanSpecialCharacters(str_replace(" ","",strtolower($cameraApiName)),'').') Phase 2 : '.print_r($jsonrep,true));
                         $manifest_id=$jsonrep['manifest_id'];
                         if (isset($manifest_id)) {
                             $result= array();
@@ -1240,38 +1245,41 @@ file_put_contents($folderJson,json_encode($jsonrep));
     }
 
     function requestNewManifest($_accountBlink,$network_id,$syncId) {
-        self::logdebug('REQUEST NEW MANISFEST for syncId: '.$syncId);
-        $flagToRelease=self::checkAndGetLock('requestNewManifest-syncId-'.$syncId);
-        $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
-        $url_manifest_req=$url_manifest.'/request';
-        try {
-            $jsonReqManisfest=self::queryPost($url_manifest_req);
-            //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
-            //file_put_contents($folderJson,json_encode($jsonReqManisfest));
-            $this->setConfiguration('manifest',$jsonReqManisfest['id']);
-            self::logdebug('FOUND NEW MANISFEST for syncId: '.$syncId.' New manisfest id: '.$jsonReqManisfest['id']);
-            self::propagateManifest($syncId,$jsonReqManisfest['id']);
-            self::releaseLock($flagToRelease);
-        } catch (Exception $e) {
-            self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
-            if (method_exists($e,'getResponse')) {
-                $response = $e->getResponse();
-                $responseJson = json_decode($response->getBody()->getContents(),true);
-                if($responseJson['code']===307) {
-    //                        sleep(5);
-    //                        self::releaseLock('getVideoListLocal-syncId-'.$syncId);
-    //                        self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,10);
-    //                        $jsonReqManisfest=self::queryPost($url_manifest_req);
-                };
+
+            self::logdebug('REQUEST NEW MANISFEST for syncId: '.$syncId);
+            $flagToRelease=self::checkAndGetLock('requestNewManifest-syncId-'.$syncId);
+            $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
+            $url_manifest_req=$url_manifest.'/request';
+            try {
+                $jsonReqManisfest=self::queryPost($url_manifest_req);
+                //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/requestNewManifest_ph1.json';
+                //file_put_contents($folderJson,json_encode($jsonReqManisfest));
+                $this->setConfiguration('manifest',$jsonReqManisfest['id']);
+                $this->setConfiguration('manifest_timestamp',date_timestamp_get(date_create()));
+                self::logdebug('FOUND NEW MANISFEST for syncId: '.$syncId.' New manisfest id: '.$jsonReqManisfest['id']);
+                self::propagateManifest($syncId,$jsonReqManisfest['id']);
+                self::releaseLock($flagToRelease);
+            } catch (Exception $e) {
+                self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
+                if (method_exists($e,'getResponse')) {
+                    $response = $e->getResponse();
+                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                    if($responseJson['code']===307) {
+        //                        sleep(5);
+        //                        self::releaseLock('getVideoListLocal-syncId-'.$syncId);
+        //                        self::checkAndGetLock('getVideoListLocal-syncId-'.$syncId,10);
+        //                        $jsonReqManisfest=self::queryPost($url_manifest_req);
+                    };
+                }
+                self::releaseLock($flagToRelease);
             }
-            self::releaseLock($flagToRelease);
-        }
     }
     public static function propagateManifest($syncId,$newManisfetId) {
         $eqLogics = self::byType('blink_camera', true);
         foreach ($eqLogics as $cam) {
             if ($syncId==$cam->getConfiguration('sync_id')) {
                 $cam->setConfiguration('manifest',$newManisfetId);
+                $cam->setConfiguration('manifest_timestamp',date_timestamp_get(date_create()));
                 self::logdebug('NEW MANISFEST PROPAGATED TO: '.$cam->getName().' - '.$cam->getId().' - New manisfest id: '.$newManisfetId);
             }
         }
@@ -1424,7 +1432,7 @@ file_put_contents($folderJson,json_encode($jsonrep));
                 if (($key = array_search($file, $fileToKeep)) == false) {
                     if ($file!=="." && $file!=="..") {
                         // On ne supprime pas les thumbnail de camera
-                        if(preg_match("#.*".self::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($file))==false){
+                        if ($storage!=='local' && preg_match("#.*".self::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($file))==false){
                             $fileToDelete[]=$file;
                         }
                     }

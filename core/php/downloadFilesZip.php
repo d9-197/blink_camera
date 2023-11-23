@@ -66,7 +66,7 @@ try {
 		}
 		$directory = new \RecursiveDirectoryIterator($pathfile, \FilesystemIterator::SKIP_DOTS);
 		$filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) use ($pathFilter) {
-			//blink_camera::logdebug('downloadFilesZip - check file for '.$pathFilter.' : '.$current->getPathname());
+			blink_camera::logdebug('downloadFilesZip - check file for '.$pathFilter.' : '.$current->getPathname());
 			return preg_match('/'.$pathFilter.'/i',$current->getPathname()) > 0;
 		});
 		$iterator = new \RecursiveIteratorIterator($filter);

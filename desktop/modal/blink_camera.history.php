@@ -84,7 +84,7 @@ $archiver="downloadFilesZip";
 if (!extension_loaded('zip')) {
     $archiver="downloadFiles";
 }
-echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/'.$archiver.'.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'*'.$formatMedia).'&archive='.urlencode($blink_camera->getName()).'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
+echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/'.$archiver.'.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'.*'.$formatMedia).'&archive='.urlencode($blink_camera->getName()).'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
 
 echo '</div>';
 
