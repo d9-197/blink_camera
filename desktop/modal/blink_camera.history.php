@@ -237,6 +237,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
                         overlay<?=$cptVideo?>.style.display = "none";
                         video<?=$cptVideo?>.style.display = "block";
                         videoPlaying<?=$cptVideo?> = true;
+                        $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
                         video<?=$cptVideo?>.play();
                     }
                     function showOverlay<?=$cptVideo?>() {
