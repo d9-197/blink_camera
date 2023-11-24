@@ -773,17 +773,19 @@ class blink_camera extends eqLogic
                         catch (TransferException $e) {
                             self::logdebug('An error occured during Blink Cloud call: '.$urlMedia. ' - ERROR:'.print_r($e->getMessage(), true));
                             self::deleteMedia($folderBase.$filename);
+                            self::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : error.png 1");
                             return self::ERROR_IMG;
                         }
                     }
                 } else {
-                    //self::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : error.png");
+                    self::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : error.png 2");
                     return self::ERROR_IMG;
                 }
             }
                 //self::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : $filename");
                 return '/plugins/blink_camera/medias/'.$equipement_id.'/'.$filename;
         }
+        self::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : error.png 3");
         return self::ERROR_IMG;
     }
 
@@ -917,9 +919,18 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                                         $jsonrep=self::queryPost($url_media);
                                         self::releaseLock($flagToRelease);
                                     } catch (Exception $e) {
-                                        self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_media. ' - ERROR:'.print_r($e->getMessage(), true));
-                                        self::releaseLock($flagToRelease);
-                                        return self::ERROR_IMG;
+                                        if (null !=$e->getMessage())
+                                        {
+                                            $jsonException=json_decode($e->getMessage());
+                                            self::releaseLock($flagToRelease);
+                                            if (isset($jsonException['code']) && $jsonException['code']==307) {
+                                                self::logdebug('System busy...');
+                                            } else {
+                                                self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_media. ' - ERROR:'.print_r($e->getMessage(), true));
+                                                self::logdebug("blink_camera->getMediaLocal() : error.png 1");
+                                                return self::ERROR_IMG;
+                                                    }
+                                        }      
                                     }
                                     self::logdebug('getMediaLocal PHASE 3 - syncId=: '.$syncId.' - result : '.$jsonrep);
 //$folderJson=__DIR__.'/../../medias/'.$cam->getId().'-localStorage_ph3.json';
@@ -944,6 +955,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         } else {
             self::logdebug('getMediaLocal syncID not found !');
         }
+        self::logdebug("blink_camera->getMediaLocal() : error.png 2");
         return self::ERROR_IMG;
     }
     private static function checkAndGetLock($ident='all', $attente_maxi=self::ATTENTE_MAXI_DEFAUT) {
@@ -1163,7 +1175,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId .' - lastManifest:'.$lastManifest);
                 //if (!isset($lastManifest) || $lastManifest=='') {
                 $lastRequestTime=$this->getConfiguration('manifest_timestamp');
-                if ((date_timestamp_get(date_create())-$lastRequestTime) > 120) {
+                if ((date_timestamp_get(date_create())-$lastRequestTime) > 10) {
                     $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                 }
                 //}
@@ -1524,7 +1536,9 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     self::logdebug('blink_camera->getLastEventDate() '.$this->getId().' previous='.$previous);
                     $new=self::getDateJeedomTimezone($event['created_at']);
                     self::logdebug('blink_camera->getLastEventDate() '.$this->getId().' new='.$new);
-                    if (isset($new) && $new!="" && ($new>$previous || $ignorePrevious)) {
+                    $infoCmd=$this->getCmd(null, 'clip_path');
+                    $clip_path=$infoCmd->execCmd();
+                    if ((isset($new) && $new!="" && ($new>$previous || $ignorePrevious)) || $clip_path==blink_camera::ERROR_IMG) {
                         self::logdebug('New event detected:'.$new. ' (previous:'.$previous.')');
                         $this->checkAndUpdateCmd('last_event', $new);
                         $pathThumb=self::getMedia($event['thumbnail'],$this->getId(),$event['id'].'-'.self::getDateJeedomTimezone($event['created_at']),'jpg');
@@ -1532,9 +1546,11 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                         $urlThumb=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",self::GET_RESOURCE.$pathThumb);
                         $this->checkAndUpdateCmd('thumb_url',$urlThumb);
                         $pathLastVideo=self::getMedia($event['media'],$this->getId(),$event['id'].'-'.self::getDateJeedomTimezone($event['created_at']));
-                        $this->checkAndUpdateCmd('clip_path',$pathLastVideo);
-                        $urlLastVideo=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",self::GET_RESOURCE.$pathLastVideo);
-                        $this->checkAndUpdateCmd('clip_url',$urlLastVideo);
+                        if ($pathLastVideo!=='') {
+                            $this->checkAndUpdateCmd('clip_path',$pathLastVideo);
+                            $urlLastVideo=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",self::GET_RESOURCE.$pathLastVideo);
+                            $this->checkAndUpdateCmd('clip_url',$urlLastVideo);
+                        }
                     }
                 }
                 $info = $this->getCmd(null, 'source_last_event');
