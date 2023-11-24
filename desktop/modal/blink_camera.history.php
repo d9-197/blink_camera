@@ -243,7 +243,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
                                 $overlay="/plugins/blink_camera/img/play.png";
                             }
                             $strVideo.="<img height=\"".$newHeight."\" src=\"". blink_camera::GET_RESOURCE . urlencode($overlay)."\"/>";
-                            $strVideo.="<span style=\" position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\"><i style=\"font-size:5em;\" class=\"icon font-awesome-play-circle icon_green\"></i></span>";
+                            //$strVideo.="<span style=\" position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\"><i style=\"font-size:5em;\" class=\"icon font-awesome-play-circle icon_green\"></i></span>";
                             $strVideo.="</div>";
                         }
                         $strVideo.= "<video id=\"video-".$cptVideo."\" class=\"displayVideo\"";
@@ -259,9 +259,12 @@ foreach ($videoFiltered as $date => $videoByDate) {
                                 function hideOverlay<?=$cptVideo?>() {
                                     overlay<?=$cptVideo?>.style.display = "none";
                                     video<?=$cptVideo?>.style.display = "block";
-                                    $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
                                     videoPlaying<?=$cptVideo?> = true;
                                     video<?=$cptVideo?>.play();
+                                    if ($('#video-<?=$cptVideo?>').is(":visible")) {
+                                        $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+                                     };
+    
                                 }
                                 function showOverlay<?=$cptVideo?>() {
                                     // this check is to differentiate seek and actual pause 
@@ -272,7 +275,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
                                     video<?=$cptVideo?>.style.display = "none";
                                 }
                                 video<?=$cptVideo?>.style.display = "none";
-                                //video<?=$cptVideo?>.addEventListener('pause', showOverlay<?=$cptVideo?>);
+                               // video<?=$cptVideo?>.addEventListener('pause', showOverlay<?=$cptVideo?>);
                                 overlay<?=$cptVideo?>.addEventListener('click', hideOverlay<?=$cptVideo?>);
                             </script>
                 <?php
@@ -302,6 +305,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
     </div>
     <script>
         $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+
     </script>
 <?php 
 } // FIN DATES
