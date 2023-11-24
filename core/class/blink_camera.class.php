@@ -91,7 +91,12 @@ class blink_camera extends eqLogic
     public static function logwarn($message) {
         log::add('blink_camera','warning',$message);
     }
-
+    public static function searchForFile($fileToSearchFor){
+        foreach (glob($fileToSearchFor) as $filesFound) {
+            return $filesFound;
+        }
+        return false;
+    }
     /* Every 10 minutes, check and download last event video (named last.mp4 in Jeedom) */
     public static function cron10($_eqLogic_id = null)
     {
@@ -858,6 +863,12 @@ class blink_camera extends eqLogic
         $netId=$cam->getConfiguration('network_id');
         $syncId=$cam->getConfiguration('sync_id');
         $lastManifest=$cam->getConfiguration('manifest');
+        $fileExists=blink_camera::searchForFile(dirname(__FILE__) . '/../../medias/'.$equipement_id.'/'.$clip_id_req.'*.*');
+        if ($fileExists!==false)
+        {
+            self::logdebug('getMediaLocal FILE ALREADY EXISTS FOR CLIP '.$fileExists);
+            return $fileExists;
+        }
         if (!$syncId =="") {
 self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
             if (!isset($lastManifest) || $lastManifest=='') {
@@ -925,11 +936,12 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                                             self::releaseLock($flagToRelease);
                                             if (isset($jsonException['code']) && $jsonException['code']==307) {
                                                 self::logdebug('System busy...');
+                                                return "";
                                             } else {
                                                 self::logdebug('An error occured during call API LOCAL STORAGE POST: '.$url_media. ' - ERROR:'.print_r($e->getMessage(), true));
                                                 self::logdebug("blink_camera->getMediaLocal() : error.png 1");
                                                 return self::ERROR_IMG;
-                                                    }
+                                            }
                                         }      
                                     }
                                     self::logdebug('getMediaLocal PHASE 3 - syncId=: '.$syncId.' - result : '.$jsonrep);
