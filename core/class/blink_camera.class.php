@@ -73,7 +73,7 @@ class blink_camera extends eqLogic
     }
     public static function cleanSpecialCharacters($string, $replacement='_') {
         $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
-        return preg_replace('/[^A-Za-z0-9\-]/', $replacement, $string); // Removes special chars.
+        return preg_replace('/[^A-Za-z0-9]/', $replacement, $string); // Removes special chars.
      }
     public static function logdebug($message) {
         log::add('blink_camera','debug',$message);
