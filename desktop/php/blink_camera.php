@@ -6,6 +6,7 @@ $plugin = plugin::byId('blink_camera');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 ?>
+<?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
 
 <div class="row row-overflow">
     <!--div class="col-lg-2 col-md-3 col-sm-4">
@@ -84,7 +85,7 @@ foreach ($eqLogics as $eqLogic) {
             <div class="form-group">
                 <label class="col-sm-3 control-label">{{Nom de l'équipement}}</label>
                 <div class="col-sm-3">
-                    <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
+                    <input id="ideq" type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
                     <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement}}"/>
                 </div>
             </div>
@@ -121,12 +122,18 @@ foreach ($eqLogics as $eqLogic) {
 		</div>
 	</div>
 
-    <!--div class="form-group">
+    <div class="form-group">
         <label class="col-sm-3 " ></label>
         <div class="col-sm-3">
             <button type="button" class="btn btn-default" id="bt_refresh_blink_cfg">{{Recharger la configuration}}</button>
         </div>
-    </div-->
+    </div>
+    <div class="form-group blink_cfg">
+        <label class="col-sm-3 control-label" >{{ Compte Blink }}</label>
+        <div id="liste" class="col-sm-3">
+            <select id="select_email" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="email"></select>
+        </div>
+    </div>
     <div class="form-group blink_cfg">
         <label class="col-sm-3 control-label" >{{ Système }}</label>
         <div id="liste" class="col-sm-3">
@@ -143,6 +150,7 @@ foreach ($eqLogics as $eqLogic) {
 </fieldset>
 </form>
 </div>
+
 
       <div role="tabpanel" class="tab-pane" id="commandtab">
 <a class="btn btn-success btn-sm cmdAction pull-left" data-action="add" style="margin-top:5px;"><i class="fa fa-plus-circle"></i> {{Commandes}}</a><br/><br/>
@@ -166,7 +174,12 @@ foreach ($eqLogics as $eqLogic) {
 </div>
 </div>
 
-<?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
 <?php include_file('core', 'plugin.template', 'js');?>
+<?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
-<?php include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');?>
+<?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
+<script>
+  //  checkBlinkCameraConfig();
+  // init du 1st select
+  //chainSelect('init');
+</script>

@@ -228,7 +228,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
                     <a target="_blank" href="core/php/downloadFile.php?pathfile=<?=$pathEncoded?>" class="btn btn-success btn-xs pull-right" style="color : white"><i class="fas fa-download"></i></a>
                     <?php
                     if ($cameraConnected) {
-                            echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
+                            echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-ideq="'.$blink_camera->getId().'" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
                     }
                     ?>
                 </div>
@@ -317,6 +317,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
 
 $('.bt_removefile').on('click', function() {
 	var filename = $(this).attr('data-filename');
+	var idEquipment = $(this).attr('data-ideq');
 	var direct = $(this).attr('data-dirname');
 	var card = $(this).closest('.blink_cardVideo');
 	if($(this).attr('data-day') == 1){
@@ -332,6 +333,7 @@ $('.bt_removefile').on('click', function() {
 			action: "removeRecord",
 			file: filename,
 			dir: direct,
+            ideq: idEquipment,
 		},
 		dataType: 'json',
 		error: function(request, status, error) {

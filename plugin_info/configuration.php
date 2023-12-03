@@ -38,7 +38,7 @@ if (!isConnect()) {
         <div class="form-group">
              <label class="col-lg-6 control-label">{{Email}}</label>
             <div class="col-lg-3">
-                <input class="configKey form-control" data-l1key="param1" />
+                <input class="configKey form-control" id="email" data-l1key="param1" />
             </div>
             <div class="col-lg-1">
                 <a id="bt_test_blink" class="btn btn-success btn-xs">{{Sauvegarder et tester la connexion Blink}}</a>
@@ -158,7 +158,7 @@ if (!isConnect()) {
         <div class="form-group">
             <label class="col-lg-6 control-label">{{Mode eco}}</label>
             <div class="col-lg-1">
-                <input  id='fallback_checkbox' type="checkbox"class="configKey form-control" data-l1key="mode_eco"/>
+                <input  id='mode_eco_checkbox' type="checkbox"class="configKey form-control" data-l1key="mode_eco"/>
             </div>
             <label class="col-lg-5">{{Mode eco desc}}</label>
         </div>
@@ -174,11 +174,13 @@ if (!isConnect()) {
 </form>
 <script>
     function checkConnexionBlink() {
+//        alert ($email);
         $.ajax({
                     type: "POST",
                     url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
                     data: {
                         action: "test_blink",
+                        email : document.getElementById("email").value,
                     },
                     dataType: 'json',
                     error: function(request, status, error) {
@@ -190,7 +192,7 @@ if (!isConnect()) {
                             $.fn.showAlert({message: "{{Connexion à votre compte Blink OK}}", level: 'info'});
                             $('#verifdiv').hide();
                             $('.blink_cfg').show();
-                            checkBlinkCameraConfig();
+                            //checkBlinkCameraConfig();
                             sessionStorage.setItem("blink_camera_refresh","REFRESH");
                         } else if ($res.token == "verif") {
                             $.fn.showAlert({message: "{{Connexion à votre compte Blink OK mais un code de vérification est nécessaire}}", level: 'warning'});
@@ -228,7 +230,7 @@ if (!isConnect()) {
                     }
                 });
     }; 
-    $('#verifdiv').hide();
+   // $('#verifdiv').hide();
     $('#bt_verifypin').on('click', function() {
         $.ajax({
             type: 'POST',
@@ -236,6 +238,8 @@ if (!isConnect()) {
             data: {
                 action: 'verifyPinCode',
                 pin: document.getElementById("pincode").value,
+                email: document.getElementById("email").value,
+
             },
             dataType: 'json',
             global: false,
@@ -252,7 +256,7 @@ if (!isConnect()) {
             //savePluginConfig();
 			jeeFrontEnd.plugin.savePluginConfig();
             sleep(1000);
-            checkConnexionBlink();
+            //checkConnexionBlink();
 
     })
     $('#bt_reinit_blink').on('click', function() {
@@ -273,6 +277,6 @@ if (!isConnect()) {
             $(warning_thumb).hide();
         }
     })
-    checkConnexionBlink();
+    //checkConnexionBlink();
     </script>
 <?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
