@@ -22,7 +22,16 @@ Camera information is also available:
 * Battery status,
 * [Doorbell only] Source of the last evebt ("pir" for IR detection, "button_press" pour the button)
 
->**In the plugin, Blink Mini cameras and Doorbell do not have the same capabilities as other Blink XT, Outdoor cameras, etc.<br> For example, camera thumbnails are not implemented for Mini**
+>**In the plugin, some types of Blink camera do not have the same capabilities as other. Then some functions or information can not be available for these types of camera.**
+
+**Case of the local storage**\
+There are 3 storage configurations for camera videos/images.
+- "Cloud": Storage on the Blink Cloud
+- "Local": Storage on a USB key : a synchronisation module v2 is required
+- "No storage": no Cloud, no USB key.
+
+The "Cloud" and "Local" configurations allow the plugin to obtain the last event (every minutes : it is not instantaneous).
+The "No storage" configuration does not allow obtaining the last event and does not allow obtaining videos/images. In this case, this plugin is not very useful.   
 
 # Configuration of the plugin
 
@@ -30,6 +39,13 @@ In the plugin configuration screen the following options are available:
 
 * Blink account
   + Area to enter the email, password and pin code associated with your Blink account. (The pin code entry field is only displayed when the connection is not yet validated)
+
+>**Important point about the PIN code sent by Blink:**\
+>Blink regularly asks you to re-enter the PIN code (the duration between 2 requests is variable - and independent of the plugin). When this happens, you then receive a PIN code from Blink but the plugin does not have the information that a new code must be entered. In this case, it is likely that the PIN code field is not displayed in the plugin.\
+**You must then force a PIN code request from the plugin** (and therefore the redisplay of the field). To do this, enter a __bad__ email or password then save (at this stage you will have an error: which is normal since the email or password are not correct), then enter the correct email and password and save .\
+**A new PIN code is then sent to you by Blink.**
+The PIN code entry field will appear in the plugin config.\
+[**&rarr; Video guide request a pin code**](https://youtu.be/mDud775DjYQ)
 
 * Security
   + _"Block access to video and image URLs without being authenticated in Jeedom?"_
@@ -49,13 +65,21 @@ In the plugin configuration screen the following options are available:
   + Thumbnail size: allows you to define the reduction to be applied (as a percentage of the initial size).
     
 * Historical view
-  + This view is accessible from the widget
-  + It displays the latest videos/thumbnails available
-  + The maximum number of downloaded videos allows you to limit the amount of data to download when opening the historical view
+  > This view is accessible from the widget. It displays the latest videos/thumbnails available
+  + The maximum number of downloaded videos allows you to limit the amount of data to download when opening the historical view.
   + The size of the video previews can also be configured.
 
     *Warning: If you configure a large size and a large number of videos, this can cause slowness in the historical view*
 
+  + Eco mode: This mode limits the quantity of data exchanged:
+    + between Jeedom and your browser: a video is downloaded to your browser only when you click on it.
+    + between the Blink and Jeedom servers: only data already present on Jeedom is displayed.
+
+
+* Backup
+  + This option allows you to include videos and images in Jeedom backups.
+  
+  **CAUTION: this option will cause a significant increase in the size of the Jeedom backup**
 
 >**Don't forget to click on the "Save" button**
 
@@ -123,4 +147,4 @@ You can trigger a scenario by directly activating the information "Last event"
 
 > See "Event" field in the image below
 
-![Utilisation dans des scénarios](..\assets\images\scenario.png "Utilisation dans des scénarios")
+![Utilisation dans des scénarios](..\assets\images\scenario2.png "Utilisation dans des scénarios")

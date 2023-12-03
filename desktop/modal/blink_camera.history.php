@@ -19,7 +19,7 @@ log::add('blink_camera','debug','History['.$blink_camera->getId().'] START');
 
 
 if (blink_camera::isConnected() && $blink_camera->isConfigured()) {
-    $cameraConnected=false;
+    $cameraConnected=true;
 }
 
 $storage=$blink_camera->getConfiguration('storage');
@@ -74,15 +74,24 @@ if ('<?=$storage?>'=='local') {
     $('#btn-jpg').remove();
 }
 
-</script>
-<div id='div_blink_cameraRecordAlert' style="display: none;"></div>
-<?php
-echo '<div>';
-echo '<a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'*'.$formatMedia).'&archive='.urlencode('blink_all').'"  ><i class="fas fa-download"></i> {{Tout télécharger}}</a>';                                                        
-echo '</div>';
 
+
+</script>
+<?php
+$archiver="downloadFilesZip.php";
+if (!extension_loaded('zip')) {
+    $archiver="downloadFiles.php";
+}
+$dirEncoded=urlencode($dir);
+$filterAllEncoded=urlencode($thumbFilter.'.*'.$formatMedia);
+$cameraNameEncoded=urlencode($blink_camera->getName());
 ?>
 
+<div>
+    <a class="btn btn-success  pull-right" target="_blank" href="plugins/blink_camera/core/php/<?=$archiver?>?pathfile=<?=$dirEncoded?>&filter=<?=$filterEncoded?>&archive=<?=$cameraNameEncoded?>">
+        <i class="fas fa-download"></i> {{Tout télécharger}}
+    </a>                                                        
+</div>
 <div>
     <button type="button" class="btn btn-secondary" id="btn-mp4">{{Vidéos}}</button>
     <button type="button" class="btn btn-secondary" id="btn-jpg">{{Vignettes des vidéos}}</button>
@@ -96,7 +105,7 @@ if ($nbMax <= 0) {
 }
 $cptVideo=0;
 if ($thumbFilter=='') {
-    if ($storage!='local' && $blink_camera->isConnected() && blink_camera_api::getToken() && ((boolean) config::byKey('offline_history', 'blink_camera'))===false) {
+    if ($storage!='local' && $blink_camera->isConnected() && $blink_camera->getToken() && blink_camera::isModeEco()===false) {
         $blink_camera->forceCleanup(true);
     }
     log::add('blink_camera','debug','History['.$blink_camera->getId().'] Avant scandir');
@@ -150,21 +159,38 @@ $newWidth=2*$newHeight;
 $cptVideo=0;
 $cptDate=0;
 krsort($videoFiltered);
+?>
+<?php
 foreach ($videoFiltered as $date => $videoByDate) {
     if ($nbMax>0 && $cptVideo>=($nbMax)) {
         break;
     };
     $cptDate++;
-    echo '<div class="div_dayContainer">';
-    echo '<legend>';
-    echo ' <a class="btn btn-xs btn-default toggleList"><i class="fa fa-chevron-down"></i></a> ';
-    echo '<span class="blink_cameraHistoryDate spacer-left-5">'.$date.'</span>';
-    echo '<a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/downloadFiles.php?pathfile='. urlencode($dir) .'&filter='.urlencode($thumbFilter.'*'.$date.'*'.$formatMedia).'&archive='.urlencode($date).'" ><i class="fas fa-download"></i></a>';
-    echo '</legend>';
+    $filterDateEncoded=urlencode($thumbFilter.'.*'.$date.'.*'.$formatMedia);
+    $archiveName=urlencode($blink_camera->getName().'-'.$date);
+    $dateLabel=blink_camera::getDateLocaleJeedom($date);
     if ($cptDate==1) {
-        echo '<div class="blink_cameraThumbnailContainer blink_cameraThumbnailContainer_'.$cptDate.'" >';
+        $icone="fa fa-minus";
     } else {
-        echo '<div class="blink_cameraThumbnailContainer blink_cameraThumbnailContainer_'.$cptDate.'" style="display:none;">'; 
+        $icone="fa fa-plus";
+    }
+
+?>
+    <div class="div_dayContainer">
+        <legend>
+            <a class="btn btn-xs btn-default toggleList"><i class="<?=$icone?>"></i></a>
+            <span class="blink_cameraHistoryDate spacer-left-5"><?=$dateLabel?></span>
+            <a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/<?=$archiver?>?pathfile=<?=$dirEncoded?>&filter=<?=$filterDateEncoded?>&archive=<?=$archiveName?>" ><i class="fas fa-download"></i></a>
+        </legend>
+<?php
+    if ($cptDate==1) {
+?>
+       <div class="blink_cameraThumbnailContainer blink_cameraThumbnailContainer_<?=$cptDate?>" >
+<?php
+    } else {
+?>
+        <div class="blink_cameraThumbnailContainer blink_cameraThumbnailContainer_<?=$cptDate?>" style="display:none;"> 
+<?php   
     }
     rsort($videoByDate);
     foreach ($videoByDate as $video) {
@@ -194,50 +220,101 @@ foreach ($videoFiltered as $date => $videoByDate) {
         $path=$dir.'/'.$file;
         $nom = $video['created_at'];
         $blink_cameraName = str_replace(' ', '-', $blink_camera->getName());
-        echo '<div class="panel panel-primary blink_cardVideo">';
-        echo '<div class="panel-heading blink_cameraHistoryDate">'.$time;
-        echo '<a target="_blank" href="core/php/downloadFile.php?pathfile=' . urlencode($path) . '" class="btn btn-success btn-xs pull-right" style="color : white"><i class="fas fa-download"></i></a>';
-        if ($cameraConnected) {
-            echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
-        }
-        echo '</div>';
-        echo '<div style="padding:auto !important ;">';
-        echo '<center style="margin-top:5px;">';
-        if (strpos($file, '.mp4')) {
-            $strVideo= '<video class="displayVideo"';
-            if ($cptDate==1) {
-                $strVideo.= ' preload ';
-            }
-            $strVideo.= ' height="'.$newHeight.'" controls loop data-src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '" style="cursor:pointer"><source src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) . '">Your browser does not support the video tag.</video>';
-            echo $strVideo;
-        } else {
-            list($width, $height, $type, $attr) = getimagesize($dir . '/' . $file);
-            if ($height<=200) {
-                $facteurImg=1;
-                $idIMG='';
-            } else {
-                $facteurImg=$facteur;
-                $idIMG=' id="'.$file.'" ';
-            }
-            $newHeight=$height*$facteurImg;
-            $newWidth=$width*$facteurImg;
-            echo '<!--ORIG HEIGHT: '.$height.' ORIG WIDTH: '.$width.' factor: '.$facteurImg.' HEIGTH: '.$newHeight.' WIDTH: '.$newWidth. ' -->';
-            echo '<div><img '.$idIMG.' class="displayImage" loading="eager" src="core/php/downloadFile.php?pathfile=' . urlencode($dir . '/' . $file) .  '" height="'.$newHeight.'" width="'.$newWidth.'"/></div>';
-        }
-        echo '</center>';
-        echo '</div>';
-        echo '</div>';
-    }
-    echo '</div>';
-    echo '</div>';
-}
+        $pathEncoded=urlencode($path);
+?>
+            <div class="panel panel-primary blink_cardVideo">
+                <div class="panel-heading blink_cameraHistoryDate">
+                    <?=$time?>
+                    <a target="_blank" href="core/php/downloadFile.php?pathfile=<?=$pathEncoded?>" class="btn btn-success btn-xs pull-right" style="color : white"><i class="fas fa-download"></i></a>
+                    <?php
+                    if ($cameraConnected) {
+                            echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
+                    }
+                    ?>
+                </div>
+                <?php
+                    if (strpos($file, '.mp4')) {
+                        $strVideo="";
+                        if (blink_camera::isModeEco()) {
+                            $strVideo.="<div id=\"video-overlay-".$cptVideo."\">";
+                            if (file_exists($dir . '/' . str_replace(".mp4",".jpg",$file))) {
+                                $overlay=$dir . '/' . str_replace(".mp4",".jpg",$file);
+                            } else {
+                                $overlay="/plugins/blink_camera/img/play.png";
+                            }
+                            $strVideo.="<img height=\"".$newHeight."\" src=\"". blink_camera::GET_RESOURCE . urlencode($overlay)."\"/>";
+                            //$strVideo.="<span style=\" position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\"><i style=\"font-size:5em;\" class=\"icon font-awesome-play-circle icon_green\"></i></span>";
+                            $strVideo.="</div>";
+                        }
+                        $strVideo.= "<video id=\"video-".$cptVideo."\" class=\"displayVideo\"";
+                        $strVideo.= " preload=\"none\" poster=\"". blink_camera::GET_RESOURCE . urlencode($overlay) . "\" ";
+                        $strVideo.=" height=\"".$newHeight."\" controls loop data-src=\"". blink_camera::GET_RESOURCE.urlencode($dir . '/' . $file)."\" style=\"cursor:pointer\"><source src=\"". blink_camera::GET_RESOURCE.urlencode($dir.'/'.$file)."\">Your browser does not support the video tag.</video>";
+                        echo $strVideo;
+                        if (blink_camera::isModeEco()) {
+                ?>
+                        <script>
+                                var overlay<?=$cptVideo?>         = document.getElementById('video-overlay-<?=$cptVideo?>'),
+                                video<?=$cptVideo?>         = document.getElementById('video-<?=$cptVideo?>'),
+                                videoPlaying<?=$cptVideo?>    = false;
+                                function hideOverlay<?=$cptVideo?>() {
+                                    overlay<?=$cptVideo?>.style.display = "none";
+                                    video<?=$cptVideo?>.style.display = "block";
+                                    videoPlaying<?=$cptVideo?> = true;
+                                    video<?=$cptVideo?>.play();
+                                    if ($('#video-<?=$cptVideo?>').is(":visible")) {
+                                        $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+                                     };
+    
+                                }
+                                function showOverlay<?=$cptVideo?>() {
+                                    // this check is to differentiate seek and actual pause 
+                                    if (video<?=$cptVideo?>.readyState === 4) {
+                                        overlay<?=$cptVideo?>.style.display = "block";
+                                        videoPlaying<?=$cptVideo?> = true;
+                                    }
+                                    video<?=$cptVideo?>.style.display = "none";
+                                }
+                                video<?=$cptVideo?>.style.display = "none";
+                               // video<?=$cptVideo?>.addEventListener('pause', showOverlay<?=$cptVideo?>);
+                                overlay<?=$cptVideo?>.addEventListener('click', hideOverlay<?=$cptVideo?>);
+                            </script>
+                <?php
+                        }
+                    } else {
+                        list($width, $height, $type, $attr) = getimagesize($dir . '/' . $file);
+                        if ($height<=200) {
+                            $facteurImg=1;
+                            $idIMG='';
+                        } else {
+                            $facteurImg=$facteur;
+                            $idIMG=' id="'.$file.'" ';
+                        }
+                        $newHeight=$height*$facteurImg;
+                        $newWidth=$width*$facteurImg;
+                        echo '<!--ORIG HEIGHT: '.$height.' ORIG WIDTH: '.$width.' factor: '.$facteurImg.' HEIGTH: '.$newHeight.' WIDTH: '.$newWidth. ' -->';
+                        echo '<div><img '.$idIMG.' class="displayImage" loading="eager" src="'. blink_camera::GET_RESOURCE . urlencode($dir . '/' . $file) .  '" height="'.$newHeight.'" width="'.$newWidth.'"/></div>';
+                    }
+                ?>
+            </div>
+
+<?php
+
+    } // FIN VIDEOS
+?>
+        </div>
+    </div>
+    <script>
+        $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+
+    </script>
+<?php 
+} // FIN DATES
 ?>
 <script>
     $('img .displayImage').on('load', function(){
         magnify($(this).attr('id'), (1/<?=$facteur?>));
     })
 
-$('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 $('.bt_removefile').on('click', function() {
 	var filename = $(this).attr('data-filename');
 	var direct = $(this).attr('data-dirname');
@@ -266,16 +343,23 @@ $('.bt_removefile').on('click', function() {
 				return;
 			}
 			card.remove();
-			$(".blink_cameraThumbnailContainer").slideToggle(1);
-			$(".blink_cameraThumbnailContainer").slideToggle(1);
-            $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+			//$(".blink_cameraThumbnailContainer").slideToggle(1);
+			//$(".blink_cameraThumbnailContainer").slideToggle(1);
+            $(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 		}
 	});
 });
 
 $('.toggleList').on('click', function() {
-	$(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").slideToggle("slow");
-    $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+	$(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").slideToggle("slow", function() {
+        //alert($(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").css('display'));
+        if ($(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").css('display')=="block") {
+            $(this).closest('.div_dayContainer').find(".toggleList").html("<i class=\"fa fa-minus\"></i>");
+        } else {
+            $(this).closest('.div_dayContainer').find(".toggleList").html("<i class=\"fa fa-plus\"></i>");
+        }
+    });
+    $(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 });
   
 $('.ui-resizable').resizable({
@@ -285,6 +369,7 @@ $('.ui-resizable').resizable({
 $( document ).ready(function() {
     $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 });
+
 $('#btn-thumb').click(function() {
     $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
     $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=thumb').dialog('open');
@@ -300,19 +385,8 @@ $('#btn-jpg').click(function() {
 
 
 document.querySelectorAll("img.displayImage").forEach(function (vignette) {
-    //alert(vignette.id);
     magnify(vignette.id, 3);
 });
 
 
-Promise.all(Array.from(document.images).map(img => {
-    if (img.complete) 
-        return Promise.resolve(img.naturalHeight !== 0);
-    return new Promise(resolve => {
-        img.addEventListener('load', () => resolve(true));
-        img.addEventListener('error', () => resolve(false));
-    });
-})).then(results => {
-    $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
-});
 </script>

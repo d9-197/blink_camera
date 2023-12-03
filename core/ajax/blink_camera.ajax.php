@@ -37,13 +37,13 @@ try {
         $filepath = realpath($dir.'/'.$file);
         blink_camera::deleteMedia($filepath);
         if (!blink_camera::endsWith($file, "*") && !str_starts_with($file, blink_camera::PREFIX_THUMBNAIL)) {
-            blink_camera_api::deleteMediaCloud($filepath);
+            blink_camera::deleteMediaCloud($filepath);
         }
         ajax::success();
     }
 
     if (init('action') == 'getConfig') {
-        $config = blink_camera_api::getAccountConfigDatas2(false,false);
+        $config = blink_camera::getAccountConfigDatas2(false,false);
 		if ($config==null) {
 			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
         }
@@ -55,7 +55,7 @@ try {
 		ajax::success($return);
     }
     if (init('action') == 'test_blink') {
-        $status = blink_camera_api::getToken(false);
+        $status = blink_camera::getToken(false);
         $json='{"token":"false"}';
         if ($status===true) {
             $json='{"token":"true"}';
@@ -73,7 +73,7 @@ try {
 		ajax::success($return);
     }
     if (init('action') == 'reinitConfig') {
-        $status = blink_camera_api::getToken(false);
+        $status = blink_camera::getToken(false);
         $json='{"reinit":"KO"}';
         config::save('token', '', 'blink_camera');
         config::save('account', '', 'blink_camera');

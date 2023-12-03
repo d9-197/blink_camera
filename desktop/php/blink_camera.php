@@ -56,6 +56,9 @@ foreach ($eqLogics as $eqLogic) {
                 echo '<span style="font-size : 0.8em;position:relative; top : 5px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">(' . $eqLogic->getBlinkHumanDeviceType() . ')</span>';
                 echo "<br>";
                 echo '<span style="font-size : 1.1em;position:relative; top : 15px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">' . $eqLogic->getHumanName(true, true) . '</span>';
+                echo "<br>";
+                echo '<span style="font-size : 0.8em;position:relative; top : 20px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">({{Stockage}} ' . $eqLogic->getConfiguration("storage") . ')</span>';
+                
                 echo '</div>';
             }
 ?>
@@ -118,12 +121,12 @@ foreach ($eqLogics as $eqLogic) {
 		</div>
 	</div>
 
-    <div class="form-group">
+    <!--div class="form-group">
         <label class="col-sm-3 " ></label>
         <div class="col-sm-3">
             <button type="button" class="btn btn-default" id="bt_refresh_blink_cfg">{{Recharger la configuration}}</button>
         </div>
-    </div>
+    </div-->
     <div class="form-group blink_cfg">
         <label class="col-sm-3 control-label" >{{ Système }}</label>
         <div id="liste" class="col-sm-3">

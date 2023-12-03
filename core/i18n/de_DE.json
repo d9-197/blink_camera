@@ -20,19 +20,23 @@
         " Système ": "System",
         " Caméra ": "Camera",
         "Nom": "Name",
-        "Liste de commandes": "List of commands",
+        "Liste de commandes": "Logical Id",
+        "Recharger la configuration": "Reload configuration",
         "Paramètres": "Settings",
         "Options": "Options",
         "Actions": "Actions",
-        "Impossible de se connecter au compte Blink. Vérifiez vos indentifiants et mot de passe. Recharger la page ensuite.": "Can not connect to Blink account. Check your identifiers and password. Reload page next (F5)."
+        "Ajouter toutes les caméras":"Add all cameras",
+        "Stockage":"Storage"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
+        "Ajout des caméras":"Search for cameras",
         "Choisir": "Select"
     },
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
         "Compte Blink": "Blink account",
         "Email": "E-mail",
         "Mot de passe": "Password",
+        "Envoyer": "Send",
         "Unité de température": "Temperature unit",
         "° C": "° C",
         "° F": "° F",
@@ -49,13 +53,43 @@
         "Interne": "Internal",
         "Externe": "External",
         "La page doit être rechargée pour prendre en compte les modifications. Souhaitez-vous recharger la page maintenant ?": "The page must be reloaded to reflect the changes. Would you like to reload the page now?",
-        "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Show camera thumbnail if no video available?"
+        "Connexion à votre compte Blink OK":"Blink account OK",
+        "Code PIN de vérification":"Verification PIN",
+        "Connexion à votre compte Blink OK mais un code de vérification est nécessaire":"Blink account OK but a pin code is requiered",
+        "Erreur de connexion à votre compte Blink":"Error during Blink account connection",
+        "Afficher la vignette de caméra s'il n'y a pas de vidéo ?": "Show camera thumbnail if no video available?",
+        "Sauvegarder et tester la connexion Blink":"Save and check Blink connection",
+        "Sécurité": "Security",
+        "Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?":"Block access to video and image URLs without being authenticated in Jeedom?",
+        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"You will received a SMS from Blink with a pin code, you must fill it here and clic  \"Send\".",
+        "Type de stockage":"Storage",
+        "Cloud":"Cloud",
+        "Local":"Local",
+        "Largeur du widget":"Widget width",
+        "Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).":"The thumbnails of the videos are not available if you use a local storage(USB).",
+        "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Do not download videos/images when opening the view (faster loading)",
+        "Sauvegarde":"Backup",
+        "Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?":"Include videos/images of cameras in the Jeedom backup ?",
+        "backup desc":"<span style='color:#F00;'>WARNING !</span><BR>Be carefull : size of Jeedom backups can be very important",
+        "Mode eco":"<span style='color:#0F0;'>Eco mode</span>",
+        "Mode eco desc":"This mode limits the amount of data exchanged in the historical view: <UL><LI>between Jeedom and your browser: a video is downloaded to your browser only when you click on it.</LI><LI>between Blink and Jeedom servers: only data already present on Jeedom is displayed.</LI></UL>"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"
     },
     "plugins\/blink_camera\/desktop\/modal\/blink_camera.history.php": {
-        "Tout télécharger": "Download all"
+        "Tout télécharger": "Download all",
+		"Vidéos": "Videos",
+        "Vignettes de la caméra": "Camera thumbnails",
+        "Vignettes des vidéos": "Videos thumbnails"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.scan.php": {
+        "Erreur de connexion à votre compte Blink":"Error during Blink account connection",
+        "Recherche des caméras...":"Search for cameras...",
+        "caméra ajoutée":"The camera has been added",
+        "caméra existe déja":"The camera already exists",
+        "caméra(s)":"camera(s)",
+        "Fermer":"Back"
     },
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Système armé ?": "Armed system?",
@@ -74,7 +108,25 @@
         "Désarmer la caméra": "Disarm the camera",
         "Historique": "History",
         "Prendre une vidéo": "Take a video",
-        "Forcer le téléchargement": "Force download"
+        "Forcer le téléchargement": "Force download",
+        "Prendre une photo": "Take a picture",
+        "URL dernière vidéo": "Last video URL",
+        "URL vignette": "Thumbnail URL",
+        "URL vignette caméra":"Camera thumbnail URL",
+        "Chemin vignette caméra":"Camera thumbnail path",
+        "Mode hors ligne":"Warning the plugin is offline (check the plugin configuration)",
+        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mot de passe. Recharger la page ensuite.": "Can not connect to Blink account. Check your identifiant and password in plugin configuration.",
+        "APImessage":"[Message from Blink servers] ",
+        "System is busy, please wait":"System is busy, please wait.",
+        "Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes.":"The connection limit on the Blink servers has been reached. The Jeedom plugin automatically disconnects (widgets and history view) but do not open the configuration page for 60 minutes.",
+        "Login attempted too quickly. Please try again in a few seconds.":"Login attempted too quickly. Please try again in a few seconds.",
+        "Invalid credentials":"Invalid credentials",
+        "xt":"Outdoor generation 1",
+        "catalina":"Outdoor generation 3",
+        "white" : "Indoor",
+        "owl": "Mini",
+        "lotus": "Doorbell",
+        "type_name_missing":"Camera model unknowed"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "' + init(_cmd.type) + '": "' + init(_cmd.type) + '",
