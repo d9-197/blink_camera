@@ -180,21 +180,25 @@ class blink_camera extends eqLogic
 
     public static function getConfigBlinkAccount(string $email, string $key) {
         $accounts=config::byKey('configBlinkAccounts','blink_camera');
-        //self::logdebug('getConfigBlinkAccount all values: '. print_r($accounts,true));
         foreach($accounts as $account) {
             if ($account['email'] == $email) {
-                //self::logdebug('getConfigBlinkAccount account : '. print_r($account,true));
-                //self::logdebug('getConfigBlinkAccount account '.$key.': '. $account[$key]);
+                //self::logdebug('getConfigBlinkAccount('.$email.') '.$key.': '. $account[$key]);
                 return $account[$key];
+            }
+        }
+    }
+    public static function getConfigBlinkAccountAll(string $email) {
+        $accounts=config::byKey('configBlinkAccounts','blink_camera');
+        foreach($accounts as $account) {
+            if ($account['email'] == $email) {
+                return $account;
             }
         }
     }
     public static function getConfigBlinkAccountsList() {
         $accounts=config::byKey('configBlinkAccounts','blink_camera');
-        //self::logdebug('getConfigBlinkAccountsList all values: '. print_r($accounts,true));
         $listAccounts=array();
         foreach($accounts as $account) {
-            //self::logdebug('getConfigBlinkAccountsList account : '. $account['account']);
             $listAccounts[]=$account['email'];
         }
         return $listAccounts;
@@ -202,25 +206,25 @@ class blink_camera extends eqLogic
 
     public static function setConfigBlinkAccount(string $email, string $key,string $value) {
         $accounts=config::byKey('configBlinkAccounts','blink_camera');
-        $accountsObj=json_decode($accounts);
-        //self::logdebug('setConfigBlinkAccount ('.$email.') previous values: '. print_r($accounts,true));
+        //self::logdebug('setConfigBlinkAccount ('.$email.') '.$key.':'.$value);
         $accountIndex=0;
+        $updated=false;
         foreach($accounts as $account) {
-          //  self::logdebug('setConfigBlinkAccount account found: '. print_r($account,true));
             if ($account['email'] == $email) {
-                //self::logdebug('setConfigBlinkAccount account previous value: '. $account[$key]);
+//                self::logdebug('setConfigBlinkAccount account found: '. print_r($account,true));
                 $account[$key]=$value;
-                $accountsObj[$accountIndex]=$account;
-                //self::logdebug('setConfigBlinkAccount accounts after : '. print_r($accounts,true));
-                config::save('configBlinkAccounts',json_encode($accountsObj),'blink_camera');
-                return true;
+                $updated=true;
             }
+            $accountsObj[]=$account;
             $accountIndex++;
+        } 
+        if ($updated==false) {
+            self::logdebug('setConfigBlinkAccount ('.$email.') new account');
+            $newAccount=array();
+            $newAccount['email']=$email;
+            $newAccount[$key]=$value;
+            $accountsObj[]=$newAccount;
         }
-        $newAccount=array();
-        $newAccount['email']=$email;
-        $newAccount[$key]=$value;
-        $accountsObj[$accountIndex]=$newAccount;
         config::save('configBlinkAccounts',json_encode($accountsObj),'blink_camera');
         return true;
     }
@@ -229,7 +233,7 @@ class blink_camera extends eqLogic
         $_accountBlink=self::getConfigBlinkAccount($email,'accountId');
         $_regionBlink=self::getConfigBlinkAccount($email,'region');
         $jsonrep=null;
-        self::logdebug("token / accountId / region : ".$_tokenBlink." / " .$_accountBlink." / ".$_regionBlink);
+        self::logdebug("queryGet - email=".$email." - token / accountId / region : ".$_tokenBlink." / " .$_accountBlink." / ".$_regionBlink);
         if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
             $lock=self::checkAndGetLock('getQuery');
             self::logDebugBlinkAPIRequest("CALL[queryGet]: ".'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url);
@@ -286,7 +290,7 @@ class blink_camera extends eqLogic
     }
     
     public static function queryPostLogin(string $url, string $datas, string $email) {
-        //self::logdebug('queryPostLogin(url='.$url.',datas='.$datas.') START');
+        self::logdebug('queryPostLogin(url='.$url.',datas='.$datas.') START');
         
         self::logDebugBlinkAPIRequest("CALL[queryPostLogin]: ".$url);
         $lock=self::checkAndGetLock('queryPostLogin');  
@@ -332,41 +336,43 @@ class blink_camera extends eqLogic
         $_tokenBlink=self::getConfigBlinkAccount($email,'token');
         $account_id=self::getConfigBlinkAccount($email,'accountId');
         $_regionBlink=self::getConfigBlinkAccount($email,'region');
-        $url='https://rest-'.$_regionBlink.'.immedia-semi.com/api/v4/account/'.$account_id.'/client/'.$client_id.'/pin/verify';
-        self::logDebugBlinkAPIRequest("CALL[queryPostPinVerify]: ".$url);
-        $lock=self::checkAndGetLock('queryPostPinVerify');  
-        $datas="{\"pin\":".$pin."}";
-        try {
-            $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $url]);
-            $r = $client->request('POST',$url,  [
-                //['http_errors' => false],
-                ['timeout' => 1],
-                'headers' => [
-                    'TOKEN_AUTH'=> ''.$_tokenBlink,
-                    'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT
-                ],
-                'json' => json_decode($datas)
-            ]);
-            self::releaseLock($lock);
-            $jsonrep= json_decode($r->getBody(), true);
-            self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
+        if ($client_id!="" && $_tokenBlink!="" && $account_id!="" && $_regionBlink!="") {
+            $url='https://rest-'.$_regionBlink.'.immedia-semi.com/api/v4/account/'.$account_id.'/client/'.$client_id.'/pin/verify';
+            self::logDebugBlinkAPIRequest("CALL[queryPostPinVerify]: ".$url);
+            $lock=self::checkAndGetLock('queryPostPinVerify');  
+            $datas="{\"pin\":".$pin."}";
+            try {
+                $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $url]);
+                $r = $client->request('POST',$url,  [
+                    //['http_errors' => false],
+                    ['timeout' => 1],
+                    'headers' => [
+                        'TOKEN_AUTH'=> ''.$_tokenBlink,
+                        'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT
+                    ],
+                    'json' => json_decode($datas)
+                ]);
+                self::releaseLock($lock);
+                $jsonrep= json_decode($r->getBody(), true);
+                self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
 
-            if ($jsonrep['valid']==1) {
-                self::logdebug('queryPostPinVerify(pin='.$pin.') Vérification OK');
-                self::setConfigBlinkAccount($email,'verif', 'true');
-                return 0;
-            } else {
-                self::setConfigBlinkAccount($email,'verif', 'false');
-                //self::logdebug('queryPostPinVerify(pin='.$pin.') Vérification KO');
+                if ($jsonrep['valid']==1) {
+                    self::logdebug('queryPostPinVerify(pin='.$pin.') Vérification OK');
+                    self::setConfigBlinkAccount($email,'verif', 'true');
+                    return 0;
+                } else {
+                    self::setConfigBlinkAccount($email,'verif', 'false');
+                    //self::logdebug('queryPostPinVerify(pin='.$pin.') Vérification KO');
+                    return 1;
+                }
+            }  catch (Exception $e) {
+                self::releaseLock($lock);
+                self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
+                self::logdebug('ERROR:'.print_r($e->getMessage(), true));
                 return 1;
             }
-        }  catch (Exception $e) {
-            self::releaseLock($lock);
-            self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
-            self::logdebug('ERROR:'.print_r($e->getMessage(), true));
-            return 1;
         }
-        return 0;
+        return 1;
     }
     public static function queryPost(string $url, string $datas="{}", string $email) {
         //self::logdebug('queryPost(url='.$url.') START');
@@ -472,13 +478,15 @@ class blink_camera extends eqLogic
 
         $date = date_create();
         $tstamp1=date_timestamp_get($date);
-        $pwd=utils::decrypt(self::getConfigBlinkAccount($email,'pwd'));
-        self::logdebug('getToken('.$email.','.$argu.')  password='.self::getConfigBlinkAccount($email,'pwd'));
-
-        $pwd_prev=utils::decrypt(self::getConfigBlinkAccount($email,'pwd_prev'));
-        $email_prev=self::getConfigBlinkAccount($email,'account_prev');
-
-          
+        $cryptedPwd=self::getConfigBlinkAccount($email,'pwd');
+        if (!$cryptedPwd || $cryptedPwd=="") {
+            self::logdebug('getToken('.$email.','.$argu.')  no password provided');
+            return false;
+        }
+        $pwd=utils::decrypt($cryptedPwd);
+        $pwd_prev="".utils::decrypt(self::getConfigBlinkAccount($email,'pwd_prev'));
+        $email_prev="".self::getConfigBlinkAccount($email,'account_prev');
+         
         if (!$forceReinit) {
             $forceReinit=($email!==$email_prev || $pwd!==$pwd_prev);
             if (!$forceReinit) {
@@ -486,6 +494,16 @@ class blink_camera extends eqLogic
             }
         }
         self::logdebug('getToken('.$email.','.$argu.') '.$updFlag);
+        $notification_key=self::getConfigBlinkAccount($email,'notification_key');
+        $unique_id=self::getConfigBlinkAccount($email,'uniqId');;
+        if (!isset($notification_key) || $notification_key==="" || strlen($notification_key) <> 152) {
+            $notification_key=self::genererIdAleatoire(152);
+            self::setConfigBlinkAccount($email,'notification_key', $notification_key);
+        }
+        if (!isset($unique_id) || $unique_id==="" || strlen($unique_id) <> 16) {
+            $unique_id=self::genererIdAleatoire(16);
+            self::setConfigBlinkAccount($email,'uniqId', $unique_id);
+        }
 
         /* Test de validité du token deja existant */
         $need_new_token=false;
@@ -543,8 +561,10 @@ class blink_camera extends eqLogic
             self::logdebug('getToken('.$argu.') '.$updFlag. ' : Nouveau TOKEN');
             $_regionBlink=self::getConfigBlinkAccount($email,'region');
             $_accountBlink=self::getConfigBlinkAccount($email,'accountId');
-            self::setConfigBlinkAccount($email,'account_prev',$email);      
-            self::setConfigBlinkAccount($email,'pwd_prev',utils::encrypt($pwd)); 
+            self::setConfigBlinkAccount($email,'account_prev',$email);
+            if ($pwd!="") {      
+                self::setConfigBlinkAccount($email,'pwd_prev',utils::encrypt($pwd)); 
+            }
             $_verifBlink=self::getConfigBlinkAccount($email,'verif');
 
             $notification_key=self::getConfigBlinkAccount($email,'notification_key');
@@ -553,8 +573,10 @@ class blink_camera extends eqLogic
             if ($_verifBlink=="true") {
                 $reauthArg=",\"reauth\":\"true\"";
             }
-            $data = "{\"email\" : \"".$email."\",\"password\": \"".$pwd."\",\"notification_key\" : \"".$notification_key."\",\"unique_id\":\"".$unique_id."\",\"device_identifier\":\"".self::BLINK_DEVICE_IDENTIFIER."\",\"client_name\":\"".self::BLINK_CLIENT_NAME."\"".$reauthArg."}";
+            $idDeviceJeedom=self::BLINK_DEVICE_IDENTIFIER.'-'.self::cleanSpecialCharacters(config::byKey('name'));
+            $data = "{\"email\" : \"".$email."\",\"password\": \"".$pwd."\",\"notification_key\" : \"".$notification_key."\",\"unique_id\":\"".$unique_id."\",\"device_identifier\":\"".$idDeviceJeedom."\",\"client_name\":\"".self::BLINK_CLIENT_NAME."\"".$reauthArg."}";
             try {
+                self::logdebug('getToken('.$email.') data: '.$data);
                 $jsonrep=self::queryPostLogin(self::BLINK_URL_LOGIN,$data,$email);
             } catch (TransferException $e) {
                 if ($e->hasResponse()===true) {
@@ -1008,7 +1030,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                                     self::logdebug('getMediaLocal PHASE 3 - syncId=: '.$syncId.' - clip_id : '.$clip_id.' will be downloaded');
                                     try {
                                         $flagToRelease=self::checkAndGetLock('getMediaLocal-Phase3-syncId-'.$syncId,100);
-                                        $jsonrep=self::queryPost($url_media,$email);
+                                        $jsonrep=self::queryPost($url_media,"{}",$email);
                                         self::releaseLock($flagToRelease);
                                     } catch (Exception $e) {
                                         if (null !=$e->getMessage())
@@ -1260,7 +1282,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     $url_manifest_req=$url_manifest.'/request';
                     $url=$url_manifest_req.'/'.$lastManifest;
                     try {
-                        $jsonrep=self::queryGet($url);
+                        $jsonrep=self::queryGet($url,$email);
                     } catch (TransferException $e) {
                         if (null !=$e->getMessage())
                         {
@@ -1278,7 +1300,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                         $url=$url_manifest_req.'/'.$lastManifest;
                         try {
                             jeedomUtils.sleep(5);
-                            $jsonrep=self::queryGet($url);
+                            $jsonrep=self::queryGet($url,$email);
                         } catch (TransferException $e) {
                             self::logdebug('An error occured during RETRY OF GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
                             unset($jsonrep);
@@ -1336,7 +1358,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
             $url_manifest_req=$url_manifest.'/request';
             try {
-                $jsonReqManisfest=self::queryPost($url_manifest_req,$email);
+                $jsonReqManisfest=self::queryPost($url_manifest_req,"{}",$email);
                 //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/requestNewManifest_ph1.json';
                 //file_put_contents($folderJson,json_encode($jsonReqManisfest));
                 $this->setConfiguration('manifest',$jsonReqManisfest['id']);
@@ -1399,7 +1421,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     }
                     self::logDebugBlinkAPIRequest("CALL[requestNewMedia]: --> ");
                 try {
-                    $jsonrep=self::queryPost($url,$email);
+                    $jsonrep=self::queryPost($url,"{}",$email);
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     $response = $e->getResponse();
@@ -1869,7 +1891,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         if (self::isConnected($email) && $this->isConfigured()) {
                 $url='/network/'.$this->getConfiguration('network_id').'/arm';
                 try {
-                    self::queryPost($url);
+                    self::queryPost($url,"{}",$email);
                     jeedomUtils.sleep(1);
                     $this->refreshCameraInfos("networkArm");
                     return true;
@@ -1889,7 +1911,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         if (self::isConnected($email) && $this->isConfigured()) {
             $url='/network/'.$this->getConfiguration('network_id').'/disarm';
             try {
-                self::queryPost($url);
+                self::queryPost($url,"{}",$email);
                 jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("networkDisarm");
                 return true;
@@ -1923,7 +1945,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $datas = "{}";
             }
             try {
-                self::queryPost($url,$datas);
+                self::queryPost($url,$datas,$email);
                 jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("cameraArm");
                 return true;
@@ -1955,7 +1977,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $datas = "{}";
             }
             try {
-                self::queryPost($url,$datas);
+                self::queryPost($url,$datas,$email);
                 jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("cameraDisarm");
                 return true;
@@ -2001,7 +2023,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $datas='{"media_list":['.$mediaId.']}';
                 $url='/api/v1/accounts/'.$_accountBlink.'/media/delete';
                 try {
-                    $jsonrep=self::queryPost($url,$datas);
+                    $jsonrep=self::queryPost($url,$datas,$email);
                     $infoCmd=$cam->getCmd(null, 'last_event');
                     if (is_object($infoCmd)) {
                         $previous=$infoCmd->execCmd();
@@ -2472,13 +2494,13 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         }
 
         /* construction des clés uniques pour les API Blink */
-        $email=$this->getConfiguration('email');
+  /*      $email=$this->getConfiguration('email');
+        self::logdebug("postSave - email " . $email);
         if ($email !=="") {
-            self::setConfiguration($email,'pwd',utils::encrypt(config::byKey('param2')));
+            self::setConfigBlinkAccount($email,'pwd',utils::encrypt(config::byKey('param2','blink_camera')));
+            self::logdebug("postSave - pwd save in configuration");
             $notification_key=self::getConfigBlinkAccount($email,'notification_key');
             $unique_id=self::getConfigBlinkAccount($email,'uniqId');;
-            //$notification_key="";
-            //$unique_id="";    
             if (!isset($notification_key) || $notification_key==="" || strlen($notification_key) <> 152) {
                 $notification_key=self::genererIdAleatoire(152);
                 self::setConfigBlinkAccount($email,'notification_key', $notification_key);
@@ -2488,7 +2510,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 self::setConfigBlinkAccount($email,'uniqId', $unique_id);
             }
         }
-
+*/
     }
 
     public function preUpdate()
@@ -2701,7 +2723,7 @@ class blink_cameraCmd extends cmd
                     $eqlogic->getLastEventDate();
                     $eqlogic->refreshCameraInfos("execute refresh");
                 }
-                blink_camera::initNewConfigAccount();
+                //blink_camera::initNewConfigAccount();
 				break;
 			case 'force_download':
                 // Nettoyage des fichiers du dossier medias

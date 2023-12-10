@@ -38,6 +38,11 @@ foreach ($eqLogics as $eqLogic) {
         <br>
         <span style="font-size : 1.1em;position:relative; top : 23px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;color:#00A900;">{{Ajouter toutes les caméras}}</span>
       </div>
+      <div class="cursor eqLogicAction" data-action="account" style="text-align: center; background-color : #ffffff; height : 120px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 200px;margin-left : 10px;" >
+        <i class="icon mdi-shield-account" style="font-size : 6em;color:#767676;"></i>
+        <br>
+        <span style="font-size : 1.1em;position:relative; top : 23px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;color:#767676;">{{Comptes Blink}}</span>
+      </div>
       <div class="cursor eqLogicAction" data-action="gotoPluginConf" style="text-align: center; background-color : #ffffff; height : 120px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 200px;margin-left : 10px;">
         <i class="fa fa-wrench" style="font-size : 6em;color:#767676;"></i>
         <br>
@@ -129,21 +134,24 @@ foreach ($eqLogics as $eqLogic) {
         </div>
     </div>
     <div class="form-group blink_cfg">
-        <label class="col-sm-3 control-label" >{{ Compte Blink }}</label>
+        <label class="col-sm-3 control-label" >{{Compte Blink}}</label>
         <div id="liste" class="col-sm-3">
-            <select id="select_email" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="email"></select>
+        <!--select id="select_email" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="email"></select-->
+        <select id="select_email" class="form-control" ></select>
         </div>
     </div>
     <div class="form-group blink_cfg">
-        <label class="col-sm-3 control-label" >{{ Système }}</label>
+        <label class="col-sm-3 control-label" >{{Système}}</label>
         <div id="liste" class="col-sm-3">
-            <select id="select_reseau" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="network_id"></select>
+        <!--select id="select_reseau" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="network_id"></select-->
+        <select id="select_reseau" class="form-control"></select>
         </div>
     </div>
     <div class="form-group blink_cfg">
-        <label class="col-sm-3 control-label" >{{ Caméra }}</label>
+        <label class="col-sm-3 control-label" >{{Caméra}}</label>
         <div id="liste" class="col-sm-3">         
-            <select id="select_camera" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="camera_id"></select>
+        <!--select id="select_camera" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="camera_id"></select-->
+        <select id="select_camera" class="form-control"></select>
         </div>
     </div>
 
@@ -179,7 +187,49 @@ foreach ($eqLogics as $eqLogic) {
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
 <?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
 <script>
-  //  checkBlinkCameraConfig();
-  // init du 1st select
-  //chainSelect('init');
+  
+ function onVisible(element, callback) {
+  new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if(entry.intersectionRatio > 0) {
+        callback(element);
+        observer.disconnect();
+      }
+    });
+  }).observe(element);
+  if(!callback) return new Promise(r => callback=r);
+}
+//onVisible(document.querySelector("#select_email"), () => initSelect());
+//onVisible(document.querySelector("#select_reseau"), () => getNetworks());
+onVisible(document.querySelector("#select_camera"), () => {
+  if ($("#ideq").val()!="") {
+    initSelect();
+  }
+});
+document.querySelector("#select_email").addEventListener("change", (event) => {
+    setEmail();
+    $('#select_reseau').find('option').remove();
+    getNetworks(true);
+    $('#select_camera').find('option').remove();
+    getCameras(true);
+
+});
+document.querySelector("#select_reseau").addEventListener("change", (event) => {
+    setNetwork();
+    $('#select_camera').find('option').remove();
+    getCameras(true);
+});
+document.querySelector("#select_camera").addEventListener("change", (event) => {
+    setCamera();
+});
+document.querySelector("#ideq").addEventListener("change", (event) => {
+  if ($("#ideq").val()!="") {
+    initSelect();
+  }
+});
+
+$('#bt_refresh_blink_cfg').on('click', function (e) {
+  initSelect();
+});
+
 </script>

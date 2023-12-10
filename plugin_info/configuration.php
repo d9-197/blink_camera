@@ -35,7 +35,7 @@ if (!isConnect()) {
     </div>
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
-        <div class="form-group">
+        <!--div class="form-group">
              <label class="col-lg-6 control-label">{{Email}}</label>
             <div class="col-lg-3">
                 <input class="configKey form-control" id="email" data-l1key="param1" />
@@ -69,7 +69,7 @@ if (!isConnect()) {
             </div>
             <div id ="pinstatus"></div>
         </div>
-        </div>
+        </div-->
         <div class="form-group">
             <label class="col-lg-6 control-label">{{Unité de température}}</label>
             <div class="col-lg-3">
@@ -173,7 +173,7 @@ if (!isConnect()) {
   </fieldset>
 </form>
 <script>
-    function checkConnexionBlink() {
+    /*function checkConnexionBlink() {
 //        alert ($email);
         $.ajax({
                     type: "POST",
@@ -255,15 +255,15 @@ if (!isConnect()) {
             $('#div_test_blink_result').hideAlert();
             //savePluginConfig();
 			jeeFrontEnd.plugin.savePluginConfig();
-            sleep(1000);
-            //checkConnexionBlink();
+            jeedomUtils.sleep(1000);
+            checkConnexionBlink();
 
     })
     $('#bt_reinit_blink').on('click', function() {
             reinitConfig();
 
     })
-    
+    */
     $('#thumb_type_select').on('change', function() {
         if ($('#thumb_type_select').val()==2 || $('#thumb_type_select').val()==3) {
             $(fallback_thumb).show();

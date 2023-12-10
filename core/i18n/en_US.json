@@ -26,12 +26,36 @@
         "Options": "Options",
         "Actions": "Actions",
         "Ajouter toutes les caméras":"Add all cameras",
-        "Stockage":"Storage"
+        "Stockage":"Storage",
+        "Compte Blink": " Blink account ",
+        "Comptes Blink":"Blink accounts",
+        "Erreur lors de la mise à jour de la configuration du compte":"Erreur lors de la mise à jour de la configuration du compte"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.account.php": {
+        "Email":"Email",
+        "Mot de passe":"Password",
+        "Tester":"Test",
+        "Sauvegarder le mot de passe":"Save password",
+        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"You will received a SMS from Blink with a pin code, you must fill it here and clic  \"Send\".",
+        "Compte Blink": " Blink account ",
+        "Comptes Blink":"Blink accounts",
+        "Connexion à votre compte Blink OK":"Blink account OK",
+        "Code PIN de vérification":"Verification PIN",
+        "Connexion à votre compte Blink OK mais un code de vérification est nécessaire":"Blink account OK but a pin code is requiered",
+        "Erreur de connexion à votre compte Blink":"Error during Blink account connection",
+        "Fermer":"Back"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
         "Ajout des caméras":"Search for cameras",
         "Choisir": "Select"
     },
+    "plugins\/blink_camera\/desktop\/js\/blink_camera_config2.js": {
+        "Comptes Blink":"Blink accounts",
+        "Ajout des caméras":"Search for cameras",
+        "Connexion à votre compte Blink OK":"Blink account OK",
+        "Erreur de connexion à votre compte Blink":"Error during Blink account connection"
+    },
+
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
         "Compte Blink": "Blink account",
         "Email": "E-mail",

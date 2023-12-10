@@ -17,8 +17,8 @@
         "Catégorie": "Catégorie",
         "Activer": "Activer",
         "Visible": "Visible",
-        " Système ": " Système ",
-        " Caméra ": " Caméra ",
+        "Système": " Système ",
+        "Caméra": " Caméra ",
         "Nom": "Nom",
         "Liste de commandes": "Id logique",
         "Recharger la configuration": "Reload configuration",
@@ -26,11 +26,34 @@
         "Options": "Options",
         "Actions": "Actions",
         "Ajouter toutes les caméras":"Ajouter toutes les caméras",
-        "Stockage":"Stockage"
+        "Stockage":"Stockage",
+        "Compte Blink": " Compte Blink ",
+        "Comptes Blink":"Comptes Blink",
+        "Erreur lors de la mise à jour de la configuration du compte":"Erreur lors de la mise à jour de la configuration du compte"
+    },
+    "plugins\/blink_camera\/desktop\/modal\/blink_camera.account.php": {
+        "Email":"Email",
+        "Mot de passe":"Mot de passe",
+        "Tester":"Tester",
+        "Sauvegarder le mot de passe":"Sauvegarder le mot de passe",
+        "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".":"Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".",
+        "Compte Blink": " Compte Blink ",
+        "Comptes Blink":"Comptes Blink",
+        "Connexion à votre compte Blink OK":"Connexion à votre compte Blink OK",
+        "Code PIN de vérification":"Code PIN de vérification",
+        "Connexion à votre compte Blink OK mais un code de vérification est nécessaire":"Connexion à votre compte Blink OK mais un code de vérification est nécessaire",
+        "Erreur de connexion à votre compte Blink":"Erreur de connexion à votre compte Blink",
+        "Fermer":"Retour"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
         "Ajout des caméras":"Ajout des caméras",
         "Choisir": "Choisir"
+    },
+    "plugins\/blink_camera\/desktop\/js\/blink_camera_config2.js": {
+        "Comptes Blink":"Comptes Blink",
+        "Ajout des caméras":"Ajout des caméras",
+        "Connexion à votre compte Blink OK":"Connexion à votre compte Blink OK",
+        "Erreur de connexion à votre compte Blink":"Erreur de connexion à votre compte Blink",
     },
     "plugins\/blink_camera\/plugin_info\/configuration.php": {
         "Compte Blink": "Compte Blink",

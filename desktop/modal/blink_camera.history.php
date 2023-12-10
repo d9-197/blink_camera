@@ -17,8 +17,9 @@ if ($blink_camera->getEqType_name() != 'blink_camera') {
 }
 log::add('blink_camera','debug','History['.$blink_camera->getId().'] START');
 
+$email=$blink_camera->getConfiguration('email');
 
-if (blink_camera::isConnected() && $blink_camera->isConfigured()) {
+if (blink_camera::isConnected($email) && $blink_camera->isConfigured()) {
     $cameraConnected=true;
 }
 
