@@ -36,6 +36,16 @@ $('.bt_return_cfg').on('click', function (e) {
 </div>
 <form class="form-horizontal">
 <fieldset>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Email}}</label>
+        <div class="col-sm-3">
+            <input id="new_email" type="text" class="blink_account form-control"/>
+        </div>
+        <div class="col-lg-6">
+            <a id="bt_new_acocunt" class="btn btn-success btn-xs" onclick="addAccount(document.getElementById('new_email').value)">{{Ajouter un compte}}</a>
+        </div>
+    </div>
+    <HR>
 <?php
    
     $eqLogics = blink_camera::byType('blink_camera', false);
@@ -67,20 +77,24 @@ $('.bt_return_cfg').on('click', function (e) {
             <div class="form-group">
                 <label class="col-sm-3 control-label">{{Email}}</label>
                 <div class="col-sm-3">
-                    <input id="email_<?=$cptAccount?>" type="text" class="blink_account form-control" placeholder="{{compte}}"/>
+                    <input id="email_<?=$cptAccount?>" type="text" class="blink_account form-control" placeholder="{{Compte Blink}}"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label">{{Mot de passe}}</label>
                 <div class="col-sm-3">
-                    <input id="pwd_<?=$cptAccount?>" type="password" class="blink_pwd form-control" placeholder="{{mdp}}"/>
+                    <input id="pwd_<?=$cptAccount?>" type="password" class="blink_pwd form-control" placeholder="{{Mot de Passe}}"/>
                 </div>
-                <div class="col-lg-3">
+                <div class="col-sm-2">
                     <a id="bt_save_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="savePwd(<?=$cptAccount?>)">{{Sauvegarder le mot de passe}}</a>
                 </div>
-                <div class="col-lg-3">
+                <div class="col-sm-2">
                     <a id="bt_verify_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="checkConnexionBlink(<?=$cptAccount?>)">{{Tester}}</a>
                 </div>
+                <div class="col-sm-2">
+                    <a id="bt_del_account_<?=$cptAccount?>" class="btn btn-danger btn-xs" onclick="removeConfigAccount(document.getElementById('email_<?=$cptAccount?>').value)">{{Supprimer le compte}}</a>
+                </div>
+
             </div>
             <div id="verifdiv_<?=$cptAccount?>">
                 <div class="form-group">

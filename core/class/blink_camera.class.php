@@ -228,6 +228,26 @@ class blink_camera extends eqLogic
         config::save('configBlinkAccounts',json_encode($accountsObj),'blink_camera');
         return true;
     }
+    public static function delConfigBlinkAccount(string $email) {
+        $accounts=config::byKey('configBlinkAccounts','blink_camera');
+        //self::logdebug('setConfigBlinkAccount ('.$email.') '.$key.':'.$value);
+        $accountIndex=0;
+        $updated=false;
+        foreach($accounts as $account) {
+            if ($account['email'] == $email) {
+//                self::logdebug('setConfigBlinkAccount account found: '. print_r($account,true));
+                $account=array();;
+                $updated=true;
+            }
+            $accountsObj[]=$account;
+            $accountIndex++;
+        } 
+        if ($updated==true) {
+            config::save('configBlinkAccounts',json_encode($accountsObj),'blink_camera');
+        }
+        return true;
+    }
+
     public static function queryGet(string $url, string $email) {
         $_tokenBlink=self::getConfigBlinkAccount($email,'token');
         $_accountBlink=self::getConfigBlinkAccount($email,'accountId');

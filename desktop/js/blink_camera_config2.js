@@ -408,6 +408,7 @@ function initSelect() {
 function updateConfigAccount(email,key,value) {
   $.ajax({
     type: "POST",
+    async:false,
     url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
     data: {
         action: "update_cfg_account",
@@ -428,10 +429,40 @@ function updateConfigAccount(email,key,value) {
     }
 });
 }
+function removeConfigAccount(email) {
+  $.ajax({
+    type: "POST",
+    async:false,
+    url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
+    data: {
+        action: "remove_cfg_account",
+        email : email
+    },
+    dataType: 'json',
+    error: function(request, status, error) {
+        handleAjaxError(request, status, error,$('#div_alert'));
+    },
+    success: function(data) {
+        $res = JSON.parse(JSON.parse(data.result));
+        if ($res.status != "true") {
+            $.fn.showAlert({message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning'});
+        }
+        return;
+    }
+});
+$('#md_modal').dialog({
+  title: "{{Comptes Blink}}"
+}).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id='+$("#ideq").find(":selected").text()).dialog('open');
+}
 function savePwd(accountNumber) {
   updateConfigAccount(document.getElementById("email_"+accountNumber).value,'pwd',document.getElementById("pwd_"+accountNumber).value);
 };
-
+function addAccount(email) {
+  updateConfigAccount(email,'pwd','xxx');
+  $('#md_modal').dialog({
+    title: "{{Comptes Blink}}"
+  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id='+$("#ideq").find(":selected").text()).dialog('open');
+};
 function checkConnexionBlink(accountNumber) {
           $.ajax({
                       type: "POST",
@@ -486,7 +517,7 @@ function verifyPin(accountNumber) {
                 bootbox.alert("ERREUR 'verifyPinCode' !<br>Erreur lors l'envoi du code de vérification à Blink.");
             },
             success: function (json_res) {
-                checkConnexionBlink();   
+                checkConnexionBlink(accountNumber);   
             }
         });
     };

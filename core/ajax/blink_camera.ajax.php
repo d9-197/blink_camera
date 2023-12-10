@@ -173,6 +173,13 @@ try {
         $return=json_encode($json);
 		ajax::success($return);
     }
+    if (init('action') == 'remove_cfg_account') {
+        blink_camera::logdebug('blink_camera.ajax - remove_cfg_account: -'.init('email'));
+        blink_camera::delConfigBlinkAccount(init('email'));
+        $json='{"status":"true"}';
+        $return=json_encode($json);
+		ajax::success($return);
+    }
     if (init('action') == 'test_blink') {
         $email=init('email');
         blink_camera::logdebug('blink_camera.ajax - test_blink: '.print_r($email,true));
