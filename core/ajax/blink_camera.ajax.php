@@ -91,9 +91,9 @@ try {
         $cam=blink_camera::byId(init('ideq'));
         $config = $cam->getConfiguration('email');
         blink_camera::logdebug('blink_camera.ajax - getEmail: '.$config);
-		if ($config==null) {
+		/*if ($config==null) {
 			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
-        }
+        }*/
         $return=json_encode($config);
 		ajax::success($return);
     }
@@ -116,9 +116,9 @@ try {
         $cam=blink_camera::byId(init('ideq'));
         $config='{"network_id":"'.$cam->getConfiguration('network_id').'","network_name":"'.$cam->getConfiguration('network_name').'"}';
         blink_camera::logdebug('blink_camera.ajax - getNetwork: RESULTAT '.print_r($config,true));
-		if ($config==null) {
+		/*if ($config==null) {
 			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
-        }
+        }*/
 		ajax::success($config);
     }
     if (init('action') == 'setNetwork') {
@@ -141,9 +141,9 @@ try {
         $cam=blink_camera::byId(init('ideq'));
         $config='{"device_id":"'.$cam->getConfiguration('camera_id').'","device_name":"'.$cam->getConfiguration('camera_name').'"}';
         blink_camera::logdebug('blink_camera.ajax - getCamera: '.print_r($config,true));
-		if ($config==null) {
+		/*if ($config==null) {
 			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
-        }
+        }*/
 		ajax::success($config);
     }
     if (init('action') == 'setCamera') {

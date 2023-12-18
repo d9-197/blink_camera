@@ -199,34 +199,39 @@ class blink_camera extends eqLogic
         $accounts=config::byKey('configBlinkAccounts','blink_camera');
         $listAccounts=array();
         foreach($accounts as $account) {
-            $listAccounts[]=$account['email'];
+            if ($account['email'] && $account['email']!="") {
+                $listAccounts[]=$account['email'];
+            }
         }
         return $listAccounts;
     }
 
     public static function setConfigBlinkAccount(string $email, string $key,string $value) {
-        $accounts=config::byKey('configBlinkAccounts','blink_camera');
-        //self::logdebug('setConfigBlinkAccount ('.$email.') '.$key.':'.$value);
-        $accountIndex=0;
-        $updated=false;
-        foreach($accounts as $account) {
-            if ($account['email'] == $email) {
-//                self::logdebug('setConfigBlinkAccount account found: '. print_r($account,true));
-                $account[$key]=$value;
-                $updated=true;
+        if ($email && $email !="") {
+            $accounts=config::byKey('configBlinkAccounts','blink_camera');
+            //self::logdebug('setConfigBlinkAccount ('.$email.') '.$key.':'.$value);
+            $accountIndex=0;
+            $updated=false;
+            foreach($accounts as $account) {
+                if ($account['email'] == $email) {
+    //                self::logdebug('setConfigBlinkAccount account found: '. print_r($account,true));
+                    $account[$key]=$value;
+                    $updated=true;
+                }
+                $accountsObj[]=$account;
+                $accountIndex++;
+            } 
+            if ($updated==false) {
+                self::logdebug('setConfigBlinkAccount ('.$email.') new account');
+                $newAccount=array();
+                $newAccount['email']=$email;
+                $newAccount[$key]=$value;
+                $accountsObj[]=$newAccount;
             }
-            $accountsObj[]=$account;
-            $accountIndex++;
+            config::save('configBlinkAccounts',json_encode($accountsObj),'blink_camera');
+            return true;
         } 
-        if ($updated==false) {
-            self::logdebug('setConfigBlinkAccount ('.$email.') new account');
-            $newAccount=array();
-            $newAccount['email']=$email;
-            $newAccount[$key]=$value;
-            $accountsObj[]=$newAccount;
-        }
-        config::save('configBlinkAccounts',json_encode($accountsObj),'blink_camera');
-        return true;
+        return false;
     }
     public static function delConfigBlinkAccount(string $email) {
         $accounts=config::byKey('configBlinkAccounts','blink_camera');
@@ -546,6 +551,14 @@ class blink_camera extends eqLogic
                 }*/
                 $reponseHomescreen=self::getHomescreenData("getToken",$email);
                 if ($reponseHomescreen['message']) {
+                    self::logdebug('Homescreen KO : need a new token');
+                    self::setConfigBlinkAccount($email,'token','');
+                    self::setConfigBlinkAccount($email,'region','');
+                    self::setConfigBlinkAccount($email,'accountId','');
+        
+                    $_tokenBlink='';
+                    $_accountBlink='';
+                    $_regionBlink='';
                     $need_new_token=true;
                 }
             } else {
@@ -926,13 +939,17 @@ class blink_camera extends eqLogic
                 #$folderJson=__DIR__.'/../../medias/getHomescreenData.json';
                 #file_put_contents($folderJson,json_encode($jsonrep));
             }
-            catch (TransferException $e) {
+            catch (Exception $e) {
                 $errorTxt='ERROR: getHomescreenData - '.print_r($e->getMessage(), true);
-                    self::logwarn($errorTxt);
-                    $jsonrep=json_decode('{"message":"'.$errorTxt.'"}',true);
+                self::logwarn($errorTxt);
+                if (method_exists($e,'getResponse')) {
+                    $response = $e->getResponse();
+                    return json_decode($response->getBody()->getContents(),true);
+                }
+                $jsonrep=json_decode('{"message":"'.$errorTxt.'"}',true);
 
             }
-            //self::logdebug('getHomescreenData :\n'.print_r($jsonrep,true));
+            self::logdebug('getHomescreenData RESULT:\n'.print_r($jsonrep,true));
             return $jsonrep;
         //}
     }
@@ -2668,11 +2685,10 @@ class blink_cameraCmd extends cmd
             $bl_cam=$this->getEqLogic();
                 if ($bl_cam->isConfigured()) {
                 $result=parent::toHtml($_version,$_options,$_cmdColor);
-                
-                $result.='<script> $(\'.cmd[data-cmd_id='.$this->getId().']\').off(\'click\').on(\'click\', function () {';
-                $result.='$(\'#md_modal\').dialog({title: "Historique '.$bl_cam->getName().'"});';
-#               $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'&mode='.$bl_cam->getConfigHistory().'\').dialog(\'open\');});';
-                $result.='$(\'#md_modal\').load(\'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id='.$bl_cam->getId().'\').dialog(\'open\');});';
+                $result.="<script>document.querySelector('.cmd[data-cmd_id=\"".$this->getId()."\"]').addEventListener('click', function(event) {";
+//                $result.="alert('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=".$bl_cam->getId()."');";
+                $result.="jeeDialog.dialog({title: 'Historique ".$bl_cam->getName()."',contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=".$bl_cam->getId()."'});";
+                $result.="})";
                 $result.="</script>";
 
                 return $result;
