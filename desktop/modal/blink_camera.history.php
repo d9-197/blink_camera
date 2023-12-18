@@ -43,6 +43,10 @@ if ($configMedia!='') {
 $dir= realpath(dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/');
 ?>
 <script>
+
+
+var resizers = ['top', 'top-right', 'right', 'bottom-right', 'bottom', 'bottom-left', 'left', 'top-left']
+
 if ('<?=$formatMedia?>'=='.jpg') {
     if ('<?=$thumbFilter?>'=='') {
         if ('<?=$storage?>'!='local') {
@@ -263,7 +267,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
                                     videoPlaying<?=$cptVideo?> = true;
                                     video<?=$cptVideo?>.play();
                                     if ($('#video-<?=$cptVideo?>').is(":visible")) {
-                                        $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+                                      //  $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
                                      };
     
                                 }
@@ -305,8 +309,12 @@ foreach ($videoFiltered as $date => $videoByDate) {
         </div>
     </div>
     <script>
-        $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
-
+        pckry_<?=$cptDate?> = new Packery( '.blink_cameraThumbnailContainer_<?=$cptDate?>', {itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+        pckry_<?=$cptDate?>.layout();
+        function relayout_<?=$cptDate?>() {
+            pckry_<?=$cptDate?>.layout();
+        }
+        new ResizeObserver(relayout_<?=$cptDate?>).observe(document.querySelector('.blink_cameraThumbnailContainer_<?=$cptDate?>'));
     </script>
 <?php 
 } // FIN DATES
@@ -346,8 +354,6 @@ $('.bt_removefile').on('click', function() {
 				return;
 			}
 			card.remove();
-			//$(".blink_cameraThumbnailContainer").slideToggle(1);
-			//$(".blink_cameraThumbnailContainer").slideToggle(1);
             $(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 		}
 	});
@@ -364,27 +370,18 @@ $('.toggleList').on('click', function() {
     });
     $(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
 });
-  
-$('.ui-resizable').resizable({
-      resize: function( event, ui ) {$('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});}
+ 
+document.querySelector('#btn-thumb').addEventListener('click', function(event) {
+    jeeDialog.dialog({title: "Historique <?=$blink_camera->getName()?>",contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=thumb'});
 });
-
-$( document ).ready(function() {
-    $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+document.querySelector('#btn-mp4').addEventListener('click', function(event) {
+    jeeDialog.dialog({title: "Historique <?=$blink_camera->getName()?>",contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=mp4'});
 });
-
-$('#btn-thumb').click(function() {
-    $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
-    $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=thumb').dialog('open');
-});
-$('#btn-mp4').click(function() {
-    $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
-    $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=mp4').dialog('open');
-});
-$('#btn-jpg').click(function() {
-    $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
-    $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=jpg').dialog('open');
-});
+if ('<?=$storage?>'!='local') {
+    document.querySelector('#btn-jpg').addEventListener('click', function(event) {
+        jeeDialog.dialog({title: "Historique <?=$blink_camera->getName()?>",contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=jpg'});
+    });
+}
 
 
 document.querySelectorAll("img.displayImage").forEach(function (vignette) {
