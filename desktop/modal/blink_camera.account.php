@@ -42,7 +42,13 @@ $('.bt_return_cfg').on('click', function (e) {
             <input id="new_email" type="text" class="blink_account form-control"/>
         </div>
         <div class="col-lg-6">
-            <a id="bt_new_acocunt" class="btn btn-success btn-xs" onclick="addAccount(document.getElementById('new_email').value)">{{Ajouter un compte}}</a>
+            <a id="bt_new_account" class="btn btn-success btn-xs" onclick="addAccount(document.getElementById('new_email').value)">{{Ajouter un compte}}</a>
+        </div>
+    </div>
+    <HR>
+    <div class="form-group">
+        <div class="col-lg-12">
+            <a id="bt_reinit" class="btn btn-success btn-xs" onclick="reinitAccounts()">{{Supprimer tous les comptes}}</a>
         </div>
     </div>
     <HR>

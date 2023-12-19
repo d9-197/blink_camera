@@ -429,6 +429,31 @@ function updateConfigAccount(email,key,value) {
     }
 });
 }
+function reinitAccounts() {
+  $.ajax({
+    type: "POST",
+    async:false,
+    url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
+    data: {
+        action: "reinit_cfg_account"
+    },
+    dataType: 'json',
+    error: function(request, status, error) {
+        handleAjaxError(request, status, error,$('#div_alert'));
+    },
+    success: function(data) {
+        $res = JSON.parse(JSON.parse(data.result));
+        if ($res.status != "true") {
+            $.fn.showAlert({message: "{{Erreur lors de la réinitialisation de la configuration des comptes}}", level: 'warning'});
+        }
+        return;
+    }
+});
+$('#md_modal').dialog({
+  title: "{{Comptes Blink}}"
+}).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id='+$("#ideq").find(":selected").text()).dialog('open');
+
+}
 function removeConfigAccount(email) {
   $.ajax({
     type: "POST",

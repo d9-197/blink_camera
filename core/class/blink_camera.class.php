@@ -252,7 +252,9 @@ class blink_camera extends eqLogic
         }
         return true;
     }
-
+    public static function delAllConfigBlinkAccounts() {
+        config::remove('configBlinkAccounts','blink_camera');
+    }
     public static function queryGet(string $url, string $email) {
         $_tokenBlink=self::getConfigBlinkAccount($email,'token');
         $_accountBlink=self::getConfigBlinkAccount($email,'accountId');

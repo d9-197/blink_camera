@@ -6,12 +6,12 @@ if (!isConnect()) {
 
 $eqLogics = blink_camera::byType('blink_camera', true);
 $email="";
-foreach ($eqLogics as $cam) {
+/*foreach ($eqLogics as $cam) {
     $email=$cam->getConfiguration("email");
 }
 if (!blink_camera::isConnected($email) || !blink_camera::getToken($email,false)) {
     throw new Exception('{{Erreur de connexion à votre compte Blink}} '.$email);
-}
+}*/
 
 ?>
 <script>
@@ -70,7 +70,8 @@ $('.bt_return_cfg').on('click', function (e) {
 
                     $newCamera=new blink_camera();
                     $newCamera->setEqType_name('blink_camera');
-                    $newCamera->setName($network['network_name']." - ".$camera['device_name']);
+                    $newCamera->setName($camera['device_name']);
+                    $newCamera->setConfiguration('email',$email['email']);
                     $newCamera->setConfiguration('network_id',$network['network_id']);
                     $newCamera->setConfiguration('camera_id',$camera['device_id']);
                     $newCamera->save();

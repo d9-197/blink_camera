@@ -180,6 +180,13 @@ try {
         $return=json_encode($json);
 		ajax::success($return);
     }
+    if (init('action') == 'reinit_cfg_account') {
+        blink_camera::logdebug('blink_camera.ajax - reinit_cfg_account');
+        blink_camera::delAllConfigBlinkAccounts();
+        $json='{"status":"true"}';
+        $return=json_encode($json);
+		ajax::success($return);
+    }
     if (init('action') == 'test_blink') {
         $email=init('email');
         blink_camera::logdebug('blink_camera.ajax - test_blink: '.print_r($email,true));
