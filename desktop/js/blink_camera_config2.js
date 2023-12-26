@@ -29,12 +29,12 @@ function getEmails(forceValue) {
           message: "'" + data.result + "'",
           level: 'danger'
         });
-        document.getElementById('blink_cfg').hide();
+        if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
         return;
       } else {
         dataParsed = JSON.parse(data.result);
         if (dataParsed != null && dataParsed.message) {
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           document.getElementById('div_alert').showAlert({
             message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
             level: 'warning'
@@ -43,7 +43,8 @@ function getEmails(forceValue) {
           document.getElementById('select_email').disabled = false;
           document.getElementById('select_email').innerHTML = "";
           dataParsed.forEach(function (key, value) {
-            document.getElementById('select_email').append('<option value=' + value + '>' + value + '</option>');
+            mySelect = document.getElementById('select_email');
+            mySelect.options[mySelect.options.length] = new Option(key, key);
           });
           if (forceValue) {
             setEmail();
@@ -82,7 +83,7 @@ function getNetworks(forceValue) {
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           return;
         } else {
           dataParsed = JSON.parse(data.result);
@@ -132,12 +133,12 @@ function getCameras(forceValue) {
           message: "'" + data.result + "'",
           level: 'danger'
         });
-        document.getElementById('blink_cfg').hide();
+        if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
         return;
       } else {
         dataParsed = JSON.parse(data.result);
         if (dataParsed != null && dataParsed.message) {
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           document.getElementById('div_alert').showAlert({
             message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
             level: 'warning'
@@ -145,10 +146,12 @@ function getCameras(forceValue) {
         } else {
           document.getElementById('select_camera').disabled = false;
           document.getElementById('select_camera').innerHTML = "";
-          dataParsed.forEach(function (key, value) {
-            mySelect = document.getElementById('select_camera');
-            mySelect.options[mySelect.options.length] = new Option(key['device_name'], key['device_id']);
-          });
+          if (dataParsed!=null) {
+            dataParsed.forEach(function (key, value) {
+              mySelect = document.getElementById('select_camera');
+              mySelect.options[mySelect.options.length] = new Option(key['device_name'], key['device_id']);
+            });
+          }
           if (forceValue) {
             setCamera();
           } else {
@@ -184,12 +187,12 @@ function getEmail() {
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           return;
         } else {
           dataParsed = JSON.parse(data.result);
           if (dataParsed.message) {
-            document.getElementById('blink_cfg').hide();
+            if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
             document.getElementById('div_alert').showAlert({
               message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
               level: 'warning'
@@ -239,7 +242,7 @@ function setEmail() {
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           return;
         }
       }
@@ -268,12 +271,12 @@ function getNetwork() {
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           return;
         } else {
           dataParsed = JSON.parse(data.result);
           if (dataParsed.message) {
-            document.getElementById('blink_cfg').hide();
+            if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
             document.getElementById('div_alert').showAlert({
               message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
               level: 'warning'
@@ -315,7 +318,7 @@ function setNetwork() {
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           return;
         }
       }
@@ -344,12 +347,12 @@ function getCamera() {
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           return;
         } else {
           dataParsed = JSON.parse(data.result);
           if (dataParsed.message) {
-            document.getElementById('blink_cfg').hide();
+            if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
             document.getElementById('div_alert').showAlert({
               message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
               level: 'warning'
@@ -392,7 +395,7 @@ function setCamera() {
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          document.getElementById('blink_cfg').hide();
+          if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
           return;
         }
       }
@@ -426,7 +429,7 @@ function updateConfigAccount(email, key, value) {
     success: function (data) {
       $res = JSON.parse(JSON.parse(data.result));
       if ($res.status != "true") {
-        $.fn.showAlert({ message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning' });
+        jeedomUtils.showAlert({ message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning' });
       }
       return;
     }
@@ -447,7 +450,7 @@ function reinitAccounts() {
     success: function (data) {
       $res = JSON.parse(JSON.parse(data.result));
       if ($res.status != "true") {
-        $.fn.showAlert({ message: "{{Erreur lors de la réinitialisation de la configuration des comptes}}", level: 'warning' });
+        jeedomUtils.showAlert({ message: "{{Erreur lors de la réinitialisation de la configuration des comptes}}", level: 'warning' });
       }
       return;
     }
@@ -472,7 +475,7 @@ function removeConfigAccount(email) {
     success: function (data) {
       $res = JSON.parse(JSON.parse(data.result));
       if ($res.status != "true") {
-        $.fn.showAlert({ message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning' });
+        jeedomUtils.showAlert({ message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning' });
       }
       return;
     }
@@ -506,25 +509,25 @@ function checkConnexionBlink(accountNumber) {
     success: function (data) {
       $res = JSON.parse(JSON.parse(data.result));
       if ($res.token == "true") {
-        $.fn.showAlert({ message: "{{Connexion à votre compte Blink OK}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'info' });
-        document.getElementById('verifdiv_' + accountNumber).hide();
+        jeedomUtils.showAlert({ message: "{{Connexion à votre compte Blink OK}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'info' });
+        document.getElementById('verifdiv_' + accountNumber).unseen();
         document.getElementById('blink_cfg').show();
         //checkBlinkCameraConfig();
         sessionStorage.setItem("blink_camera_refresh", "REFRESH");
       } else if ($res.token == "verif") {
-        $.fn.showAlert({ message: "{{Connexion à votre compte Blink OK mais un code de vérification est nécessaire}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'warning' });
-        //$.fn.showAlert({message: "{{Connexion à votre compte Blink OK - Email de vérification nécessaire}}", level: 'info'});
+        jeedomUtils.showAlert({ message: "{{Connexion à votre compte Blink OK mais un code de vérification est nécessaire}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'warning' });
+        //jeedomUtils.showAlert({message: "{{Connexion à votre compte Blink OK - Email de vérification nécessaire}}", level: 'info'});
         document.getElementById('verifdiv_' + accountNumber).show();
       } else if ($res.token == "limit") {
-        $.fn.showAlert({ message: "{{limite connexion}}", level: 'danger' });
-        document.getElementById('verifdiv_' + accountNumber).hide();
-        //$.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
-        document.getElementById('blink_cfg').hide();
+        jeedomUtils.showAlert({ message: "{{limite connexion}}", level: 'danger' });
+        document.getElementById('verifdiv_' + accountNumber).unseen();
+        //jeedomUtils.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
+        if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
       } else {
-        $.fn.showAlert({ message: "{{Erreur de connexion à votre compte Blink}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'danger' });
-        document.getElementById('verifdiv_' + accountNumber).hide();
-        //$.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
-        document.getElementById('blink_cfg').hide();
+        jeedomUtils.showAlert({ message: "{{Erreur de connexion à votre compte Blink}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'danger' });
+        document.getElementById('verifdiv_' + accountNumber).unseen();
+        //jeedomUtils.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
+        if (document.getElementById('blink_cfg')!=null) {document.getElementById('blink_cfg').unseen();}
       }
       return;
     }
@@ -549,3 +552,18 @@ function verifyPin(accountNumber) {
     }
   });
 };
+function reloadParentPage(e) {
+  //if (needrefresh==1) {
+      var vars = getUrlVars()
+      var url = 'index.php?'
+      for (var i in vars) {
+          if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
+              url += i + '=' + vars[i].replace('#', '') + '&'
+          }
+      }   
+      url=url.substring(0, url.length - 1);
+      
+  jeedomUtils.loadPage(url)
+  //}
+};
+document.querySelectorAll('.bt_return_cfg').forEach(function (key, value) {key.addEventListener('click',reloadParentPage);})

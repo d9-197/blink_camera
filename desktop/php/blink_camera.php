@@ -210,15 +210,15 @@ onVisible(document.querySelector("#select_camera"), () => {
 });
 document.querySelector("#select_email").addEventListener("change", (event) => {
     setEmail();
-     document.getElementById('select_reseau').find('option').remove();
+     document.getElementById('select_reseau').innerHTML="";
     getNetworks(true);
-     document.getElementById('select_camera').find('option').remove();
+     document.getElementById('select_camera').innerHTML="";
     getCameras(true);
 
 });
 document.querySelector("#select_reseau").addEventListener("change", (event) => {
     setNetwork();
-     document.getElementById('select_camera').find('option').remove();
+     document.getElementById('select_camera').innerHTML="";
     getCameras(true);
 });
 document.querySelector("#select_camera").addEventListener("change", (event) => {

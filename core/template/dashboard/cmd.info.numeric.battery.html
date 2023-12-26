@@ -3,8 +3,7 @@
     <div  class="cmdName">#name_display#</div>
   </div>
   <div class="content-sm">
-    <span class="pull-right unit">#unite#</span>
-    <span class="pull-right state"></span>
+    <table><TR style="valign:center"><TD><span class="pull-right state"></span></TD><TD><span class="pull-right unit">#unite#</span></TD></TR></table>
   </div>
   <div class="value #hide_history#">
     <div class="col-xs-12 center-block">
@@ -14,14 +13,14 @@
   <template></template>
   <script>
      jeedom.cmd.addUpdateFunction('#id#',function(_options) {
-      $('.cmd[data-cmd_id=#id#]').attr('title', '{{Date de valeur}} : '+_options.valueDate+'<br/>{{Date de collecte}} : '+_options.collectDate)
+      document.querySelector('.cmd[data-cmd_id="#id#"]').setAttribute('title', '{{Date de valeur}} : '+_options.valueDate+'<br/>{{Date de collecte}} : '+_options.collectDate)
       if (_options.display_value>0) {
-        $('.cmd[data-cmd_id=#id#] .state').empty().append(_options.display_value);
-        $('.cmd[data-cmd_id=#id#] .unit').empty().append(_options.unit)
+        document.querySelector('.cmd[data-cmd_id="#id#"] .state').innerHTML=_options.display_value;
+        document.querySelector('.cmd[data-cmd_id="#id#"] .unit').innerHTML=_options.unit;
       } else {
         //console.log(_options);
-        $('.cmd[data-cmd_id=#id#] .state').empty().append('<span class="label label-primary" style="font-size : 1em;" title="{{Secteur}}"><i class="fa fa-plug"></i></span>');   
-        $('.cmd[data-cmd_id=#id#] .unit').empty();
+        document.querySelector('.cmd[data-cmd_id="#id#"] .state').innerHTML='<span class="label label-primary" style="font-size : 1em;" title="{{Secteur}}"><i class="fa fa-plug"></i></span>';   
+        document.querySelector('.cmd[data-cmd_id="#id#"] .unit').innerHTML="";
       }
     });
 

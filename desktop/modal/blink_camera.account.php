@@ -1,5 +1,4 @@
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
-<?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
 
 
 <?php
@@ -9,18 +8,8 @@ if (!isConnect()) {
 
 ?>
 <script>
-$('.ui-dialog-titlebar-close').on('click', function (e) {
+document.querySelector('.btClose').addEventListener('click', function (e) {
     var vars = getUrlVars()
-    var url = 'index.php?'
-    for (var i in vars) {
-        if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
-            url += i + '=' + vars[i].replace('#', '') + '&'
-        }
-    }
-    jeedomUtils.loadPage(url)
-});
-$('.bt_return_cfg').on('click', function (e) {
-        var vars = getUrlVars()
     var url = 'index.php?'
     for (var i in vars) {
         if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
@@ -69,14 +58,10 @@ $('.bt_return_cfg').on('click', function (e) {
                 <fieldset> 
                 <?php 
                 foreach ($config['emails'] as $email) {
-                //echo '<div class="panel panel-secondary">';
-                //echo '<div class="panel-heading"><i class="icon mdi-shield-account"></i> '.$email['email'].'</div>';
-                //echo '</div>';
                 $cryptedPwd=blink_camera::getConfigBlinkAccount($email['email'],'pwd');
                 $pwd=utils::decrypt($cryptedPwd);
                 ?>
                     <div class="form-group">
-                        <!--label class="col-sm-3 control-label">{{Email}}</label-->
                         <div class="col-sm-3">
                             <input id="email_<?=$cptAccount?>" disabled  class="blink_account form-control" placeholder="{{Compte Blink}}"/>
                         </div>
@@ -84,9 +69,6 @@ $('.bt_return_cfg').on('click', function (e) {
                         <div class="col-sm-3">
                             <input id="pwd_<?=$cptAccount?>" type="password" class="blink_pwd form-control" placeholder="{{Mot de Passe}}"/>
                         </div>
-                        <!--div class="col-sm-2">
-                            <a id="bt_save_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="savePwd(<?=$cptAccount?>)">{{Sauvegarder le mot de passe}}</a>
-                        </div-->
                         <div class="col-sm-2">
                             <a id="bt_verify_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="checkConnexionBlink(<?=$cptAccount?>)">{{Tester}}</a>
                         </div>
@@ -111,7 +93,7 @@ $('.bt_return_cfg').on('click', function (e) {
                     <script>
                         document.getElementById("email_<?=$cptAccount?>").value='<?=$email['email']?>';
                         document.getElementById("pwd_<?=$cptAccount?>").value='<?=$pwd?>';
-                        $('#verifdiv_<?=$cptAccount?>').hide();
+                        document.querySelector('#verifdiv_<?=$cptAccount?>').unseen();
                         checkConnexionBlink(<?=$cptAccount?>);
                     </script>
 
@@ -127,3 +109,4 @@ $('.bt_return_cfg').on('click', function (e) {
 
 <button class="btn btn-info btn-bg  bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button>
 
+<?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>

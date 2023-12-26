@@ -5,19 +5,12 @@ if (!isConnect()) {
     throw new Exception('{{401 - Accès non autorisé}}');
 }
 
-//$eqLogics = blink_camera::byType('blink_camera', true);
 $email="";
-/*foreach ($eqLogics as $cam) {
-    $email=$cam->getConfiguration("email");
-}
-if (!blink_camera::isConnected($email) || !blink_camera::getToken($email,false)) {
-    throw new Exception('{{Erreur de connexion à votre compte Blink}} '.$email);
-}*/
 
 ?>
 <script>
     needrefresh=0;
-$('.ui-dialog-titlebar-close').on('click', function (e) {
+    document.querySelector('.btClose').addEventListener('click', function (e) {
     if (needrefresh==1) {
         var vars = getUrlVars()
         var url = 'index.php?'
@@ -28,18 +21,6 @@ $('.ui-dialog-titlebar-close').on('click', function (e) {
         }
         jeedomUtils.loadPage(url)
     }
-});
-$('.bt_return_cfg').on('click', function (e) {
-    //if (needrefresh==1) {
-        var vars = getUrlVars()
-        var url = 'index.php?'
-        for (var i in vars) {
-            if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
-                url += i + '=' + vars[i].replace('#', '') + '&'
-            }
-        }   
-        jeedomUtils.loadPage(url)
-    //}
 });
 </script>
 <div class="float-right"><button class="btn btn-info btn-bg bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button></div>
@@ -116,3 +97,4 @@ $('.bt_return_cfg').on('click', function (e) {
 </form>
 <button class="btn btn-info btn-bg  bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button>
 </div>
+
