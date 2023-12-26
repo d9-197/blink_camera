@@ -31,29 +31,32 @@ $('.bt_return_cfg').on('click', function (e) {
 });
 </script>
 
-<div class="panel panel-success">
-<div class="panel-heading"><i class="fa fa-table"></i> {{Comptes Blink}} </div>
-</div>
+<button class="btn btn-info btn-bg  bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button>
+<HR>
+<div class="panel panel-info">
+        <div class="panel-heading"><i class="fa fa-table"></i> {{Ajouter un compte Blink}} </div>
+    </div>
 <form class="form-horizontal">
 <fieldset>
+
     <div class="form-group">
         <label class="col-sm-3 control-label">{{Email}}</label>
         <div class="col-sm-3">
             <input id="new_email" type="text" class="blink_account form-control"/>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-3">
             <a id="bt_new_account" class="btn btn-success btn-xs" onclick="addAccount(document.getElementById('new_email').value)">{{Ajouter un compte}}</a>
         </div>
-    </div>
-    <HR>
-    <div class="form-group">
-        <div class="col-lg-12">
+        <div class="col-lg-3">
             <a id="bt_reinit" class="btn btn-success btn-xs" onclick="reinitAccounts()">{{Supprimer tous les comptes}}</a>
         </div>
     </div>
-    <HR>
-<?php
-   
+    </fieldset>
+</form>
+<HR>
+    <div class="panel panel-info">
+        <div class="panel-heading"><i class="fa fa-table"></i> {{Comptes Blink}} </div>
+    <?php
     $eqLogics = blink_camera::byType('blink_camera', false);
     $config = blink_camera::getAccountConfigDatas(false,false);
     if ($config==null) {
@@ -61,73 +64,66 @@ $('.bt_return_cfg').on('click', function (e) {
     }
       $return=json_encode($config);
       $cptAccount=0;
-      foreach ($config['emails'] as $email) {
-        echo '<div class="form-group">';
-        echo '<label class="col-sm-4 control-label"><i class="icon mdi-shield-account"></i> '.$email['email'].'</label>';
-        echo '</div>';
-        /*echo '<table>';
-        echo '<TR><TH>{{key}}</TH><TH>{{value}}</TH></TR>';
-
-        foreach (blink_camera::getConfigBlinkAccountAll($email['email']) as $key=>$value) {
-            if ($key!='email') {
-                echo '<TR><TD>'.$key.'</TD>';
-                echo '<TD>'.$value.'</TD></TR>';
-            }
-        }
-        echo '</table>';*/
-        $cryptedPwd=blink_camera::getConfigBlinkAccount($email['email'],'pwd');
-        $pwd=utils::decrypt($cryptedPwd);
-    ?>
-    <form class="form-horizontal">
-        <fieldset> 
-            <div class="form-group">
-                <label class="col-sm-3 control-label">{{Email}}</label>
-                <div class="col-sm-3">
-                    <input id="email_<?=$cptAccount?>" type="text" class="blink_account form-control" placeholder="{{Compte Blink}}"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">{{Mot de passe}}</label>
-                <div class="col-sm-3">
-                    <input id="pwd_<?=$cptAccount?>" type="password" class="blink_pwd form-control" placeholder="{{Mot de Passe}}"/>
-                </div>
-                <div class="col-sm-2">
-                    <a id="bt_save_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="savePwd(<?=$cptAccount?>)">{{Sauvegarder le mot de passe}}</a>
-                </div>
-                <div class="col-sm-2">
-                    <a id="bt_verify_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="checkConnexionBlink(<?=$cptAccount?>)">{{Tester}}</a>
-                </div>
-                <div class="col-sm-2">
-                    <a id="bt_del_account_<?=$cptAccount?>" class="btn btn-danger btn-xs" onclick="removeConfigAccount(document.getElementById('email_<?=$cptAccount?>').value)">{{Supprimer le compte}}</a>
-                </div>
-
-            </div>
-            <div id="verifdiv_<?=$cptAccount?>">
-                <div class="form-group">
-                    <label class="col-lg-9 control-label text-danger">{{Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton "Envoyer".}}</label>
-                </div>
-                <div class="form-group">
-                    <label class="col-lg-3 control-label">{{Code PIN de vérification}}</label>
-                    <div class="col-lg-3">
-                        <input  class="form-control" id="pincode_<?=$cptAccount?>"/>
+      ?>
+            <form class="form-horizontal">
+                <fieldset> 
+                <?php 
+                foreach ($config['emails'] as $email) {
+                //echo '<div class="panel panel-secondary">';
+                //echo '<div class="panel-heading"><i class="icon mdi-shield-account"></i> '.$email['email'].'</div>';
+                //echo '</div>';
+                $cryptedPwd=blink_camera::getConfigBlinkAccount($email['email'],'pwd');
+                $pwd=utils::decrypt($cryptedPwd);
+                ?>
+                    <div class="form-group">
+                        <!--label class="col-sm-3 control-label">{{Email}}</label-->
+                        <div class="col-sm-3">
+                            <input id="email_<?=$cptAccount?>" disabled  class="blink_account form-control" placeholder="{{Compte Blink}}"/>
+                        </div>
+                        <label class="col-sm-2 control-label">{{Mot de passe}}</label>
+                        <div class="col-sm-3">
+                            <input id="pwd_<?=$cptAccount?>" type="password" class="blink_pwd form-control" placeholder="{{Mot de Passe}}"/>
+                        </div>
+                        <!--div class="col-sm-2">
+                            <a id="bt_save_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="savePwd(<?=$cptAccount?>)">{{Sauvegarder le mot de passe}}</a>
+                        </div-->
+                        <div class="col-sm-2">
+                            <a id="bt_verify_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="checkConnexionBlink(<?=$cptAccount?>)">{{Tester}}</a>
+                        </div>
+                        <div class="col-sm-2">
+                            <a id="bt_del_account_<?=$cptAccount?>" class="btn btn-danger btn-xs" onclick="removeConfigAccount(document.getElementById('email_<?=$cptAccount?>').value)">{{Supprimer le compte}}</a>
+                        </div>
                     </div>
-                    <div class="col-lg-3">
-                        <a id="bt_verifypin_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="verifyPin(<?=$cptAccount?>)">{{Envoyer}}</a>
+                    <div id="verifdiv_<?=$cptAccount?>">
+                        <div class="form-group">
+                            <label class="col-lg-9 control-label text-danger">{{Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton "Envoyer".}}</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-lg-3 control-label">{{Code PIN de vérification}}</label>
+                            <div class="col-lg-3">
+                                <input  class="form-control" id="pincode_<?=$cptAccount?>"/>
+                            </div>
+                            <div class="col-lg-3">
+                                <a id="bt_verifypin_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="verifyPin(<?=$cptAccount?>)">{{Envoyer}}</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <script>
-                document.getElementById("email_<?=$cptAccount?>").value='<?=$email['email']?>';
-                document.getElementById("pwd_<?=$cptAccount?>").value='<?=$pwd?>';
-                checkConnexionBlink(<?=$cptAccount?>);
-            </script>
-        </fieldset>
-    </form>
-<?php
-        $cptAccount++;
-      } 
-?>
-</fieldset>
-</form>
+                    <script>
+                        document.getElementById("email_<?=$cptAccount?>").value='<?=$email['email']?>';
+                        document.getElementById("pwd_<?=$cptAccount?>").value='<?=$pwd?>';
+                        $('#verifdiv_<?=$cptAccount?>').hide();
+                        checkConnexionBlink(<?=$cptAccount?>);
+                    </script>
+
+                <?php
+                        $cptAccount++;
+                    } 
+                ?>
+                </fieldset>
+            </form>
+            <br>
+        </div>
+    </div>
+
 <button class="btn btn-info btn-bg  bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button>
-</div>
+

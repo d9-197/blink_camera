@@ -6,7 +6,7 @@ $plugin = plugin::byId('blink_camera');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 ?>
-<?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
+<?php //include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
 
 <div class="row row-overflow">
     <!--div class="col-lg-2 col-md-3 col-sm-4">
@@ -55,8 +55,10 @@ foreach ($eqLogics as $eqLogic) {
     
 
 foreach ($eqLogics as $eqLogic) {
-                $opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive');
-                echo '<div class="eqLogicDisplayCard cursor" data-eqLogic_id="' . $eqLogic->getId() . '" style="text-align: center; background-color : #ffffff; height : 230px!important;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;' . $opacity . '" >';
+                //echo "<!--".print_r(jeedom::getConfiguration('eqLogic:style:noactive'),true)."-->";
+                //$opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive').'!important';
+                $opacityClass = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+                echo '<div class="eqLogicDisplayCard cursor '.$opacityClass.'" data-eqLogic_id="' . $eqLogic->getId() . '" style="text-align: center; background-color : #ffffff; height : 230px!important;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;" >';
                 echo '<br><img src="' . $plugin->getPathImgIcon() . '" height="105" width="95" />';
                 echo "<br>";
                 echo '<span style="font-size : 0.8em;position:relative; top : 5px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">(' . $eqLogic->getBlinkHumanDeviceType() . ')</span>';

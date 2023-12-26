@@ -2,11 +2,13 @@
     "plugins\/blink_camera\/core\/class\/blink_camera.class.php": {
         "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mots de passe. Recharger la page ensuite.": "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mots de passe. Recharger la page ensuite.",
         "accountid": "accountid",
-        "Secteur": "Secteur"
-    },
-    "plugins\/blink_camera\/core\/class\/blink_camera_api.class.php": {
-        "accountid": "accountid",
-        "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mots de passe. Recharger la page ensuite.": "Impossible de se connecter au compte Blink. Vérifiez vos identifiants et mots de passe. Recharger la page ensuite."
+        "Secteur": "Secteur",
+        "xt":"Outdoor génération 1",
+        "catalina":"Outdoor génération 3",
+        "white" : "Indoor",
+        "owl": "Mini",
+        "lotus": "Doorbell",
+        "type_name_missing":"Modèle de caméra inconnu"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
         "Commande par défaut du plugin": "Commande par défaut du plugin",

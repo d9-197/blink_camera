@@ -1,4 +1,5 @@
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
+<?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
 <?php
 if (!isConnect()) {
     throw new Exception('{{401 - Accès non autorisé}}');
@@ -25,11 +26,11 @@ $('.ui-dialog-titlebar-close').on('click', function (e) {
                 url += i + '=' + vars[i].replace('#', '') + '&'
             }
         }
-       // jeedomUtils.loadPage(url)
+        jeedomUtils.loadPage(url)
     }
 });
 $('.bt_return_cfg').on('click', function (e) {
-//    if (needrefresh==1) {
+    //if (needrefresh==1) {
         var vars = getUrlVars()
         var url = 'index.php?'
         for (var i in vars) {
@@ -38,12 +39,15 @@ $('.bt_return_cfg').on('click', function (e) {
             }
         }   
         jeedomUtils.loadPage(url)
-//    }
+    //}
 });
 </script>
+<div class="float-right"><button class="btn btn-info btn-bg bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button></div>
 
-<div class="panel panel-success">
-<div class="panel-heading"><i class="fa fa-table"></i> {{Recherche des caméras...}} </div>
+<hr>
+<div class="panel panel-info">
+    <div class="panel-heading"><i class="fa fa-table"></i> {{Recherche des caméras...}} </div>
+</div>
 </div>
 <form class="form-horizontal">
 <fieldset>
@@ -59,11 +63,16 @@ $('.bt_return_cfg').on('click', function (e) {
     }
     $nbNew=0;
       $return=json_encode($config);
+      $cptAccount=0;
       foreach ($config['emails'] as $email) {
-        echo '<div class="form-group h3">';
-        echo '<label class="col-sm-6"><i class="icon mdi-shield-account"></i> {{compte}} '.$email['email'].'</label>';
+        echo '<div class="panel panel-secondary">';
+        //echo '<div class="form-group h3">';
+        echo '<div class="panel-heading">';
+        echo '<i class="icon mdi-shield-account"></i> {{compte}} '.$email['email'];
         echo '</div>';
+        echo '<input type="hidden" id="email_'.$cptAccount.'" value="'.$email['email'].'"/>';
         $deviceList='';
+        //echo '<script>checkConnexionBlink('.$cptAccount.')</script>';
         foreach ($email['networks'] as $network) {
             $nbDevice=0;
             $deviceList='<div class="col-sm6">';
@@ -85,7 +94,7 @@ $('.bt_return_cfg').on('click', function (e) {
                     $newCamera->setConfiguration('network_id',$network['network_id']);
                     $newCamera->setConfiguration('camera_id',$camera['device_id']);
                     $newCamera->save();
-                    $deviceList=$deviceList.'<div><i class="fa fa-video-slash icon_red"></i><b>'.$camera['device_name'].' : {{caméra ajoutée}}</b></div>';
+                    $deviceList=$deviceList.'<div><i class="fa fa-video-slash icon_red"></i><b>'.$camera['device_name'].' : {{caméra ajoutée}}  </b><i class="fa fa-video icon_green"></i></div>';
                     $nbNew++;
                 } else {
                     $deviceList=$deviceList.'<div><i class="fa fa-video icon_green"></i> '.$camera['device_name'].' : {{caméra existe déja}}</div>';
@@ -97,6 +106,7 @@ $('.bt_return_cfg').on('click', function (e) {
             echo "$deviceList";
             echo '</div>';
             }
+            $cptAccount++;
       } 
       if ($nbNew>0) {
         echo "<script>needrefresh=1;</script>";
