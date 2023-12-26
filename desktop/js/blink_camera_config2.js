@@ -1,160 +1,159 @@
 function openScan(event) {
-  jeeDialog.dialog({title: "{{Ajout des caméras}}",contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.scan'});
+  jeeDialog.dialog({ title: "{{Ajout des caméras}}", contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.scan' });
 }
 document.querySelector(".eqLogicAction[data-action=scan]").addEventListener('click', openScan);
 
 function openAccount(event) {
-  jeeDialog.dialog({title: "{{Comptes Blink}}",contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id='+$("#ideq").find(":selected").text()});
+  jeeDialog.dialog({ title: "{{Comptes Blink}}", contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value });
 }
 document.querySelector(".eqLogicAction[data-action=account]").addEventListener('click', openAccount);
 
 function getEmails(forceValue) {
-  $.ajax({
+  domUtils.ajax({
     type: "POST",
     async: false,
     url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
     data: {
       action: "getEmails",
-      ideq: $("#ideq").find(":selected").text(),
+      ideq: document.getElementById("ideq").value,
     },
 
     dataType: 'json',
     error: function (request, status, error) {
-      handleAjaxError(request, status, error, $('#div_alert'));
+      handleAjaxError(request, status, error, document.getElementById('div_alert'));
     },
     success: function (data) {
       if (data.state != 'ok') {
-        //$('#div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
-        $('#div_alert').showAlert({
+        //document.getElementById('div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
+        document.getElementById('div_alert').showAlert({
           message: "'" + data.result + "'",
           level: 'danger'
         });
-        $('.blink_cfg').hide();
+        document.getElementById('blink_cfg').hide();
         return;
       } else {
-        dataParsed = $.parseJSON(data.result);
-        if (dataParsed!=null && dataParsed.message) {
-          $('.blink_cfg').hide();
-          $('#div_alert').showAlert({
+        dataParsed = JSON.parse(data.result);
+        if (dataParsed != null && dataParsed.message) {
+          document.getElementById('blink_cfg').hide();
+          document.getElementById('div_alert').showAlert({
             message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
             level: 'warning'
           });
         } else {
-            $("#select_email").attr('disabled', false);
-            $('#select_email').find('option').remove();
-            $.each(dataParsed,function(key, value)
-            {
-              $("#select_email").append('<option value=' + value + '>' + value + '</option>');
-            });
-            if (forceValue) {
-              setEmail();
-            } else {
-              getEmail();
-            }
-            getNetworks();
+          document.getElementById('select_email').disabled = false;
+          document.getElementById('select_email').innerHTML = "";
+          dataParsed.forEach(function (key, value) {
+            document.getElementById('select_email').append('<option value=' + value + '>' + value + '</option>');
+          });
+          if (forceValue) {
+            setEmail();
+          } else {
+            getEmail();
+          }
+          getNetworks();
         }
         return;
       }
     }
   });
-  
+
 }
 
 function getNetworks(forceValue) {
   //alert('getNetworks');
-  if ($("#select_email").find(":selected").val()!="") {
-    $.ajax({
+  if (document.getElementById('select_email').value != "") {
+    domUtils.ajax({
       type: "POST",
       async: false,
       url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
       data: {
         action: "getNetworks",
-        email: $("#select_email").find(":selected").val(),
+        email: document.getElementById('select_email').value,
       },
 
       dataType: 'json',
       error: function (request, status, error) {
-        handleAjaxError(request, status, error, $('#div_alert'));
+        handleAjaxError(request, status, error, document.getElementById('div_alert'));
       },
       success: function (data) {
         if (data.state != 'ok') {
-          //$('#div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
-          $('#div_alert').showAlert({
+          //document.getElementById('div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
+          document.getElementById('div_alert').showAlert({
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          $('.blink_cfg').hide();
+          document.getElementById('blink_cfg').hide();
           return;
         } else {
-          dataParsed = $.parseJSON(data.result);
-          if (dataParsed==null) {
+          dataParsed = JSON.parse(data.result);
+          if (dataParsed == null) {
           } else {
-              $("#select_reseau").attr('disabled', false);
-              $('#select_reseau').find('option').remove();
-              $.each(dataParsed,function(key, value)
-              {
-                  $("#select_reseau").append('<option value=' + value['network_id'] + '>' + value['network_name'] + '</option>');
-              });
-              if (forceValue) {
-                setNetwork();
-              } else {
-                getNetwork();
-              }
-              getCameras();
+            document.getElementById('select_reseau').disabled = false;
+            document.getElementById('select_reseau').innerHTML = "";
+            dataParsed.forEach(function (key, value) {
+              mySelect = document.getElementById('select_reseau');
+              mySelect.options[mySelect.options.length] = new Option(key['network_name'], key['network_id']);
+            });
+            if (forceValue) {
+              setNetwork();
+            } else {
+              getNetwork();
+            }
+            getCameras();
           }
           return;
         }
       }
     });
   }
-  
+
 }
 
 function getCameras(forceValue) {
- // alert('getCameras');
- //if ($("#select_reseau").find(":selected").val()!="") {
-  $.ajax({
+  // alert('getCameras');
+  //if (document.getElementById('select_reseau').options[document.getElementById('select_reseau').selectedIndex].value!="") {
+  domUtils.ajax({
     type: "POST",
     async: false,
     url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
     data: {
       action: "getCameras",
-      netid: $("#select_reseau").find(":selected").val(),
+      netid: document.getElementById('select_reseau').value,
     },
 
     dataType: 'json',
     error: function (request, status, error) {
-      handleAjaxError(request, status, error, $('#div_alert'));
+      handleAjaxError(request, status, error, document.getElementById('div_alert'));
     },
     success: function (data) {
       if (data.state != 'ok') {
-        //$('#div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
-        $('#div_alert').showAlert({
+        //document.getElementById('div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
+        document.getElementById('div_alert').showAlert({
           message: "'" + data.result + "'",
           level: 'danger'
         });
-        $('.blink_cfg').hide();
+        document.getElementById('blink_cfg').hide();
         return;
       } else {
-        dataParsed = $.parseJSON(data.result);
-        if (dataParsed!=null && dataParsed.message) {
-          $('.blink_cfg').hide();
-          $('#div_alert').showAlert({
+        dataParsed = JSON.parse(data.result);
+        if (dataParsed != null && dataParsed.message) {
+          document.getElementById('blink_cfg').hide();
+          document.getElementById('div_alert').showAlert({
             message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
             level: 'warning'
           });
         } else {
-            $("#select_camera").attr('disabled', false);
-            $('#select_camera').find('option').remove();
-            $.each(dataParsed,function(key, value)
-            {
-                $("#select_camera").append('<option value=' + value['device_id'] + '>' + value['device_name'] + '</option>');
-            });
-            if (forceValue) {
-              setCamera();
-            } else {
-              getCamera();
-            }
+          document.getElementById('select_camera').disabled = false;
+          document.getElementById('select_camera').innerHTML = "";
+          dataParsed.forEach(function (key, value) {
+            mySelect = document.getElementById('select_camera');
+            mySelect.options[mySelect.options.length] = new Option(key['device_name'], key['device_id']);
+          });
+          if (forceValue) {
+            setCamera();
+          } else {
+            getCamera();
+          }
         }
         return;
       }
@@ -164,45 +163,45 @@ function getCameras(forceValue) {
 }
 
 function getEmail() {
-  if ($("#ideq").val()!="") {
-    $.ajax({
+  if (document.getElementById("ideq").value != "") {
+    domUtils.ajax({
       type: "POST",
       async: false,
       url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
       data: {
         action: "getEmail",
-        ideq: $("#ideq").val(),
+        ideq: document.getElementById("ideq").value,
       },
 
       dataType: 'json',
       error: function (request, status, error) {
-        handleAjaxError(request, status, error, $('#div_alert'));
+        handleAjaxError(request, status, error, document.getElementById('div_alert'));
       },
       success: function (data) {
         if (data.state != 'ok') {
-          //$('#div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
-          $('#div_alert').showAlert({
+          //document.getElementById('div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
+          document.getElementById('div_alert').showAlert({
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          $('.blink_cfg').hide();
+          document.getElementById('blink_cfg').hide();
           return;
         } else {
-          dataParsed = $.parseJSON(data.result);
+          dataParsed = JSON.parse(data.result);
           if (dataParsed.message) {
-            $('.blink_cfg').hide();
-            $('#div_alert').showAlert({
+            document.getElementById('blink_cfg').hide();
+            document.getElementById('div_alert').showAlert({
               message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
               level: 'warning'
             });
           } else {
-            //$("#select_email").val(dataParsed);
-            var optionExists = ($('#select_email option[value="' + dataParsed + '"]').length > 0);
-            if(!optionExists)
-            {
-              $('#select_email').append("<option value='"+dataParsed+"'>"+dataParsed+"</option>");
+            //document.getElementById('select_email').val(dataParsed);
+            var optionExists = checkOptionValueExist("select_email", dataParsed);
+            if (!optionExists) {
+              mySelect = document.getElementById('select_email');
+              mySelect.options[mySelect.options.length] = new Option(dataParsed, dataParsed);
             }
-            $("#select_email").val(dataParsed);
+            document.getElementById('select_email').value = dataParsed;
           }
           return;
         }
@@ -210,29 +209,37 @@ function getEmail() {
     });
   }
 }
+function checkOptionValueExist(mySelect, myOption) {
+  for (i = 0; i < document.getElementById(mySelect).length; ++i) {
+    if (document.getElementById(mySelect).options[i].value == myOption) {
+      return true;
+    }
+  }
+  return false;
+}
 function setEmail() {
-  if ($("#ideq").val()!="") {
-    $.ajax({
+  if (document.getElementById("ideq").value != "") {
+    domUtils.ajax({
       type: "POST",
       async: false,
       url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
       data: {
         action: "setEmail",
-        ideq: $("#ideq").val(),
-        email: $("#select_email").val(),
+        ideq: document.getElementById("ideq").value,
+        email: document.getElementById('select_email').value,
       },
 
       dataType: 'json',
       error: function (request, status, error) {
-        handleAjaxError(request, status, error, $('#div_alert'));
+        handleAjaxError(request, status, error, document.getElementById('div_alert'));
       },
       success: function (data) {
         if (data.state != 'ok') {
-          $('#div_alert').showAlert({
+          document.getElementById('div_alert').showAlert({
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          $('.blink_cfg').hide();
+          document.getElementById('blink_cfg').hide();
           return;
         }
       }
@@ -240,44 +247,44 @@ function setEmail() {
   }
 }
 function getNetwork() {
-  if ($("#ideq").val()!="") {
-    $.ajax({
+  if (document.getElementById("ideq").value != "") {
+    domUtils.ajax({
       type: "POST",
       async: false,
       url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
       data: {
         action: "getNetwork",
-        ideq: $("#ideq").val(),
+        ideq: document.getElementById("ideq").value,
       },
 
       dataType: 'json',
       error: function (request, status, error) {
-        handleAjaxError(request, status, error, $('#div_alert'));
+        handleAjaxError(request, status, error, document.getElementById('div_alert'));
       },
       success: function (data) {
         if (data.state != 'ok') {
-          //$('#div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
-          $('#div_alert').showAlert({
+          //document.getElementById('div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
+          document.getElementById('div_alert').showAlert({
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          $('.blink_cfg').hide();
+          document.getElementById('blink_cfg').hide();
           return;
         } else {
-          dataParsed = $.parseJSON(data.result);
+          dataParsed = JSON.parse(data.result);
           if (dataParsed.message) {
-            $('.blink_cfg').hide();
-            $('#div_alert').showAlert({
+            document.getElementById('blink_cfg').hide();
+            document.getElementById('div_alert').showAlert({
               message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
               level: 'warning'
             });
           } else {
-            var optionExists = ($('#select_reseau option[value=' + dataParsed['network_id'] + ']').length > 0);
-            if(!optionExists)
-            {
-              $('#select_reseau').append("<option value='"+dataParsed['network_id']+"'>"+dataParsed['network_name']+"</option>");
+            var optionExists = checkOptionValueExist('select_reseau', dataParsed['network_id']);
+            if (!optionExists) {
+              mySelect = document.getElementById('select_reseau');
+              mySelect.options[mySelect.options.length] = new Option(dataParsed['network_name'], dataParsed['network_id']);
             }
-            $("#select_reseau").val(dataParsed['network_id']);
+            document.getElementById('select_reseau').value = dataParsed['network_id'];
           }
           return;
         }
@@ -286,29 +293,29 @@ function getNetwork() {
   }
 }
 function setNetwork() {
-  if ($("#ideq").val()!="") {
-    $.ajax({
+  if (document.getElementById("ideq").value != "") {
+    domUtils.ajax({
       type: "POST",
       async: false,
       url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
       data: {
         action: "setNetwork",
-        ideq: $("#ideq").val(),
-        netid: $("#select_reseau").find(":selected").val(),
-        netname: $("#select_reseau").find(":selected").text(),
+        ideq: document.getElementById("ideq").value,
+        netid: document.getElementById('select_reseau').options[document.getElementById('select_reseau').selectedIndex].value,
+        netname: document.getElementById('select_reseau').options[document.getElementById('select_reseau').selectedIndex].text,
       },
 
       dataType: 'json',
       error: function (request, status, error) {
-        handleAjaxError(request, status, error, $('#div_alert'));
+        handleAjaxError(request, status, error, document.getElementById('div_alert'));
       },
       success: function (data) {
         if (data.state != 'ok') {
-          $('#div_alert').showAlert({
+          document.getElementById('div_alert').showAlert({
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          $('.blink_cfg').hide();
+          document.getElementById('blink_cfg').hide();
           return;
         }
       }
@@ -316,45 +323,45 @@ function setNetwork() {
   }
 }
 function getCamera() {
-  if ($("#ideq").val()!="") {
-    $.ajax({
+  if (document.getElementById("ideq").value != "") {
+    domUtils.ajax({
       type: "POST",
       async: false,
       url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
       data: {
         action: "getCamera",
-        ideq: $("#ideq").val(),
+        ideq: document.getElementById("ideq").value,
       },
 
       dataType: 'json',
       error: function (request, status, error) {
-        handleAjaxError(request, status, error, $('#div_alert'));
+        handleAjaxError(request, status, error, document.getElementById('div_alert'));
       },
       success: function (data) {
         if (data.state != 'ok') {
-          //$('#div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
-          $('#div_alert').showAlert({
+          //document.getElementById('div_alert').showAlert({message: data.result.replace('\{\{','').replace('\}\}',''), level: 'danger'});
+          document.getElementById('div_alert').showAlert({
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          $('.blink_cfg').hide();
+          document.getElementById('blink_cfg').hide();
           return;
         } else {
-          dataParsed = $.parseJSON(data.result);
+          dataParsed = JSON.parse(data.result);
           if (dataParsed.message) {
-            $('.blink_cfg').hide();
-            $('#div_alert').showAlert({
+            document.getElementById('blink_cfg').hide();
+            document.getElementById('div_alert').showAlert({
               message: dataParsed.message.replace('\{\{', '{{').replace('\}\}', '}}'),
               level: 'warning'
             });
           } else {
-            var optionExists = ($('#select_camera option[value=' + dataParsed['device_id'] + ']').length > 0);
-            if(!optionExists)
-            {
-              $('#select_camera').append("<option value='"+dataParsed['device_id']+"'>"+dataParsed['device_name']+"</option>");
-            } 
-            $("#select_camera").val(dataParsed['device_id']);
-            
+            var optionExists = checkOptionValueExist('select_camera', dataParsed['device_id']);
+            if (!optionExists) {
+              mySelect = document.getElementById('select_camera');
+              mySelect.options[mySelect.options.length] = new Option(dataParsed['device_name'], dataParsed['device_id']);
+            }
+            document.getElementById('select_camera').value = dataParsed['device_id'];
+
           }
           return;
         }
@@ -363,29 +370,29 @@ function getCamera() {
   }
 };
 function setCamera() {
-  if ($("#ideq").val()!="") {
-    $.ajax({
+  if (document.getElementById("ideq").value != "") {
+    domUtils.ajax({
       type: "POST",
       async: false,
       url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
       data: {
         action: "setCamera",
-        ideq: $("#ideq").val(),
-        devid: $("#select_camera").find(":selected").val(),
-        devname: $("#select_camera").find(":selected").text(),
+        ideq: document.getElementById("ideq").value,
+        devid: document.getElementById('select_camera').options[document.getElementById('select_camera').selectedIndex].value,
+        devname: document.getElementById('select_camera').options[document.getElementById('select_camera').selectedIndex].text,
       },
 
       dataType: 'json',
       error: function (request, status, error) {
-        handleAjaxError(request, status, error, $('#div_alert'));
+        handleAjaxError(request, status, error, document.getElementById('div_alert'));
       },
       success: function (data) {
         if (data.state != 'ok') {
-          $('#div_alert').showAlert({
+          document.getElementById('div_alert').showAlert({
             message: "'" + data.result + "'",
             level: 'danger'
           });
-          $('.blink_cfg').hide();
+          document.getElementById('blink_cfg').hide();
           return;
         }
       }
@@ -393,7 +400,7 @@ function setCamera() {
   }
 }
 function initSelect() {
-  getEmails(); 
+  getEmails();
   getEmail();
   //setTimeout( getEmail(), 500);
   getNetworks();
@@ -401,144 +408,144 @@ function initSelect() {
   getCameras();
   getCamera();
 }
-function updateConfigAccount(email,key,value) {
-  $.ajax({
+function updateConfigAccount(email, key, value) {
+  domUtils.ajax({
     type: "POST",
-    async:false,
+    async: false,
     url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
     data: {
-        action: "update_cfg_account",
-        email : email,
-        key : key,
-        value : ''+value,
+      action: "update_cfg_account",
+      email: email,
+      key: key,
+      value: '' + value,
     },
     dataType: 'json',
-    error: function(request, status, error) {
-        handleAjaxError(request, status, error,$('#div_alert'));
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error, document.getElementById('div_alert'));
     },
-    success: function(data) {
-        $res = JSON.parse(JSON.parse(data.result));
-        if ($res.status != "true") {
-            $.fn.showAlert({message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning'});
-        }
-        return;
+    success: function (data) {
+      $res = JSON.parse(JSON.parse(data.result));
+      if ($res.status != "true") {
+        $.fn.showAlert({ message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning' });
+      }
+      return;
     }
   });
 }
 function reinitAccounts() {
-  $.ajax({
+  domUtils.ajax({
     type: "POST",
-    async:false,
+    async: false,
     url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
     data: {
-        action: "reinit_cfg_account"
+      action: "reinit_cfg_account"
     },
     dataType: 'json',
-    error: function(request, status, error) {
-        handleAjaxError(request, status, error,$('#div_alert'));
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error, document.getElementById('div_alert'));
     },
-    success: function(data) {
-        $res = JSON.parse(JSON.parse(data.result));
-        if ($res.status != "true") {
-            $.fn.showAlert({message: "{{Erreur lors de la réinitialisation de la configuration des comptes}}", level: 'warning'});
-        }
-        return;
+    success: function (data) {
+      $res = JSON.parse(JSON.parse(data.result));
+      if ($res.status != "true") {
+        $.fn.showAlert({ message: "{{Erreur lors de la réinitialisation de la configuration des comptes}}", level: 'warning' });
+      }
+      return;
     }
   });
   $('#md_modal').dialog({
     title: "{{Comptes Blink}}"
-  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id='+$("#ideq").find(":selected").text()).dialog('open');
+  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value).dialog('open');
 }
 function removeConfigAccount(email) {
-  $.ajax({
+  domUtils.ajax({
     type: "POST",
-    async:false,
+    async: false,
     url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
     data: {
-        action: "remove_cfg_account",
-        email : email
+      action: "remove_cfg_account",
+      email: email
     },
     dataType: 'json',
-    error: function(request, status, error) {
-        handleAjaxError(request, status, error,$('#div_alert'));
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error, document.getElementById('div_alert'));
     },
-    success: function(data) {
-        $res = JSON.parse(JSON.parse(data.result));
-        if ($res.status != "true") {
-            $.fn.showAlert({message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning'});
-        }
-        return;
+    success: function (data) {
+      $res = JSON.parse(JSON.parse(data.result));
+      if ($res.status != "true") {
+        $.fn.showAlert({ message: "{{Erreur lors de la mise à jour de la configuration du compte}}", level: 'warning' });
+      }
+      return;
     }
   });
   $('#md_modal').dialog({
     title: "{{Comptes Blink}}"
-  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id='+$("#ideq").find(":selected").text()).dialog('open');
+  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value).dialog('open');
 }
 function savePwd(accountNumber) {
-  updateConfigAccount(document.getElementById("email_"+accountNumber).value,'pwd',document.getElementById("pwd_"+accountNumber).value);
+  updateConfigAccount(document.getElementById("email_" + accountNumber).value, 'pwd', document.getElementById("pwd_" + accountNumber).value);
 };
 function addAccount(email) {
-  updateConfigAccount(email,'pwd','xxx');
+  updateConfigAccount(email, 'pwd', 'xxx');
   $('#md_modal').dialog({
     title: "{{Comptes Blink}}"
-  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id='+$("#ideq").find(":selected").text()).dialog('open');
+  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value).dialog('open');
 };
 function checkConnexionBlink(accountNumber) {
-  updateConfigAccount(document.getElementById("email_"+accountNumber).value,'pwd',document.getElementById("pwd_"+accountNumber).value);
-  $.ajax({
+  updateConfigAccount(document.getElementById("email_" + accountNumber).value, 'pwd', document.getElementById("pwd_" + accountNumber).value);
+  domUtils.ajax({
     type: "POST",
     url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
     data: {
-        action: "test_blink",
-        email : document.getElementById("email_"+accountNumber).value
+      action: "test_blink",
+      email: document.getElementById("email_" + accountNumber).value
     },
     dataType: 'json',
-    error: function(request, status, error) {
-        handleAjaxError(request, status, error,$('#div_alert'));
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error, document.getElementById('div_alert'));
     },
-    success: function(data) {
-        $res = JSON.parse(JSON.parse(data.result));
-        if ($res.token == "true") {
-            $.fn.showAlert({message: "{{Connexion à votre compte Blink OK}} ("+document.getElementById("email_"+accountNumber).value+")", level: 'info'});
-            $('#verifdiv_'+accountNumber).hide();
-            $('.blink_cfg').show();
-            //checkBlinkCameraConfig();
-            sessionStorage.setItem("blink_camera_refresh","REFRESH");
-        } else if ($res.token == "verif") {
-            $.fn.showAlert({message: "{{Connexion à votre compte Blink OK mais un code de vérification est nécessaire}} ("+document.getElementById("email_"+accountNumber).value+")", level: 'warning'});
-            //$.fn.showAlert({message: "{{Connexion à votre compte Blink OK - Email de vérification nécessaire}}", level: 'info'});
-            $('#verifdiv_'+accountNumber).show();
-        } else if ($res.token == "limit") {
-            $.fn.showAlert({message: "{{limite connexion}}", level: 'danger'});
-            $('#verifdiv_'+accountNumber).hide();
-            //$.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
-            $('.blink_cfg').hide();
-        } else {
-            $.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}} ("+document.getElementById("email_"+accountNumber).value+")", level: 'danger'});
-            $('#verifdiv_'+accountNumber).hide();
-            //$.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
-            $('.blink_cfg').hide();
-        }
-        return;
+    success: function (data) {
+      $res = JSON.parse(JSON.parse(data.result));
+      if ($res.token == "true") {
+        $.fn.showAlert({ message: "{{Connexion à votre compte Blink OK}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'info' });
+        document.getElementById('verifdiv_' + accountNumber).hide();
+        document.getElementById('blink_cfg').show();
+        //checkBlinkCameraConfig();
+        sessionStorage.setItem("blink_camera_refresh", "REFRESH");
+      } else if ($res.token == "verif") {
+        $.fn.showAlert({ message: "{{Connexion à votre compte Blink OK mais un code de vérification est nécessaire}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'warning' });
+        //$.fn.showAlert({message: "{{Connexion à votre compte Blink OK - Email de vérification nécessaire}}", level: 'info'});
+        document.getElementById('verifdiv_' + accountNumber).show();
+      } else if ($res.token == "limit") {
+        $.fn.showAlert({ message: "{{limite connexion}}", level: 'danger' });
+        document.getElementById('verifdiv_' + accountNumber).hide();
+        //$.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
+        document.getElementById('blink_cfg').hide();
+      } else {
+        $.fn.showAlert({ message: "{{Erreur de connexion à votre compte Blink}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'danger' });
+        document.getElementById('verifdiv_' + accountNumber).hide();
+        //$.fn.showAlert({message: "{{Erreur de connexion à votre compte Blink}}", level: 'danger'});
+        document.getElementById('blink_cfg').hide();
+      }
+      return;
     }
   });
-}; 
+};
 function verifyPin(accountNumber) {
-  $.ajax({
-      type: 'POST',
-      url: 'plugins/blink_camera/core/ajax/blink_camera.ajax.php',
-      data: {
-          action: 'verifyPinCode',
-          pin: document.getElementById("pincode_"+accountNumber).value,
-          email: document.getElementById("email_"+accountNumber).value
-      },
-      dataType: 'json',
-      global: false,
-      error: function (request, status, error) {
-          bootbox.alert("ERREUR 'verifyPinCode' !<br>Erreur lors l'envoi du code de vérification à Blink.");
-      },
-      success: function (json_res) {
-          checkConnexionBlink(accountNumber);   
-      }
+  domUtils.ajax({
+    type: 'POST',
+    url: 'plugins/blink_camera/core/ajax/blink_camera.ajax.php',
+    data: {
+      action: 'verifyPinCode',
+      pin: document.getElementById("pincode_" + accountNumber).value,
+      email: document.getElementById("email_" + accountNumber).value
+    },
+    dataType: 'json',
+    global: false,
+    error: function (request, status, error) {
+      bootbox.alert("ERREUR 'verifyPinCode' !<br>Erreur lors l'envoi du code de vérification à Blink.");
+    },
+    success: function (json_res) {
+      checkConnexionBlink(accountNumber);
+    }
   });
 };

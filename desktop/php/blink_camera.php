@@ -184,8 +184,8 @@ foreach ($eqLogics as $eqLogic) {
 </div>
 </div>
 
-<?php include_file('core', 'plugin.template', 'js');?>
 <?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
+<?php include_file('core', 'plugin.template', 'js');?>
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
 <?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
 <script>
@@ -204,34 +204,37 @@ foreach ($eqLogics as $eqLogic) {
 //onVisible(document.querySelector("#select_email"), () => initSelect());
 //onVisible(document.querySelector("#select_reseau"), () => getNetworks());
 onVisible(document.querySelector("#select_camera"), () => {
-  if ($("#ideq").val()!="") {
+  if ( document.getElementById('ideq').value!="") {
     initSelect();
   }
 });
 document.querySelector("#select_email").addEventListener("change", (event) => {
     setEmail();
-    $('#select_reseau').find('option').remove();
+     document.getElementById('select_reseau').find('option').remove();
     getNetworks(true);
-    $('#select_camera').find('option').remove();
+     document.getElementById('select_camera').find('option').remove();
     getCameras(true);
 
 });
 document.querySelector("#select_reseau").addEventListener("change", (event) => {
     setNetwork();
-    $('#select_camera').find('option').remove();
+     document.getElementById('select_camera').find('option').remove();
     getCameras(true);
 });
 document.querySelector("#select_camera").addEventListener("change", (event) => {
     setCamera();
 });
 document.querySelector("#ideq").addEventListener("change", (event) => {
-  if ($("#ideq").val()!="") {
+  if ( document.getElementById('ideq').value!="") {
     initSelect();
   }
 });
 
-$('#bt_refresh_blink_cfg').on('click', function (e) {
+document.querySelector("#bt_refresh_blink_cfg").addEventListener("click", function (e) {
   initSelect();
 });
-
+document.querySelectorAll('.cmdAttr[data-l1key=id]').forEach(function (key, value) {key.unseen();})
+document.querySelectorAll('.cmdAttr[data-l1key=logicalId]').forEach(function (key, value) {key.disabled=true;})
+document.querySelectorAll('.cmdAttr[data-l1key=type]').forEach(function (key, value) {key.disabled=true;})
+document.querySelectorAll('.cmdAttr[data-l1key=subType]').forEach(function (key, value) {key.disabled=true;})
 </script>
