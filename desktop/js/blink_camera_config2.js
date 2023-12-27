@@ -489,9 +489,7 @@ function reinitAccounts() {
       return;
     }
   });
-  $('#md_modal').dialog({
-    title: "{{Comptes Blink}}"
-  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value).dialog('open');
+  openAccount();
 }
 function removeConfigAccount(email) {
   domUtils.ajax({
@@ -514,18 +512,14 @@ function removeConfigAccount(email) {
       return;
     }
   });
-  $('#md_modal').dialog({
-    title: "{{Comptes Blink}}"
-  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value).dialog('open');
+  openAccount();
 }
 function savePwd(accountNumber) {
   updateConfigAccount(document.getElementById("email_" + accountNumber).value, 'pwd', document.getElementById("pwd_" + accountNumber).value);
 };
 function addAccount(email) {
-  updateConfigAccount(email, 'pwd', 'xxx');
-  $('#md_modal').dialog({
-    title: "{{Comptes Blink}}"
-  }).load('index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value).dialog('open');
+  updateConfigAccount(email, 'new', 'xxx');
+  openAccount();
 };
 function checkConnexionBlink(accountNumber) {
   updateConfigAccount(document.getElementById("email_" + accountNumber).value, 'pwd', document.getElementById("pwd_" + accountNumber).value);

@@ -215,7 +215,10 @@ class blink_camera extends eqLogic
             foreach($accounts as $account) {
                 if ($account['email'] == $email) {
     //                self::logdebug('setConfigBlinkAccount account found: '. print_r($account,true));
-                    $account[$key]=$value;
+                    if ($key !="new") {
+                        $account[$key]=$value;
+                    }
+                    $account["modification_date"]=self::getDatetimeLocaleJeedom(date_format(date_create("now"), self::FORMAT_DATETIME_OUT));
                     $updated=true;
                 }
                 $accountsObj[]=$account;
@@ -225,6 +228,7 @@ class blink_camera extends eqLogic
                 self::logdebug('setConfigBlinkAccount ('.$email.') new account');
                 $newAccount=array();
                 $newAccount['email']=$email;
+                $newAccount["modification_date"]=self::getDatetimeLocaleJeedom(date_format(date_create("now"), self::FORMAT_DATETIME_OUT));
                 $newAccount[$key]=$value;
                 $accountsObj[]=$newAccount;
             }
