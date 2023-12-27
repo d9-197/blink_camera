@@ -1,13 +1,47 @@
 function openScan(event) {
-  jeeDialog.dialog({ title: "{{Ajout des caméras}}", contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.scan' });
+  jeeDialog.dialog({
+    id: 'md_blinkScan',
+    title: "{{Ajout des caméras}}",
+    buttons: {
+      confirm: {
+        label: '<i class="icon securite-exit7"></i> {{Fermer}}',
+        className: 'success',
+        callback: {
+          click: function(event) {
+            reloadParentPage();
+          }
+        }
+      },
+      cancel: {
+        className: 'hidden'
+      }
+    },
+    contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.scan'
+  });
 }
 document.querySelector(".eqLogicAction[data-action=scan]").addEventListener('click', openScan);
 
 function openAccount(event) {
-  jeeDialog.dialog({ title: "{{Comptes Blink}}", contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value });
+  jeeDialog.dialog({
+    id: 'md_blinkAccounts',
+    title: "{{Comptes Blink}}",
+    buttons: {
+      confirm: {
+        label: '<i class="icon securite-exit7"></i> {{Fermer}}',
+        className: 'success',
+        callback: {
+          click: function(event) {
+            event.target.closest('#md_blinkAccounts')._jeeDialog.destroy();
+          }
+        }
+      },
+      cancel: {
+        className: 'hidden'
+      }
+    },
+    contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.account&id=' + document.getElementById('ideq').value });
 }
 document.querySelector(".eqLogicAction[data-action=account]").addEventListener('click', openAccount);
-
 function getEmails(forceValue) {
   domUtils.ajax({
     type: "POST",
@@ -509,15 +543,15 @@ function checkConnexionBlink(accountNumber) {
     success: function (data) {
       $res = JSON.parse(JSON.parse(data.result));
       if ($res.token == "true") {
-        jeedomUtils.showAlert({ message: "{{Connexion à votre compte Blink OK}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'info' });
         document.getElementById('verifdiv_' + accountNumber).unseen();
-        document.getElementById('blink_cfg').show();
+        if (document.getElementById('blink_cfg')!=null) { document.getElementById('blink_cfg').seen();}
+        jeedomUtils.showAlert({ title:document.getElementById("email_" + accountNumber).value,message: "{{Connexion à votre compte Blink OK}}" , level: 'info' });
         //checkBlinkCameraConfig();
-        sessionStorage.setItem("blink_camera_refresh", "REFRESH");
+        //sessionStorage.setItem("blink_camera_refresh", "REFRESH");
       } else if ($res.token == "verif") {
         jeedomUtils.showAlert({ message: "{{Connexion à votre compte Blink OK mais un code de vérification est nécessaire}} (" + document.getElementById("email_" + accountNumber).value + ")", level: 'warning' });
         //jeedomUtils.showAlert({message: "{{Connexion à votre compte Blink OK - Email de vérification nécessaire}}", level: 'info'});
-        document.getElementById('verifdiv_' + accountNumber).show();
+        document.getElementById('verifdiv_' + accountNumber).seen();
       } else if ($res.token == "limit") {
         jeedomUtils.showAlert({ message: "{{limite connexion}}", level: 'danger' });
         document.getElementById('verifdiv_' + accountNumber).unseen();
@@ -553,17 +587,26 @@ function verifyPin(accountNumber) {
   });
 };
 function reloadParentPage(e) {
-  //if (needrefresh==1) {
-      var vars = getUrlVars()
-      var url = 'index.php?'
-      for (var i in vars) {
-          if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
-              url += i + '=' + vars[i].replace('#', '') + '&'
-          }
-      }   
-      url=url.substring(0, url.length - 1);
-      
+  document.querySelector('.btClose').removeEventListener('click',reloadParentPage,{ once: true });
+  var vars = getUrlVars()
+  var url = 'index.php?'
+  for (var i in vars) {
+      if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
+          url += i + '=' + vars[i].replace('#', '') + '&'
+      }
+  }   
+  url=url.substring(0, url.length - 1);
   jeedomUtils.loadPage(url)
-  //}
+};
+function loadCameraPage(idcam) {
+  var vars = getUrlVars()
+  var url = 'index.php?'
+  for (var i in vars) {
+      if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
+          url += i + '=' + vars[i].replace('#', '') + '&'
+      }
+  }   
+  url += 'id='+idcam
+  jeedomUtils.loadPage(url)
 };
 document.querySelectorAll('.bt_return_cfg').forEach(function (key, value) {key.addEventListener('click',reloadParentPage);})

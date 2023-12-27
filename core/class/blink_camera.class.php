@@ -1168,7 +1168,14 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                #$folderJson=__DIR__.'/../../medias/getCameraInfoOwl.json';
                 #file_put_contents($folderJson,json_encode($jsonrep));
             } catch (TransferException $e) {
-                self::logdebug('getCameraInfo (type device='.$this->getBlinkDeviceType().')- An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                if (null !=$e->getMessage())
+                {
+                    self::logdebug('getCameraInfo (type device='.$this->getBlinkDeviceType().')- An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                    $jsonException=json_decode($e->getMessage());
+                    if (isset($jsonException['code']) && $jsonException['code']==401) {
+                        $this->getToken($email);
+                    }
+                }             
                 return $jsonrep;
             }
             //self::logdebug('getCameraInfo  '.$url. ' - response:'.print_r($jsonrep, true));
@@ -1765,7 +1772,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     $this->checkAndUpdateCmd('temperature', $tempe);
                     $this->setConfiguration('camera_temperature',$tempe);
                     */
-                    self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - cameraInfo: = '.print_r($datas,true));
+                    self::logdebug('refreshCameraInfos() cameraInfo '.$this->getConfiguration('camera_id').' - cameraInfo: = '.print_r($datas,true));
                     
                     $ac_power=(boolean) $datas['camera_status']['ac_power'];
                     // MAJ Power 
@@ -1773,11 +1780,11 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                         $power=(float) $datas['camera_status']['battery_voltage'];
                         //$this->checkAndUpdateCmd('power', ($power/100));
                         $this->setConfiguration('camera_voltage',($power/100));
-                        $power_full=155;
-                        $power_empty=145;
+                        $power_full=170;
+                        $power_empty=135;
                         if ($power>=$power_full) {
                             $battery = 100;
-                        } else if ($power<$power_full && $power>$power_empty) {
+                        } else if ($power<=$power_full && $power>=$power_empty) {
                             $battery = ceil(($power*100)/$power_full);
                         } else {
                             $battery = 1;
@@ -1868,7 +1875,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                         $signal=$camera['signals'];
                         $batteryLevel=(float) $signal['battery'];
 
-                        $battery=100*$batteryLevel/5;
+                        $battery=100*$batteryLevel/3;
                         $this->checkAndUpdateCmd('battery', $battery);
                         $this->setConfiguration('battery',$battery);
                         $this->batteryStatus($battery);

@@ -7,21 +7,6 @@ if (!isConnect()) {
 }
 
 ?>
-<script>
-document.querySelector('.btClose').addEventListener('click', function (e) {
-    var vars = getUrlVars()
-    var url = 'index.php?'
-    for (var i in vars) {
-        if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
-            url += i + '=' + vars[i].replace('#', '') + '&'
-        }
-    }
-    jeedomUtils.loadPage(url)
-});
-</script>
-
-<button class="btn btn-info btn-bg  bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button>
-<HR>
 <div class="panel panel-info">
         <div class="panel-heading"><i class="fa fa-table"></i> {{Ajouter un compte Blink}} </div>
     </div>
@@ -94,7 +79,7 @@ document.querySelector('.btClose').addEventListener('click', function (e) {
                         document.getElementById("email_<?=$cptAccount?>").value='<?=$email['email']?>';
                         document.getElementById("pwd_<?=$cptAccount?>").value='<?=$pwd?>';
                         document.querySelector('#verifdiv_<?=$cptAccount?>').unseen();
-                        checkConnexionBlink(<?=$cptAccount?>);
+                        //checkConnexionBlink(<?=$cptAccount?>);
                     </script>
 
                 <?php
@@ -106,7 +91,4 @@ document.querySelector('.btClose').addEventListener('click', function (e) {
             <br>
         </div>
     </div>
-
-<button class="btn btn-info btn-bg  bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button>
-
 <?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
