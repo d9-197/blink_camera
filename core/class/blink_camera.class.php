@@ -2586,7 +2586,7 @@ class blink_cameraCmd extends cmd
             //blink_camera::logdebug('toHtml last_event avant custo : '.print_r($result,true));
             $valeurLastEvent=$this->execCmd();
             $params = array(
-                state => blink_camera::getDatetimeLocaleJeedom($valeurLastEvent)
+                'state' => blink_camera::getDatetimeLocaleJeedom($valeurLastEvent)
             );
             $this->setDisplay('parameters',$params);
 
