@@ -25,7 +25,8 @@
         "Paramètres": "Settings",
         "Options": "Options",
         "Actions": "Actions",
-        "Ajouter toutes les caméras":"Add all cameras"
+        "Ajouter toutes les caméras":"Add all cameras",
+        "Stockage":"Storage"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera_config.js": {
         "Ajout des caméras":"Search for cameras",
@@ -68,8 +69,10 @@
         "Les vignettes de vidéos ne sont pas disponibles si vous utilisez le stockage local (USB).":"The thumbnails of the videos are not available if you use a local storage(USB).",
         "Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)":"Do not download videos/images when opening the view (faster loading)",
         "Sauvegarde":"Backup",
-        "Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?":"Include videos/images of cameras in the Jeedom backup ?<br><span style='color:#F00;'>WARNING !</span><BR><span style='color:#F00;'>Be carefull : size of Jeedom backups can be very important</span>"
-
+        "Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?":"Include videos/images of cameras in the Jeedom backup ?",
+        "backup desc":"<span style='color:#F00;'>WARNING !</span><BR>Be carefull : size of Jeedom backups can be very important",
+        "Mode eco":"<span style='color:#0F0;'>Eco mode</span>",
+        "Mode eco desc":"This mode limits the amount of data exchanged in the historical view: <UL><LI>between Jeedom and your browser: a video is downloaded to your browser only when you click on it.</LI><LI>between Blink and Jeedom servers: only data already present on Jeedom is displayed.</LI></UL>"
     },
     "plugins\/blink_camera\/desktop\/php\/panel.php": {
         "Rechercher": "Search"

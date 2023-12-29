@@ -1,12 +1,36 @@
-[&rarr; Link to support developpements for this free plugin](https://fr.tipeee.com/duke-9)
+> 2023-11-03
+  + V2.8.1
+  + Addition of actions "Arm camera" et "Disarm camera" for the "Mini" and "Doorbell"
+  + For the "last event" info and the dates in the "history" view: The dates are displayed in French format if Jeedom is configured in French (otherwise the usual Jeedom date format is displayed)
+  + History view: Added an option to only load the video if clicked.
+  + [**&rarr; See documentation**](https://d9-197.github.io/blink_camera/beta/fr_FR/?theme=dark)
+
+> 2023-08-12
+  + V2.8.0
+  + Addition of the option "Widget width" in thumbnails size (config du plugin)
+  + **Download of local storage videos (USB support).**
+  + Addition of an "health" page
+  + **Addition of camera model names in the equiments list**
+  + Addition of a "template" for the "battery" info : Display a "plug" icon when plugin detect that camera is AC powered.
+  + Addition of a "magnifying glass" in the "History" view if the thumbnail size have been reduce.
+  + **"History" view opening is faster (no new download of videos/images**
+  + **Addition of a button to automaticaly add all the cameras**
+
+> 2023-07-04
+  + V2.7.1 Beta
+  + Security fix.
+
+> 2023-04-14
+  + V2.7.0 Beta
+  + **Addition of special widget for "arm status","arm" and "desarm" commands of cameras or systems.** See documentation for more details.
 
 > 2023-03-23
   + V2.6.0
-  + **Addition of an "offline" mode**: when the Blink servers are inaccessible or when the password has expired, the plugin uses the videos, photos and info already present in Jeedom.
+  + Addition of an "offline" mode: when the Blink servers are inaccessible or when the password has expired, the plugin uses the videos, photos and info already present in Jeedom.
   <br><br>
-  + **Camera thumbnails ("Take photo") are now saved:**
+  + Camera thumbnails ("Take photo") are now saved:
   + They are accessible in the historical view.
-  + **Blink only allows you to retrieve the last photo, the photos are saved in Jeedom as they are found.**
+  + Blink only allows you to retrieve the last photo, the photos are saved in Jeedom as they are found.
   + Example 1: If you delete a photo from the historical view, it can no longer be found (unless it was the last photo from the camera).
   + Example 2: if your Jeedom cannot connect to Blink servers for a certain period of time, it is possible that photos taken during this time will never be downloaded.
   

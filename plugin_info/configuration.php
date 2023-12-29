@@ -36,16 +36,16 @@ if (!isConnect()) {
     <fieldset>
         <h4 class="icon_blue"><i class="fa fa-user"></i> {{Compte Blink}}</h4>
         <div class="form-group">
-             <label class="col-lg-3 control-label">{{Email}}</label>
+             <label class="col-lg-6 control-label">{{Email}}</label>
             <div class="col-lg-3">
                 <input class="configKey form-control" data-l1key="param1" />
             </div>
-            <div class="col-lg-3">
+            <div class="col-lg-1">
                 <a id="bt_test_blink" class="btn btn-success btn-xs">{{Sauvegarder et tester la connexion Blink}}</a>
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-3 control-label">{{Mot de passe}}</label>
+            <label class="col-lg-6 control-label">{{Mot de passe}}</label>
             <div class="col-lg-3">
                 <input type="password" class="configKey form-control" data-l1key="param2"/>
             </div>
@@ -60,7 +60,7 @@ if (!isConnect()) {
             <label class="col-lg-9 control-label text-danger">{{Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton "Envoyer".}}</label>
         </div>
         <div class="form-group">
-            <label class="col-lg-3 control-label">{{Code PIN de vérification}}</label>
+            <label class="col-lg-6 control-label">{{Code PIN de vérification}}</label>
             <div class="col-lg-3">
                 <input  class="form-control" id="pincode"/>
             </div>
@@ -71,7 +71,7 @@ if (!isConnect()) {
         </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-3 control-label">{{Unité de température}}</label>
+            <label class="col-lg-6 control-label">{{Unité de température}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_tempUnit">
                     <option value="C">{{° C}}</option>
@@ -81,13 +81,13 @@ if (!isConnect()) {
         </div>
         <h4 class="icon_blue"><i class="fa fa-lock"></i> {{Sécurité}}</h4>
         <div class="form-group" id="medias_security">
-            <label class="col-lg-5 control-label">{{Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?}}</label>
+            <label class="col-lg-8 control-label">{{Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?}}</label>
             <div class="col-lg-1">
                 <input  type="checkbox"class="configKey form-control" data-l1key="medias_security"/>
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-3 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
+            <label class="col-lg-6 control-label">{{Adresse de Jeedom à utiliser pour les URL}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_base_url">
                     <option value="internal">{{Interne}}</option>
@@ -98,7 +98,7 @@ if (!isConnect()) {
 
         <h4 class="icon_blue"><i class="fa fa-eye"></i> {{Widget}}</h4>
         <div class="form-group">
-            <label class="col-lg-3 control-label">{{Contenu de la vignette}}</label>
+            <label class="col-lg-6 control-label">{{Contenu de la vignette}}</label>
             <div class="col-lg-3">
                 <select  id="thumb_type_select" class="configKey form-control" data-l1key="blink_dashboard_content_type">
                     <option value="1">{{Vignette de la caméra}}</option>
@@ -108,7 +108,7 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group" id="fallback_thumb">
-            <label class="col-lg-5 control-label">{{Afficher la vignette de caméra s'il n'y a pas de vidéo ?}}</label>
+            <label class="col-lg-7 control-label">{{Afficher la vignette de caméra s'il n'y a pas de vidéo ?}}</label>
             <div class="col-lg-1">
                 <input  id='fallback_checkbox' type="checkbox"class="configKey form-control" data-l1key="fallback_to_thumbnail"/>
             </div>
@@ -117,7 +117,7 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-3 control-label">{{Taille de la vignette}}</label>
+            <label class="col-lg-6 control-label">{{Taille de la vignette}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_size_thumbnail">
                     <option value="-1.0">{{Largeur du widget}}</option>
@@ -129,21 +129,16 @@ if (!isConnect()) {
                 </select>
             </div>
         </div>
+        
         <h4 class="icon_blue"><i class="fa fa-folder-open"></i> {{Vue historique}}</h4>
         <div class="form-group">
-            <label class="col-lg-3 control-label">{{Nombre maximum de vidéos téléchargées}}</label>
+            <label class="col-lg-6 control-label">{{Nombre maximum de vidéos téléchargées}}</label>
             <div class="col-lg-3">
                 <input type="number" class="configKey form-control" data-l1key="nb_max_video" min="0" />
             </div>
         </div>
-        <div class="form-group" id="offline_history">
-            <label class="col-lg-5 control-label">{{Ne pas télécharger les vidéos/images à l'ouverture de la vue (chargement plus rapide)}}</label>
-            <div class="col-lg-1">
-                <input  id='offline_history' type="checkbox"class="configKey form-control" data-l1key="offline_history"/>
-            </div>
-        </div>
         <div class="form-group">
-            <label class="col-lg-3 control-label">{{Taille des aperçus des vidéos}}</label>
+            <label class="col-lg-6 control-label">{{Taille des aperçus des vidéos}}</label>
             <div class="col-lg-3">
                 <select  class="configKey form-control" data-l1key="blink_size_videos">
                     <option value="0.1">10%</option>
@@ -159,12 +154,21 @@ if (!isConnect()) {
                 </select>
             </div>
         </div>
+
+        <div class="form-group">
+            <label class="col-lg-6 control-label">{{Mode eco}}</label>
+            <div class="col-lg-1">
+                <input  id='fallback_checkbox' type="checkbox"class="configKey form-control" data-l1key="mode_eco"/>
+            </div>
+            <label class="col-lg-5">{{Mode eco desc}}</label>
+        </div>
         <h4 class="icon_blue"><i class="fa fa-lock"></i> {{Sauvegarde}}</h4>
-        <div class="form-group" id="medias_security">
-            <label class="col-lg-5 control-label">{{Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?}}</label>
+        <div class="form-group" id="medias_backup">
+            <label class="col-lg-6 control-label">{{Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?}}</label>
             <div class="col-lg-1">
                 <input  type="checkbox"class="configKey form-control" data-l1key="include_medias_in_backup"/>
             </div>
+            <label class="col-lg-5">{{backup desc}}</label>
         </div>
   </fieldset>
 </form>
