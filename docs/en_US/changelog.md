@@ -1,3 +1,7 @@
+> 2024-01-09
+  + V2.8.2
+  + Fix of the connexion errors with message "406 Not Acceptable"
+
 > 2023-11-03
   + V2.8.1
   + Addition of actions "Arm camera" et "Disarm camera" for the "Mini" and "Doorbell"
