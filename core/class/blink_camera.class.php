@@ -29,7 +29,7 @@ use GuzzleHttp\Psr7;
 class blink_camera extends eqLogic
 {
     const BLINK_URL_LOGIN="/api/v5/account/login";
-    const BLINK_DEFAULT_USER_AGENT="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36";
+    const BLINK_DEFAULT_USER_AGENT="Mozilla/5.0 (Linux ; Android 14) AppleWebKit/537.36 (KHTML, comme Gecko) Chrome/120.0.6099.193 Mobile Safari/537.36";
     const BLINK_CLIENT_NAME="Jeedom";
     const BLINK_DEVICE_IDENTIFIER="Jeedom";
     /*     * *************************Attributs****************************** */
