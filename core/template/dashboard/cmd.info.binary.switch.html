@@ -2,7 +2,7 @@
   <div class="title #hide_name#">
     <div class="cmdName">#name_display#</div>
   </div>
-  <div class="content content-sm btn bouton">
+  <div class="content-sm btn bouton">
     <span class="iconCmd"></span>
   </div>
   <div class="value">
@@ -14,26 +14,26 @@
   <script>
       //bouton#id#='on';
       jeedom.cmd.addUpdateFunction('#id#',function(_options) {
-      let cmd = document.querySelector('.cmd[data-cmd_id="#id#"]')
+      let cmd = $('.cmd[data-cmd_id=#id#]')
       // suppress on and off command
-      document.querySelector('.cmd[data-cmd_id="#cmd_on_id#"]').unseen();
-      document.querySelector('.cmd[data-cmd_id="#cmd_off_id#"]').unseen();
+      $('.cmd[data-cmd_id=#cmd_on_id#]').remove();
+      $('.cmd[data-cmd_id=#cmd_off_id#]').remove();
 
-      if ('#time#' == 'duration' || '#time#' == 'date') {
-          jeedom.cmd.displayDuration(_options.valueDate, cmd.querySelector('.timeCmd'), '#time#')
+      if ('#_time_widget_#' == '1') {
+        jeedom.cmd.displayDuration(_options.valueDate, cmd.find('.timeCmd'), '#time#')
+      } else {
+        cmd.find('.timeCmd').parent().remove()
       }
-      cmd.querySelector('.content').setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
-      //cmd.attr('title', '{{Date de valeur}} : '+_options.valueDate+'<br/>{{Date de collecte}} : '+_options.collectDate)
-      if (_options.display_value == 1) {
-          cmd.querySelector('.iconCmd').innerHTML = "#_icon_on_#"
-          bouton#id#='on';
-        } else {
-          cmd.querySelector('.iconCmd').innerHTML = "#_icon_off_#"
-          bouton#id#='off';
-        }
-      })
-
-      document.querySelector('.cmd[data-cmd_id="#id#"] .bouton').addEventListener('click', function (event) {
+      cmd.attr('title', '{{Date de valeur}} : '+_options.valueDate+'<br/>{{Date de collecte}} : '+_options.collectDate)
+      if (_options.display_value == '1') {
+        cmd.find('.iconCmd').empty().append("#_icon_on_#");
+        bouton#id#='on';
+      } else {
+        cmd.find('.iconCmd').empty().append("#_icon_off_#");
+        bouton#id#='off';
+      }
+      });
+      $('.cmd[data-cmd_id=#id#] .bouton').off().on('click', function (event) {
         //alert(bouton#id#);
         if (bouton#id#=='off'){
           jeedom.cmd.execute({id: '#cmd_on_id#', notify: false});
@@ -46,9 +46,9 @@
         }
         event.preventDefault()
         event.stopPropagation()
-      })
+      });
 
-    jeedom.cmd.refreshValue([{ cmd_id: '#id#', value: '#value#', display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#' }])
-//    jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}])
+
+    jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}])
   </script>
 </div>

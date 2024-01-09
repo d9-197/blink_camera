@@ -17,9 +17,8 @@ if ($blink_camera->getEqType_name() != 'blink_camera') {
 }
 log::add('blink_camera','debug','History['.$blink_camera->getId().'] START');
 
-$email=$blink_camera->getConfiguration('email');
 
-if (blink_camera::isConnected($email) && $blink_camera->isConfigured()) {
+if (blink_camera::isConnected() && $blink_camera->isConfigured()) {
     $cameraConnected=true;
 }
 
@@ -43,40 +42,36 @@ if ($configMedia!='') {
 $dir= realpath(dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/');
 ?>
 <script>
-
-
-var resizers = ['top', 'top-right', 'right', 'bottom-right', 'bottom', 'bottom-left', 'left', 'top-left']
-
 if ('<?=$formatMedia?>'=='.jpg') {
     if ('<?=$thumbFilter?>'=='') {
         if ('<?=$storage?>'!='local') {
-            document.querySelector('#btn-jpg').classList.remove('btn-secondary');
-            document.querySelector('#btn-jpg').classList.add('btn-primary');
+            $('#btn-jpg').removeClass('btn-secondary');
+            $('#btn-jpg').addClass('btn-primary');
         }
-        document.querySelector('#btn-mp4').classList.remove('btn-primary');
-        document.querySelector('#btn-mp4').classList.add('btn-secondary');
-        document.querySelector('#btn-thumb').classList.remove('btn-primary');
-        document.querySelector('#btn-thumb').classList.add('btn-secondary');
+        $('#btn-mp4').removeClass('btn-primary');
+        $('#btn-mp4').addClass('btn-secondary');
+        $('#btn-thumb').removeClass('btn-primary');
+        $('#btn-thumb').addClass('btn-secondary');
     } else {
         if ('<?=$storage?>'!='local') {
-            document.querySelector('#btn-jpg').classList.remove('btn-primary');
-            document.querySelector('#btn-jpg').classList.add('btn-secondary');
+            $('#btn-jpg').removeClass('btn-primary');
+            $('#btn-jpg').addClass('btn-secondary');
         }
-        document.querySelector('#btn-mp4').classList.remove('btn-primary');
-        document.querySelector('#btn-mp4').classList.add('btn-secondary');
-        document.querySelector('#btn-thumb').classList.remove('btn-secondary');
-        document.querySelector('#btn-thumb').classList.add('btn-primary');
+        $('#btn-mp4').removeClass('btn-primary');
+        $('#btn-mp4').addClass('btn-secondary');
+        $('#btn-thumb').removeClass('btn-secondary');
+        $('#btn-thumb').addClass('btn-primary');
     }
 } else {
-    document.querySelector('#btn-jpg').classList.remove('btn-primary');
-    document.querySelector('#btn-jpg').classList.add('btn-secondary');
-    document.querySelector('#btn-mp4').classList.remove('btn-secondary');
-    document.querySelector('#btn-mp4').classList.add('btn-primary');
-    document.querySelector('#btn-thumb').classList.remove('btn-primary');
-    document.querySelector('#btn-thumb').classList.add('btn-secondary');
+    $('#btn-jpg').removeClass('btn-primary');
+    $('#btn-jpg').addClass('btn-secondary');
+    $('#btn-mp4').removeClass('btn-secondary');
+    $('#btn-mp4').addClass('btn-primary');
+    $('#btn-thumb').removeClass('btn-primary');
+    $('#btn-thumb').addClass('btn-secondary');
 }
 if ('<?=$storage?>'=='local') {
-    document.querySelector('#btn-jpg').unseen();
+    $('#btn-jpg').remove();
 }
 
 
@@ -183,14 +178,14 @@ foreach ($videoFiltered as $date => $videoByDate) {
 ?>
     <div class="div_dayContainer">
         <legend>
-            <a class="btn btn-xs btn-default toggleList toggleList_<?=$cptDate?>"><i class="<?=$icone?>"></i></a>
+            <a class="btn btn-xs btn-default toggleList"><i class="<?=$icone?>"></i></a>
             <span class="blink_cameraHistoryDate spacer-left-5"><?=$dateLabel?></span>
             <a class="btn btn-xs btn-success spacer-left-5" target="_blank" href="plugins/blink_camera/core/php/<?=$archiver?>?pathfile=<?=$dirEncoded?>&filter=<?=$filterDateEncoded?>&archive=<?=$archiveName?>" ><i class="fas fa-download"></i></a>
         </legend>
 <?php
     if ($cptDate==1) {
 ?>
-       <div class="blink_cameraThumbnailContainer blink_cameraThumbnailContainer_<?=$cptDate?> active" >
+       <div class="blink_cameraThumbnailContainer blink_cameraThumbnailContainer_<?=$cptDate?>" >
 <?php
     } else {
 ?>
@@ -233,46 +228,9 @@ foreach ($videoFiltered as $date => $videoByDate) {
                     <a target="_blank" href="core/php/downloadFile.php?pathfile=<?=$pathEncoded?>" class="btn btn-success btn-xs pull-right" style="color : white"><i class="fas fa-download"></i></a>
                     <?php
                     if ($cameraConnected) {
-                            echo ' <a class="btn btn-danger bt_removefile_'.$cptVideo.' btn-xs pull-right" style="color : white" data-day="1" data-ideq="'.$blink_camera->getId().'" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
+                            echo ' <a class="btn btn-danger bt_removefile btn-xs pull-right" style="color : white" data-day="1" data-dirname="'.$dir.'" data-filename="/'  . $file . '"><i class="fas fa-trash"></i></a>';
                     }
                     ?>
-                    <script>
-                        document.querySelector('.bt_removefile_<?=$cptVideo?>').addEventListener('click', function(event) {
-                            var filename = "/<?=$file?>";
-                            var idEquipment = "<?=$blink_camera->getId()?>";
-                            var direct = "<?=$dir?>";
-                            var card = event.target.closest('.blink_cardVideo');
-                            if(event.target.getAttribute('data-day') == 1){
-                                card = event.target.closest('.blink_cardVideo');
-                            }
-                            if(event.target.getAttribute('data-all') == 1){
-                                card = document.querySelector('.div_dayContainer');
-                            }
-                            domUtils.ajax({
-                                type: "POST",
-                                url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
-                                data: {
-                                    action: "removeRecord",
-                                    file: filename,
-                                    dir: direct,
-                                    ideq: idEquipment,
-                                },
-                                dataType: 'json',
-                                error: function(request, status, error) {
-                                    handleAjaxError(request, status, error,$('#div_blink_cameraRecordAlert'));
-                                },
-                                success: function(data) {
-                                    if (data.state != 'ok') {
-                                        jeedomUtils.showAlert({message: data.result, level: 'danger'});
-                                        return;
-                                    }
-                                    card.remove();
-                                    //event.target.closest('.div_dayContainer').querySelector(".blink_cameraThumbnailContainer").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
-                                    relayout_<?=$cptDate?>();
-                                }
-                            });
-                        });
-                    </script>
                 </div>
                 <?php
                     if (strpos($file, '.mp4')) {
@@ -304,7 +262,7 @@ foreach ($videoFiltered as $date => $videoByDate) {
                                     videoPlaying<?=$cptVideo?> = true;
                                     video<?=$cptVideo?>.play();
                                     if ($('#video-<?=$cptVideo?>').is(":visible")) {
-                                      //  $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+                                        $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
                                      };
     
                                 }
@@ -319,7 +277,6 @@ foreach ($videoFiltered as $date => $videoByDate) {
                                 video<?=$cptVideo?>.style.display = "none";
                                // video<?=$cptVideo?>.addEventListener('pause', showOverlay<?=$cptVideo?>);
                                 overlay<?=$cptVideo?>.addEventListener('click', hideOverlay<?=$cptVideo?>);
-                                
                             </script>
                 <?php
                         }
@@ -347,49 +304,89 @@ foreach ($videoFiltered as $date => $videoByDate) {
         </div>
     </div>
     <script>
-        pckry_<?=$cptDate?> = new Packery( '.blink_cameraThumbnailContainer_<?=$cptDate?>', {itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
-        pckry_<?=$cptDate?>.layout();
-        function relayout_<?=$cptDate?>() {
-            pckry_<?=$cptDate?>.layout();
-        }
-        new ResizeObserver(relayout_<?=$cptDate?>).observe(document.querySelector('.blink_cameraThumbnailContainer_<?=$cptDate?>'));
-        document.querySelector('.toggleList_<?=$cptDate?>').addEventListener('click', function(event) {
-            event.preventDefault();
-            container=document.querySelector(".blink_cameraThumbnailContainer_<?=$cptDate?>")
-            if (!container.classList.contains('active')) {
-                container.classList.add('active');
-                container.style.display = 'block';
-                document.querySelector('.toggleList_<?=$cptDate?>').querySelector('i').classList.add('fa-minus');
-                document.querySelector('.toggleList_<?=$cptDate?>').querySelector('i').classList.remove('fa-plus');
-            } else {
-                container.style.display = 'none';
-                document.querySelector('.toggleList_<?=$cptDate?>').querySelector('i').classList.add('fa-plus');
-                document.querySelector('.toggleList_<?=$cptDate?>').querySelector('i').classList.remove('fa-minus');
-                container.classList.remove('active');
-            }
-        });
+        $(".blink_cameraThumbnailContainer_<?=$cptDate?>").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+
     </script>
 <?php 
 } // FIN DATES
 ?>
 <script>
- 
-document.querySelector('#btn-thumb').addEventListener('click', function(event) {
-    jeeDialog.dialog({title: "Historique <?=$blink_camera->getName()?>",contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=thumb'});
+    $('img .displayImage').on('load', function(){
+        magnify($(this).attr('id'), (1/<?=$facteur?>));
+    })
+
+$('.bt_removefile').on('click', function() {
+	var filename = $(this).attr('data-filename');
+	var direct = $(this).attr('data-dirname');
+	var card = $(this).closest('.blink_cardVideo');
+	if($(this).attr('data-day') == 1){
+		card = $(this).closest('.blink_cardVideo');
+	}
+	if($(this).attr('data-all') == 1){
+		card = $('.div_dayContainer');
+	}
+	$.ajax({
+		type: "POST",
+		url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
+		data: {
+			action: "removeRecord",
+			file: filename,
+			dir: direct,
+		},
+		dataType: 'json',
+		error: function(request, status, error) {
+			handleAjaxError(request, status, error,$('#div_blink_cameraRecordAlert'));
+		},
+		success: function(data) {
+			if (data.state != 'ok') {
+				$('#div_blink_cameraRecordAlert').showAlert({message: data.result, level: 'danger'});
+				return;
+			}
+			card.remove();
+			//$(".blink_cameraThumbnailContainer").slideToggle(1);
+			//$(".blink_cameraThumbnailContainer").slideToggle(1);
+            $(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+		}
+	});
 });
-document.querySelector('#btn-mp4').addEventListener('click', function(event) {
-    jeeDialog.dialog({title: "Historique <?=$blink_camera->getName()?>",contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=mp4'});
-});
-if ('<?=$storage?>'!='local') {
-    document.querySelector('#btn-jpg').addEventListener('click', function(event) {
-        jeeDialog.dialog({title: "Historique <?=$blink_camera->getName()?>",contentUrl: 'index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=jpg'});
+
+$('.toggleList').on('click', function() {
+	$(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").slideToggle("slow", function() {
+        //alert($(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").css('display'));
+        if ($(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").css('display')=="block") {
+            $(this).closest('.div_dayContainer').find(".toggleList").html("<i class=\"fa fa-minus\"></i>");
+        } else {
+            $(this).closest('.div_dayContainer').find(".toggleList").html("<i class=\"fa fa-plus\"></i>");
+        }
     });
-}
+    $(this).closest('.div_dayContainer').find(".blink_cameraThumbnailContainer").packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+});
+  
+$('.ui-resizable').resizable({
+      resize: function( event, ui ) {$('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});}
+});
+
+$( document ).ready(function() {
+    $('.blink_cameraThumbnailContainer').packery({itemSelector:'.blink_cardVideo',gutter : 5,resize:true});
+});
+
+$('#btn-thumb').click(function() {
+    $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
+    $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=thumb').dialog('open');
+});
+$('#btn-mp4').click(function() {
+    $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
+    $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=mp4').dialog('open');
+});
+$('#btn-jpg').click(function() {
+    $('#md_modal').dialog({title: "Historique <?=$blink_camera->getName()?>"});
+    $('#md_modal').load('index.php?v=d&plugin=blink_camera&modal=blink_camera.history&id=<?=$blink_camera->getId()?>&mode=jpg').dialog('open');
+});
 
 
-/*document.querySelectorAll("img.displayImage").forEach(function (vignette) {
-    magnify(vignette.id, (1/<?=$facteur?>));
-});*/
+document.querySelectorAll("img.displayImage").forEach(function (vignette) {
+    magnify(vignette.id, 3);
+});
 
 
 </script>

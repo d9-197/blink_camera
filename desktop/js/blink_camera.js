@@ -1,8 +1,22 @@
 
+/* This file is part of Jeedom.
+ *
+ * Jeedom is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Jeedom is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 
-
-//document.getElementById("table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 /*
  * Fonction pour l'ajout de commande, appellé automatiquement par plugin.template
  */
@@ -10,8 +24,6 @@ function addCmdToTable(_cmd) {
     if (!isset(_cmd)) {
         var _cmd = {configuration: {}};
     }
-    //if (document.getElementById('table_cmd') == null) return
-      
     var tr = '';
     if ( false && (_cmd.logicalId != null)  ) {
         if (init(_cmd.type)=='info') {
@@ -26,7 +38,7 @@ function addCmdToTable(_cmd) {
         tr += '<span class="cmdAttr" data-l1key="display" data-l2key="icon" style="margin-left : 8px;display: inline-block;"></span>';
         tr += '<input class="cmdAttr form-control input-sm" style="width:250px;float:right;" data-l1key="name">';
         tr += '</div>';
-        tr += '<select class="cmdAttr form-control input-sm" data-l1key="value" style="margin-top : 0px;" title="La valeur de la commande vaut par défaut la commande">';
+        tr += '<select class="cmdAttr form-control input-sm" data-l1key="value" style="display : none;margin-top : 0px;" title="La valeur de la commande vaut par défaut la commande">';
         tr += '<option value="">Aucune</option>';
         tr += '</select>';
         tr += '</td>';
@@ -102,22 +114,13 @@ function addCmdToTable(_cmd) {
         // allow delete only of "info" created manually
         if (init(_cmd.type)=='info' && init(_cmd.logicalId)=='') {
             tr += '<i class="fas fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i></td>'
-            //document.querySelector('.cmd[data-cmd_id="' + init(_cmd.id) + '"] .cmdAttr[data-l1key=subType]').disabled=false;
         }
     }
-//    tr += '</tr>';
-//    $('#table_cmd tbody').append(tr);
-//    var tr = $('#table_cmd tbody tr:last');
-
-    let newRow = document.createElement('tr')
-    newRow.innerHTML = tr
-    newRow.addClass('cmd')
-    newRow.setAttribute('data-cmd_id', init(_cmd.id))
-    document.getElementById('table_cmd').querySelector('tbody').appendChild(newRow)
-
-   /* jeedom.eqLogic.buildSelectCmd({
+    tr += '</tr>';
+    $('#table_cmd tbody').append(tr);
+    var tr = $('#table_cmd tbody tr:last');
+    jeedom.eqLogic.buildSelectCmd({
         id: $(".li_eqLogic.active").attr('data-eqLogic_id'),
-        document.querySelector('.eqLogicAttr[data-l1key="id"]').jeeValue(),
         filter: {type: 'info'},
         error: function (error) {
             $('#div_alert').showAlert({message: error.message, level: 'danger'});
@@ -129,28 +132,25 @@ function addCmdToTable(_cmd) {
             jeedom.cmd.changeType(tr, init(_cmd.subType));
         }
     });
-    */
-    //$('#table_cmd tbody tr').last().setValues(_cmd, '.cmdAttr')
-    //var tr = $('#table_cmd tbody tr').last()
+    $('#table_cmd tbody tr').last().setValues(_cmd, '.cmdAttr')
+    var tr = $('#table_cmd tbody tr').last()
     jeedom.eqLogic.buildSelectCmd({
-        id: document.querySelector('.eqLogicAttr[data-l1key="id"]').jeeValue(),
-        filter: { type: 'info' },
-        error: function (error) {
-          jeedomUtils.showAlert({ message: error.message, level: 'danger' })
-        },
-        success: function (result) {
-          if (newRow.querySelector('.cmdAttr[data-l1key="value"]'!=null)) {
-            newRow.querySelector('.cmdAttr[data-l1key="value"]').insertAdjacentHTML('beforeend', result);
-          }
-          newRow.setJeeValues(_cmd, '.cmdAttr')
-          jeedom.cmd.changeType(newRow, init(_cmd.subType))
-        }
-      })
-      document.querySelectorAll('.cmdAttr[data-l1key=id]').forEach(function (key, value) {key.unseen();})
-      document.querySelectorAll('.cmdAttr[data-l1key=logicalId]').forEach(function (key, value) {key.disabled=true;})
-      document.querySelectorAll('.cmdAttr[data-l1key=type]').forEach(function (key, value) {key.disabled=true;})
-      document.querySelectorAll('.cmdAttr[data-l1key=subType]').forEach(function (key, value) {key.disabled=true;})
-     
- }
+      id: $('.eqLogicAttr[data-l1key=id]').value(),
+      filter: { type: 'info' },
+      error: function (error) {
+        $('#div_alert').showAlert({ message: error.message, level: 'danger' })
+      },
+      success: function (result) {
+        tr.find('.cmdAttr[data-l1key=value]').append(result)
+        tr.find('.cmdAttr[data-l1key=configuration][data-l2key=updateCmdId]').append(result)
+        tr.setValues(_cmd, '.cmdAttr')
+        jeedom.cmd.changeType(tr, init(_cmd.subType))
+      }
+    })
 
+
+    $('.cmdAttr[data-l1key=logicalId]').prop('readonly', true);
+    $('.cmdAttr[data-l1key=type]').prop('disabled', true);
+    $('.cmdAttr[data-l1key=subType]').prop('disabled', true);
+ }
 
