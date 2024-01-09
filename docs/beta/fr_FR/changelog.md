@@ -1,3 +1,7 @@
+> 2024-01-09
+  + V2.8.2
+  + Correction d'un problème de connexion avec des erreurs "406 Not Acceptable"
+
 > 2023-11-03
   + V2.8.1
   + Ajout des actions "Armer caméra" et "Désarmer caméra" sur les caméras de types "Mini" et "Doorbell"
