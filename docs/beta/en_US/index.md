@@ -22,7 +22,7 @@ Camera information is also available:
 * Battery status,
 * [Doorbell only] Source of the last evebt ("pir" for IR detection, "button_press" pour the button)
 
->**In the plugin, Blink Mini cameras and Doorbell do not have the same capabilities as other Blink XT, Outdoor cameras, etc.<br> For example, camera thumbnails are not implemented for Mini**
+>**In the plugin, some types of Blink camera do not have the same capabilities as other. Then some functions or information can not be available for these types of camera.**
 
 **Case of the local storage**\
 There are 3 storage configurations for camera videos/images.

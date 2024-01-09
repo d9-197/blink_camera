@@ -809,8 +809,10 @@ class blink_camera extends eqLogic
                 }
             }
             self::logdebug('getBlinkDeviceType '.$this->getId().' NEW TYPE DEVICE='.$valeur);
-            $this->setConfiguration("camera_type",$valeur);
-            $this->save();
+            if ($valeur!=="") {
+                $this->setConfiguration("camera_type",$valeur);
+                $this->save();
+            }
         }
 		return $valeur;
     }
@@ -1119,7 +1121,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
     //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph1.json';
     //file_put_contents($folderJson,json_encode($jsonrep));
     jeedomUtils.sleep(1);
-    self::logdebug('getVideoListLocal '.$this->getName().' Phase 1 : '.print_r($jsonrep,true));
+    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($jsonrep,true));
                     $manifest_req_id=$jsonrep['id'];
                     $url=$url_manifest_req.'/'.$manifest_req_id;
                     try {
@@ -1131,7 +1133,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                     if (isset($jsonrep)) {
     //$folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_ph2.json';
     //file_put_contents($folderJson,json_encode($jsonrep));
-    self::logdebug('getVideoListLocal '.$this->getName().' Phase 2 : '.print_r($jsonrep,true));
+    self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 2 : '.print_r($jsonrep,true));
                         $manifest_id=$jsonrep['manifest_id'];
                         if (isset($manifest_id)) {
                             $result= array();
@@ -1151,7 +1153,7 @@ self::logdebug('getMediaLocal URL MEDIA : '.$url_media);
                             if ($idx>0) {
 //                                $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideolocal_result.json';
 //                                file_put_contents($folderJson,json_encode($result));
-                                self::logdebug('getVideoListLocal '.$this->getName().' result  : '.print_r($result,true));
+                                self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') result  : '.print_r($result,true));
                                 return json_encode($result);
                             } else {
                                 $result="no video";
