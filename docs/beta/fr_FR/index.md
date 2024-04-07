@@ -33,13 +33,10 @@ Il existe 3 modes de stockage pour les vidéos/images des caméras
 Les modes "Cloud" et "Local" permettent de récupérer les évenements (toutes les minutes : ce n'est pas instantané).
 Le mode "pas de stockage" ne permet pas de récupérer le dernier évènement, ni les vidéos/images. Ce plugin n'a donc que peu d'interêt si vous êtes en mode "pas de stockage"   
 
+# Comptes Blink
+Vous pouvez ajouter un ou plusieurs comptes Blink.
 
-# Configuration du plugin
-
-Dans l'écran de configuration du plugin les options suivantes sont disponibles :
-
-* Compte Blink
-  + Zone permettant de saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisie du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
+  + Saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisie du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
 
 >**Point important sur le code PIN envoyé par Blink :**\
 >Blink redemande régulièrement de resaisir le code PIN (la durée entre 2 demandes est variable - et indépendante du plugin). Quand cela se produit, vous recevez alors un code PIN de la part de Blink mais le plugin n'a pas l'information qu'un nouveau code doit être renseigné. Dans ce cas, il est probable que le champs du code PIN ne soit pas affiché dans le plugin.\
@@ -47,6 +44,10 @@ Dans l'écran de configuration du plugin les options suivantes sont disponibles 
 **Un nouveau code PIN vous est alors envoyé par Blink.**
 Le champs de saisi du code PIN apparaitra dans la config du plugin.\
 [**&rarr; Vidéo guide redemander un code pin**](https://youtu.be/mDud775DjYQ)
+
+# Configuration du plugin
+
+Dans l'écran de configuration du plugin les options suivantes sont disponibles :
 
 * Sécurité
   + _"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?"_

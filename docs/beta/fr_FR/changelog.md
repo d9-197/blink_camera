@@ -1,3 +1,9 @@
+> 2024-04-07
+  + V3.0.0
+  + Version compatible Jeedom 4.4
+  + **ATTENTION : CHANGEMENTS IMPORTANTS DANS CETTE VERSION NECESSITANTS UNE RECONFIGURATION DU PLUGIN ET DE VOS CAMERAS**
+  + Support de plusieurs comptes Blink
+
 > 2024-01-09
   + V2.8.2
   + Correction d'un problème de connexion avec des erreurs "406 Not Acceptable"
