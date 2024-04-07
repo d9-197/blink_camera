@@ -6,6 +6,7 @@ $plugin = plugin::byId('blink_camera');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 ?>
+<?php //include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
 
 <div class="row row-overflow">
     <!--div class="col-lg-2 col-md-3 col-sm-4">
@@ -37,6 +38,11 @@ foreach ($eqLogics as $eqLogic) {
         <br>
         <span style="font-size : 1.1em;position:relative; top : 23px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;color:#00A900;">{{Ajouter toutes les caméras}}</span>
       </div>
+      <div class="cursor eqLogicAction" data-action="account" style="text-align: center; background-color : #ffffff; height : 120px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 200px;margin-left : 10px;" >
+        <i class="icon mdi-shield-account" style="font-size : 6em;color:#767676;"></i>
+        <br>
+        <span style="font-size : 1.1em;position:relative; top : 23px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;color:#767676;">{{Comptes Blink}}</span>
+      </div>
       <div class="cursor eqLogicAction" data-action="gotoPluginConf" style="text-align: center; background-color : #ffffff; height : 120px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 200px;margin-left : 10px;">
         <i class="fa fa-wrench" style="font-size : 6em;color:#767676;"></i>
         <br>
@@ -49,13 +55,18 @@ foreach ($eqLogics as $eqLogic) {
     
 
 foreach ($eqLogics as $eqLogic) {
-                $opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive');
-                echo '<div class="eqLogicDisplayCard cursor" data-eqLogic_id="' . $eqLogic->getId() . '" style="text-align: center; background-color : #ffffff; height : 230px!important;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;' . $opacity . '" >';
+                //echo "<!--".print_r(jeedom::getConfiguration('eqLogic:style:noactive'),true)."-->";
+                //$opacity = ($eqLogic->getIsEnable()) ? '' : jeedom::getConfiguration('eqLogic:style:noactive').'!important';
+                $opacityClass = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+                echo '<div class="eqLogicDisplayCard cursor '.$opacityClass.'" data-eqLogic_id="' . $eqLogic->getId() . '" style="text-align: center; background-color : #ffffff; height : 230px!important;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;" >';
                 echo '<br><img src="' . $plugin->getPathImgIcon() . '" height="105" width="95" />';
                 echo "<br>";
                 echo '<span style="font-size : 0.8em;position:relative; top : 5px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">(' . $eqLogic->getBlinkHumanDeviceType() . ')</span>';
                 echo "<br>";
                 echo '<span style="font-size : 1.1em;position:relative; top : 15px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">' . $eqLogic->getHumanName(true, true) . '</span>';
+                echo "<br>";
+                echo '<span style="font-size : 0.8em;position:relative; top : 20px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;">({{Stockage}} ' . $eqLogic->getConfiguration("storage") . ')</span>';
+                
                 echo '</div>';
             }
 ?>
@@ -81,7 +92,7 @@ foreach ($eqLogics as $eqLogic) {
             <div class="form-group">
                 <label class="col-sm-3 control-label">{{Nom de l'équipement}}</label>
                 <div class="col-sm-3">
-                    <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
+                    <input id="ideq" type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
                     <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement}}"/>
                 </div>
             </div>
@@ -125,21 +136,31 @@ foreach ($eqLogics as $eqLogic) {
         </div>
     </div>
     <div class="form-group blink_cfg">
-        <label class="col-sm-3 control-label" >{{ Système }}</label>
+        <label class="col-sm-3 control-label" >{{Compte Blink}}</label>
         <div id="liste" class="col-sm-3">
-            <select id="select_reseau" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="network_id"></select>
+        <!--select id="select_email" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="email"></select-->
+        <select id="select_email" class="form-control" ></select>
         </div>
     </div>
     <div class="form-group blink_cfg">
-        <label class="col-sm-3 control-label" >{{ Caméra }}</label>
+        <label class="col-sm-3 control-label" >{{Système}}</label>
+        <div id="liste" class="col-sm-3">
+        <!--select id="select_reseau" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="network_id"></select-->
+        <select id="select_reseau" class="form-control"></select>
+        </div>
+    </div>
+    <div class="form-group blink_cfg">
+        <label class="col-sm-3 control-label" >{{Caméra}}</label>
         <div id="liste" class="col-sm-3">         
-            <select id="select_camera" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="camera_id"></select>
+        <!--select id="select_camera" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="camera_id"></select-->
+        <select id="select_camera" class="form-control"></select>
         </div>
     </div>
 
 </fieldset>
 </form>
 </div>
+
 
       <div role="tabpanel" class="tab-pane" id="commandtab">
 <a class="btn btn-success btn-sm cmdAction pull-left" data-action="add" style="margin-top:5px;"><i class="fa fa-plus-circle"></i> {{Commandes}}</a><br/><br/>
@@ -166,4 +187,54 @@ foreach ($eqLogics as $eqLogic) {
 <?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
 <?php include_file('core', 'plugin.template', 'js');?>
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
-<?php include_file('desktop', 'blink_camera_config', 'js', 'blink_camera');?>
+<?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
+<script>
+  
+ function onVisible(element, callback) {
+  new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if(entry.intersectionRatio > 0) {
+        callback(element);
+        observer.disconnect();
+      }
+    });
+  }).observe(element);
+  if(!callback) return new Promise(r => callback=r);
+}
+//onVisible(document.querySelector("#select_email"), () => initSelect());
+//onVisible(document.querySelector("#select_reseau"), () => getNetworks());
+onVisible(document.querySelector("#select_camera"), () => {
+  if ( document.getElementById('ideq').value!="") {
+    initSelect();
+  }
+});
+document.querySelector("#select_email").addEventListener("change", (event) => {
+    setEmail();
+     document.getElementById('select_reseau').innerHTML="";
+    getNetworks(true);
+     document.getElementById('select_camera').innerHTML="";
+    getCameras(true);
+
+});
+document.querySelector("#select_reseau").addEventListener("change", (event) => {
+    setNetwork();
+     document.getElementById('select_camera').innerHTML="";
+    getCameras(true);
+});
+document.querySelector("#select_camera").addEventListener("change", (event) => {
+    setCamera();
+});
+document.querySelector("#ideq").addEventListener("change", (event) => {
+  if ( document.getElementById('ideq').value!="") {
+    initSelect();
+  }
+});
+
+document.querySelector("#bt_refresh_blink_cfg").addEventListener("click", function (e) {
+  initSelect();
+});
+document.querySelectorAll('.cmdAttr[data-l1key=id]').forEach(function (key, value) {key.unseen();})
+document.querySelectorAll('.cmdAttr[data-l1key=logicalId]').forEach(function (key, value) {key.disabled=true;})
+document.querySelectorAll('.cmdAttr[data-l1key=type]').forEach(function (key, value) {key.disabled=true;})
+document.querySelectorAll('.cmdAttr[data-l1key=subType]').forEach(function (key, value) {key.disabled=true;})
+</script>

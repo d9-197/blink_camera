@@ -1,87 +1,77 @@
 <?php include_file('desktop', 'blink_camera', 'css', 'blink_camera');?>
+<?php include_file('desktop', 'blink_camera_config2', 'js', 'blink_camera');?>
 <?php
 if (!isConnect()) {
     throw new Exception('{{401 - Accès non autorisé}}');
 }
 
-
-if (!blink_camera::isConnected() || !blink_camera::getToken(false)) {
-    throw new Exception('{{Erreur de connexion à votre compte Blink}}');
-   
-}
+$email="";
 
 ?>
-<script>
-$('.ui-dialog-titlebar-close').on('click', function (e) {
-    var vars = getUrlVars()
-    var url = 'index.php?'
-    for (var i in vars) {
-        if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
-            url += i + '=' + vars[i].replace('#', '') + '&'
-        }
-    }
-    jeedomUtils.loadPage(url)
-});
-$('.bt_return_cfg').on('click', function (e) {
-        var vars = getUrlVars()
-    var url = 'index.php?'
-    for (var i in vars) {
-        if (i != 'id' && i != 'saveSuccessFull' && i != 'removeSuccessFull') {
-            url += i + '=' + vars[i].replace('#', '') + '&'
-        }
-    }
-    jeedomUtils.loadPage(url)
-});
-</script>
-
-<div class="panel panel-success">
-<div class="panel-heading"><i class="fa fa-table"></i> {{Recherche des caméras...}} </div>
-</div>
-<form class="form-horizontal">
-<fieldset>
 <?php
-   
-    $eqLogics = blink_camera::byType('blink_camera', false);
-    $config = blink_camera::getAccountConfigDatas2(false,false);
+    $config = blink_camera::getAccountConfigDatas(false,false);
     if ($config==null) {
         throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
     }
-      $return=json_encode($config);
-      foreach ($config['networks'] as $network) {
-        $nbDevice=0;
-        $deviceList='<div class="col-sm6">';
-        foreach ($network['camera'] as $camera) {
-            $toCreate=true;
-            $nbDevice++;
-            foreach ($eqLogics as $existingCamera) {
-              //pour debug de creation :   
-                //if ($camera['device_name'] !=='Atelier' && $existingCamera->getConfiguration('network_id')==$network['network_id'] && $existingCamera->getConfiguration('camera_id')==$camera['device_id']) {
-                if ($existingCamera->getConfiguration('network_id')==$network['network_id'] && $existingCamera->getConfiguration('camera_id')==$camera['device_id']) {
-                    $toCreate=false;
-                }
-            }
-            if ($toCreate) {
-
-                $newCamera=new blink_camera();
-                $newCamera->setEqType_name('blink_camera');
-                $newCamera->setName($network['network_name']." - ".$camera['device_name']);
-                $newCamera->setConfiguration('network_id',$network['network_id']);
-                $newCamera->setConfiguration('camera_id',$camera['device_id']);
-                $newCamera->save();
-                $deviceList=$deviceList.'<div><i class="fa fa-video-slash icon_red"></i><b>'.$camera['device_name'].' : {{caméra ajoutée}}</b></div>';
-            } else {
-                $deviceList=$deviceList.'<div><i class="fa fa-video icon_green"></i> '.$camera['device_name'].' : {{caméra existe déja}}</div>';
-            }
+    blink_camera::logdebug("blink_camera.scan - config: ". print_r($config,true));
+    if (count($config['emails'])==0) {
+        throw new Exception(__('Configurez un compte Blink avant.', __FILE__));
+    }
+    $nbNew=0;
+    $return=json_encode($config);
+    $cptAccount=0;
+    echo '<TABLE width="100%"><TR valign="top">';
+    foreach ($config['emails'] as $email) {
+        if ($cptAccount!=0) {
+            echo '<TD width="20px">&nbsp;</TD>';
         }
-        $deviceList=$deviceList.'</div>';
-        //echo '<div class="row">';
-        echo '<div class="form-group">';
-        echo '<label class="col-sm-4 control-label"><i class="fa fa-layer-group"></i> '.$network['network_name'].' - '.$nbDevice.' {{caméra(s)}} </label>';
-        echo "$deviceList";
-        echo '</div>';
-      } 
+        echo '<TD><div class="panel panel-info" style="width:100%;text-align: center !important;">';
+        echo '  <div class="label-primary panel-title panel-heading" style="width:auto;text-align: center !important;">';
+        echo '      <i class="icon mdi-shield-account"></i> {{compte}} '.$email['email'];
+        echo '  </div>';
+        echo '  <input type="hidden" id="email_'.$cptAccount.'" value="'.$email['email'].'"/>';
+        //echo '  <div class="panel">';
+        foreach ($email['networks'] as $network) {
+            echo '      <div style="width:100%;text-align: center !important;"><label style="width:100%;text-align: center !important;" class="label-success"><i class="fa fa-layer-group"></i> '.$network['network_name'].' - '.count($network['camera']).' {{caméra(s)}}</label></div>';
+            echo '      <div style="heigth:20px;text-align: center !important;">&nbsp;</div>';
+            foreach ($network['camera'] as $camera) {
+                echo '       <span style="text-align: center !important;">';
+                $eqLogics = blink_camera::byType('blink_camera', false);
+                $toCreate=true;
+                foreach ($eqLogics as $existingCamera) {
+                    if ($existingCamera->getConfiguration('network_id')==$network['network_id'] && $existingCamera->getConfiguration('camera_id')==$camera['device_id']) {
+                        $toCreate=false;
+                        $cameraId=$existingCamera->getId();
+                    }
+                }
+                if ($toCreate) {
+                    $newCamera=new blink_camera();
+                    $newCamera->setEqType_name('blink_camera');
+                    $newCamera->setName($camera['device_name']);
+                    $newCamera->setConfiguration('email',$email['email']);
+                    $newCamera->setConfiguration('network_id',$network['network_id']);
+                    $newCamera->setConfiguration('camera_id',$camera['device_id']);
+                    $newCamera->save();
+                    $cameraId=$newCamera->getId();
+                    echo '              <button id="camera_'.$cameraId.'" class="btn btn-success btn-bg"><i class="icon kiko-medical-cross icon_orange"></i> '.$camera['device_name'].' <i class="icon kiko-medical-cross icon_orange"></i></button> : {{caméra ajoutée}}';
+                } else {
+                    echo '              <button id="camera_'.$cameraId.'" class="btn btn-primary btn-bg"><i class="fa fa-video icon_green"></i> '.$camera['device_name'].'</button> : {{caméra existe déja}}';
+                }
+                echo "              <script>document.querySelector('#camera_".$cameraId."').addEventListener('click',function (event) {event.preventDefault(); loadCameraPage(".$cameraId.")});</script>";
+                echo '          </span>';
+            }
+            echo '      <div style="heigth:20px;text-align: center !important;">&nbsp;</div>';
+            //echo '      </div>';
+        }
+        echo '</div></TD>';
+        $cptAccount++;
+    } 
+    echo '</TR></TABLE>';
+
 ?>
-</fieldset>
-</form>
-<button class="btn btn-info btn-bg  bt_return_cfg" style="color : white" ><i class="icon securite-exit7"></i> {{Fermer}}</button>
 </div>
+<script>
+    if (document.querySelector('.btClose')!=null) {
+        document.querySelector('.btClose').addEventListener('click', reloadParentPage,{ once: true });
+    }
+</script>
