@@ -57,12 +57,12 @@ class blink_camera extends eqLogic
 
     public static function logDebugBlinkAPIRequest($message) {
         config::save('log::level::blink_camera_api', config::byKey('log::level::blink_camera'));
-        log::add('blink_camera_api','debug',$message);
+        //log::add('blink_camera_api','debug',$message);
         return;
     }
     public static function logDebugBlinkAPIResponse($message) {
         config::save('log::level::blink_camera_api', config::byKey('log::level::blink_camera'));
-        log::add('blink_camera_api','debug',$message);
+        //log::add('blink_camera_api','debug',$message);
         return;
     }
     private static function logDebugBlinkResponse($message) {
@@ -113,6 +113,15 @@ class blink_camera extends eqLogic
                 }
             }
         }
+        /*$emailFound=array();
+        foreach ($eqLogics as $cam) {
+            $email=$cam->getConfiguration("email");
+            $emailFound=blink_camera::addIfNotAlreadyIn($emailFound,$email);
+        }
+        foreach($emailFound as $email) {
+            self::logdebug('cron10 refresh token for email: '.$email);
+            blink_camera::getToken($email);
+        }*/
     }
     public static function cron($_eqLogic_id = null)
     {
@@ -140,18 +149,24 @@ class blink_camera extends eqLogic
         } else {
             $eqLogics = array(self::byId($_eqLogic_id));
         }
+        $emailFound=array();
         foreach ($eqLogics as $cam) {
             $email=$cam->getConfiguration("email");
+            $emailFound=blink_camera::addIfNotAlreadyIn($emailFound,$email);
             if (self::isConnected($email)) {
                 if ($cam->getIsEnable() == 1) {
                     $cam->forceCleanup(true);
                }
             }
         }
+        foreach($emailFound as $email) {
+            self::logdebug('cronHourly refresh token for email: '.$email);
+            blink_camera::getToken($email);
+        }
     }
     public static function cronDaily($_eqLogic_id = null)
     {
-       //self::getToken(true);
+        //
     }
     
     private static function startwith(string $text,string $criteria) {
@@ -177,7 +192,14 @@ class blink_camera extends eqLogic
         self::setConfigBlinkAccount($email,'verif',config::byKey('verif', 'blink_camera'));
         
     }
-
+    private static function addIfNotAlreadyIn($tableau, $element)
+    {
+      if (! in_array ($element, $tableau) )
+      {
+      $tableau[] = $element;
+      }
+       return $tableau;
+    }
     public static function getConfigBlinkAccount(string $email, string $key) {
         $accounts=config::byKey('configBlinkAccounts','blink_camera');
         foreach($accounts as $account) {
@@ -347,8 +369,11 @@ class blink_camera extends eqLogic
         }  catch (Exception $e) {
             self::releaseLock($lock);
             //{"message":"Login limit exceeded. Please disable any 3rd party automation and try again in 60 minutes."
+            $responseJson = json_decode('{code="999"}');
             $response = $e->getResponse();
-            $responseJson = json_decode($response->getBody()->getContents(),true);
+            if (is_null($response)==false) {
+                $responseJson = json_decode($response->getBody()->getContents(),true);
+            }
             if (isset($responseJson['message'])) {
                 self::logDebugBlinkResponse($responseJson['message']);
                 if (self::startwith(strtolower($responseJson['message']),"Login limit exceeded")) {
@@ -950,7 +975,9 @@ class blink_camera extends eqLogic
                 self::logwarn($errorTxt);
                 if (method_exists($e,'getResponse')) {
                     $response = $e->getResponse();
-                    return json_decode($response->getBody()->getContents(),true);
+                    if (is_null($response)==false) {
+                        return json_decode($response->getBody()->getContents(),true);
+                    }
                 }
                 $jsonrep=json_decode('{"message":"'.$errorTxt.'"}',true);
 
@@ -1118,7 +1145,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
     }
     private static function checkAndGetLock($ident='all', $attente_maxi=self::ATTENTE_MAXI_DEFAUT) {
         $previousCaller=config::byKey('api_last_call_caller','blink_camera');
-        $newCaller=$ident.'-'.self::generateRandomString(10);
+        $newCaller=$ident.'-'.blink_camera::generateRandomString(10);
         //self::logdebug('checkAndGetLock('.$newCaller.') START');
         $idx=1;
         while (isset ($previousCaller) && $previousCaller <> $newCaller && $previousCaller <> '' && $idx <= $attente_maxi) {
@@ -1241,7 +1268,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     }
                 }
 
-           		$pathRandom=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",self::GET_RESOURCE.$path."&".$this->generateRandomString());
+           		$pathRandom=trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera'), '', '', false), '/').str_replace(" ","%20",self::GET_RESOURCE.$path."&".blink_camera::generateRandomString());
           		if (isset($path) && $path <> "") {
           		}
           		$this->setConfiguration("last_camera_thumb_time",$newtime);
@@ -1419,8 +1446,11 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             } catch (Exception $e) {
                 self::logdebug('An error occured during Blink Cloud call POST : '.$url_manifest_req. ' - ERROR:'.print_r($e->getMessage(), true));
                 if (method_exists($e,'getResponse')) {
+                    $responseJson = json_decode('{code="999"}');
                     $response = $e->getResponse();
-                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                    if (is_null($response)==false) {
+                        $responseJson = json_decode($response->getBody()->getContents(),true);
+                    }
                     if($responseJson['code']===307) {
         //                        sleep(5);
         //                        self::releaseLock('getVideoListLocal-syncId-'.$syncId);
@@ -1474,9 +1504,14 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     $jsonrep=self::queryPost($url,"{}",$email);
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                    $responseJson = json_decode('{code="999"}');
                     $response = $e->getResponse();
-                    $responseJson = json_decode($response->getBody()->getContents(),true);
-                    self::logDebugBlinkResponse($responseJson['message']);
+                    if (is_null($response)==false) {
+                        $responseJson = json_decode($response->getBody()->getContents(),true);
+                    }
+                    if (isset($responseJson['message'])) {
+                        self::logDebugBlinkResponse($responseJson['message']);
+                    }
                     return false;
                 }
             return $jsonrep;
@@ -1628,11 +1663,13 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         }
         for ($page=1;$page<=$pageMax;$page++) {
             $jsonvideo=$this->getVideoList($page);
-            foreach ($jsonvideo as $event) {
-                if ($storage=='local' || $include_deleted || $event['deleted']===false) {
-                    //self::logdebug('blink_camera->getLastEvent() '.$this->getName().' '.$event['created_at']);
-                    if (!isset($last_event) || $last_event['created_at']<$event['created_at']) {
-                        $last_event=$event;
+            if (isset($jsonvideo)) {
+                foreach ($jsonvideo as $event) {
+                    if ($storage=='local' || $include_deleted || $event['deleted']===false) {
+                        //self::logdebug('blink_camera->getLastEvent() '.$this->getName().' '.$event['created_at']);
+                        if (!isset($last_event) || $last_event['created_at']<$event['created_at']) {
+                            $last_event=$event;
+                        }
                     }
                 }
             }
@@ -1650,7 +1687,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         return json_decode($jsonstr, true);
     }
 
-  function generateRandomString($length = 10) {
+  private static function generateRandomString($length = 10) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $charactersLength = strlen($characters);
     $randomString = '';
@@ -1764,7 +1801,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             
             if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
                 $datas=$this->getCameraInfo();
-                if (!$datas['message']) {
+                if (isset($datas['message']) ==false) {
                    /* // MAJ Température 
                     $tempe=(float) $datas['camera_status']['temperature'];
                     self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
@@ -1817,7 +1854,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $this->setConfiguration('noBatterieCheck', 1);
             }
             $datas=self::getHomescreenData("refreshCameraInfos - ".$callOrig,$email);
-            if (!$datas['message']) {
+            if (isset($datas['message']) ==false) {
                 $this->setConfiguration('storage', 'cloud');
                 foreach($datas['cameras'] as $camera) {
                      if ($camera['id']==$this->getConfiguration('camera_id')) {
@@ -1947,9 +1984,14 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     return true;
                 } catch (TransferException $e) {
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                    $responseJson = json_decode('{code="999"}');
                     $response = $e->getResponse();
-                    $responseJson = json_decode($response->getBody()->getContents(),true);
-                    self::logDebugBlinkResponse($responseJson['message']);
+                    if (is_null($response)==false) {
+                        $responseJson = json_decode($response->getBody()->getContents(),true);
+                    }
+                    if (isset($responseJson['message'])) {
+                        self::logDebugBlinkResponse($responseJson['message']);
+                    }
                     return false;
                 }
         }
@@ -1967,10 +2009,15 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 return true;
             } catch (TransferException $e) {
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                $responseJson = json_decode('{code="999"}');
                 $response = $e->getResponse();
-                $responseJson = json_decode($response->getBody()->getContents(),true);
-                self::logDebugBlinkResponse($responseJson['message']);
-                return false;
+                if (is_null($response)==false) {
+                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                }
+                if (isset($responseJson['message'])) {
+                    self::logDebugBlinkResponse($responseJson['message']);
+                }
+            return false;
             }
         }
         return false;
@@ -2001,10 +2048,15 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 return true;
             } catch (TransferException $e) {
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                $responseJson = json_decode('{code="999"}');
                 $response = $e->getResponse();
-                $responseJson = json_decode($response->getBody()->getContents(),true);
-                self::logDebugBlinkResponse($responseJson['message']);
-                return false;
+                if (is_null($response)==false) {
+                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                }
+                if (isset($responseJson['message'])) {
+                    self::logDebugBlinkResponse($responseJson['message']);
+                }
+            return false;
             }
         }
         return false;
@@ -2033,10 +2085,15 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 return true;
             } catch (TransferException $e) {
                 self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
+                $responseJson = json_decode('{code="999"}');
                 $response = $e->getResponse();
-                $responseJson = json_decode($response->getBody()->getContents(),true);
-                self::logDebugBlinkResponse($responseJson['message']);
-                return false;
+                if (is_null($response)==false) {
+                    $responseJson = json_decode($response->getBody()->getContents(),true);
+                }
+                if (isset($responseJson['message'])) {
+                    self::logDebugBlinkResponse($responseJson['message']);
+                }
+            return false;
             }
         }
         return false;
@@ -2088,9 +2145,14 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     } 
                     return false;
                 } catch (TransferException $e) {
+                    $responseJson = json_decode('{code="999"}');
                     $response = $e->getResponse();
-                    $responseJson = json_decode($response->getBody()->getContents(),true);
-                    self::logDebugBlinkResponse($responseJson['message']);
+                    if (is_null($response)==false) {
+                        $responseJson = json_decode($response->getBody()->getContents(),true);
+                    }
+                    if (isset($responseJson['message'])) {
+                        self::logDebugBlinkResponse($responseJson['message']);
+                    }
                     self::logdebug('An error occured during Blink Cloud call: '.$url. ' - ERROR:'.print_r($e->getMessage(), true));
                     return false;
                 }
