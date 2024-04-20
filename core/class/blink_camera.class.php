@@ -581,7 +581,7 @@ class blink_camera extends eqLogic
                     $need_new_token=true;
                 }*/
                 $reponseHomescreen=self::getHomescreenData("getToken",$email);
-                if ($reponseHomescreen['message']) {
+                if (isset($reponseHomescreen['message'])==false) {
                     self::logdebug('Homescreen KO : need a new token');
                     self::setConfigBlinkAccount($email,'token','');
                     self::setConfigBlinkAccount($email,'region','');
