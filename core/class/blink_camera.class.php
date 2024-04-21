@@ -1856,105 +1856,115 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $datas=self::getHomescreenData("refreshCameraInfos - ".$callOrig,$email);
             if (isset($datas['message']) ==false) {
                 $this->setConfiguration('storage', 'cloud');
-                foreach($datas['cameras'] as $camera) {
-                     if ($camera['id']==$this->getConfiguration('camera_id')) {
-                        self::logdebug('refreshCameraInfos() CAMERA '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
-                        if ($camera['enabled']===true) {
-                            $this->checkAndUpdateCmd('arm_status_camera', 1);
-                            $this->setConfiguration('camera_status',true);
-                        } else 
-                        {
-                            $this->checkAndUpdateCmd('arm_status_camera', 0);
-                            $this->setConfiguration('camera_status',false);
+                if (isset($datas['cameras'])) {
+                    foreach($datas['cameras'] as $camera) {
+                        if ($camera['id']==$this->getConfiguration('camera_id')) {
+                            self::logdebug('refreshCameraInfos() CAMERA '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
+                            if ($camera['enabled']===true) {
+                                $this->checkAndUpdateCmd('arm_status_camera', 1);
+                                $this->setConfiguration('camera_status',true);
+                            } else 
+                            {
+                                $this->checkAndUpdateCmd('arm_status_camera', 0);
+                                $this->setConfiguration('camera_status',false);
+                            }
+                            $this->setConfiguration('camera_type',$camera['type']);
+                            $this->setConfiguration('camera_name',$camera['name']);
+                            $this->setConfiguration('camera_battery_status',$camera['battery']);
+                            $signal=$camera['signals'];
+                            $tempe=(float) $signal['temp'];
+                            //self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
+                            $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
+                            if ($blink_tempUnit==="C") {
+                                $tempe =($tempe - 32) / 1.8;
+                            }
+                            $this->checkAndUpdateCmd('temperature', $tempe);
+                            $this->setConfiguration('camera_temperature',$tempe);
+                            break;
                         }
-                        $this->setConfiguration('camera_type',$camera['type']);
-                        $this->setConfiguration('camera_name',$camera['name']);
-                        $this->setConfiguration('camera_battery_status',$camera['battery']);
-                        $signal=$camera['signals'];
-                        $tempe=(float) $signal['temp'];
-                        //self::logdebug('refreshCameraInfos() '.$this->getConfiguration('camera_id').' - temperature = '.print_r($tempe,true));
-                        $blink_tempUnit=config::byKey('blink_tempUnit', 'blink_camera');
-                        if ($blink_tempUnit==="C") {
-                            $tempe =($tempe - 32) / 1.8;
-                        }
-                        $this->checkAndUpdateCmd('temperature', $tempe);
-                        $this->setConfiguration('camera_temperature',$tempe);
-                        break;
                     }
                 }
-                foreach($datas['owls'] as $camera) {
-                    if ($camera['id']==$this->getConfiguration('camera_id')) {
-                        self::logdebug('refreshCameraInfos() OWL '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
-                        if ($camera['enabled']===true) {
-                            $this->checkAndUpdateCmd('arm_status_camera', 1);
-                            $this->setConfiguration('camera_status',true);
-                        } else 
-                        {
-                            $this->checkAndUpdateCmd('arm_status_camera', 0);
-                            $this->setConfiguration('camera_status',false);
+                if (isset($datas['owls'])) {
+                    foreach($datas['owls'] as $camera) {
+                        if ($camera['id']==$this->getConfiguration('camera_id')) {
+                            self::logdebug('refreshCameraInfos() OWL '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
+                            if ($camera['enabled']===true) {
+                                $this->checkAndUpdateCmd('arm_status_camera', 1);
+                                $this->setConfiguration('camera_status',true);
+                            } else 
+                            {
+                                $this->checkAndUpdateCmd('arm_status_camera', 0);
+                                $this->setConfiguration('camera_status',false);
+                            }
+                            $this->setConfiguration('camera_type',$camera['type']);
+                            $this->setConfiguration('camera_name',$camera['name']);
+                            //$this->setConfiguration('camera_battery_status',$camera['battery']);
+                            break;
                         }
-                        $this->setConfiguration('camera_type',$camera['type']);
-                        $this->setConfiguration('camera_name',$camera['name']);
-                        //$this->setConfiguration('camera_battery_status',$camera['battery']);
-                        break;
                     }
                 }
-                foreach($datas['doorbells'] as $camera) {
-                    if ($camera['id']==$this->getConfiguration('camera_id')) {
-                        self::logdebug('refreshCameraInfos() DOORBELLS '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
-                        if ($camera['enabled']===true) {
-                            $this->checkAndUpdateCmd('arm_status_camera', 1);
-                            $this->setConfiguration('camera_status',true);
-                        } else 
-                        {
-                            $this->checkAndUpdateCmd('arm_status_camera', 0);
-                            $this->setConfiguration('camera_status',false);
-                        }
-                        $this->setConfiguration('camera_type',$camera['type']);
-                        $this->setConfiguration('camera_name',$camera['name']);
-                        $this->setConfiguration('camera_battery_status',$camera['battery']);
-                        $signal=$camera['signals'];
-                        $batteryLevel=(float) $signal['battery'];
+                if (isset($datas['doorbells'])) {
+                    foreach($datas['doorbells'] as $camera) {
+                        if ($camera['id']==$this->getConfiguration('camera_id')) {
+                            self::logdebug('refreshCameraInfos() DOORBELLS '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
+                            if ($camera['enabled']===true) {
+                                $this->checkAndUpdateCmd('arm_status_camera', 1);
+                                $this->setConfiguration('camera_status',true);
+                            } else 
+                            {
+                                $this->checkAndUpdateCmd('arm_status_camera', 0);
+                                $this->setConfiguration('camera_status',false);
+                            }
+                            $this->setConfiguration('camera_type',$camera['type']);
+                            $this->setConfiguration('camera_name',$camera['name']);
+                            $this->setConfiguration('camera_battery_status',$camera['battery']);
+                            $signal=$camera['signals'];
+                            $batteryLevel=(float) $signal['battery'];
 
-                        $battery=100*$batteryLevel/3;
-                        $this->checkAndUpdateCmd('battery', $battery);
-                        $this->setConfiguration('battery',$battery);
-                        $this->batteryStatus($battery);
-    
-                        // MAJ WIFI
-                        $wifi=100*(float) $signal['wifi']/5;
-                        $this->checkAndUpdateCmd('wifi_strength', $wifi);
-                        $this->setConfiguration('camera_wifi',$wifi);
-                        break;
+                            $battery=100*$batteryLevel/3;
+                            $this->checkAndUpdateCmd('battery', $battery);
+                            $this->setConfiguration('battery',$battery);
+                            $this->batteryStatus($battery);
+        
+                            // MAJ WIFI
+                            $wifi=100*(float) $signal['wifi']/5;
+                            $this->checkAndUpdateCmd('wifi_strength', $wifi);
+                            $this->setConfiguration('camera_wifi',$wifi);
+                            break;
+                        }
                     }
                 }
-                foreach($datas['networks'] as $network) {
-                    if ($network['id']==$this->getConfiguration('network_id')) {
-                        self::logdebug('refreshCameraInfos() NETWORKS '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($network,true));
+                if (isset($datas['networks'])) {                
+                    foreach($datas['networks'] as $network) {
+                        if ($network['id']==$this->getConfiguration('network_id')) {
+                            self::logdebug('refreshCameraInfos() NETWORKS '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($network,true));
 
-                        if ($network['armed']===true) {
-                            $this->checkAndUpdateCmd('arm_status', 1);
-                        } else 
-                        {
-                            $this->checkAndUpdateCmd('arm_status', 0);
+                            if ($network['armed']===true) {
+                                $this->checkAndUpdateCmd('arm_status', 1);
+                            } else 
+                            {
+                                $this->checkAndUpdateCmd('arm_status', 0);
+                            }
+                            $this->setConfiguration('network_status',$network['armed']);
+                            $this->setConfiguration('network_time_zone',$network['time_zone']);
+                            $this->setConfiguration('network_name',$network['name']);
+                            break;
                         }
-                        $this->setConfiguration('network_status',$network['armed']);
-                        $this->setConfiguration('network_time_zone',$network['time_zone']);
-                        $this->setConfiguration('network_name',$network['name']);
-                        break;
                     }
                 }
-                foreach($datas['sync_modules'] as $syncMod) {
-                    if ($syncMod['network_id']==$this->getConfiguration('network_id')) {
-                        self::logdebug('refreshCameraInfos() SYNC_MODULES '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($syncMod,true));
-                        self::logdebug('refreshCameraInfos: '.$this->getName().' sync module - local_storage_enabled='.$syncMod['local_storage_enabled'].' - local_storage_compatible='.$syncMod['local_storage_compatible'].' - local_storage_status='.$syncMod['local_storage_status']);
-                        $this->setConfiguration('storage', 'cloud');
-                        if ($syncMod['local_storage_enabled'] && $syncMod['local_storage_compatible'] && $syncMod['local_storage_status']==='active') {
-                            $this->setConfiguration('storage', 'local');
+                if (isset($datas['sync_modules'])) {                
+                    foreach($datas['sync_modules'] as $syncMod) {
+                        if ($syncMod['network_id']==$this->getConfiguration('network_id')) {
+                            self::logdebug('refreshCameraInfos() SYNC_MODULES '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($syncMod,true));
+                            self::logdebug('refreshCameraInfos: '.$this->getName().' sync module - local_storage_enabled='.$syncMod['local_storage_enabled'].' - local_storage_compatible='.$syncMod['local_storage_compatible'].' - local_storage_status='.$syncMod['local_storage_status']);
+                            $this->setConfiguration('storage', 'cloud');
+                            if ($syncMod['local_storage_enabled'] && $syncMod['local_storage_compatible'] && $syncMod['local_storage_status']==='active') {
+                                $this->setConfiguration('storage', 'local');
+                            }
+                            $this->setConfiguration('sync_id',$syncMod['id']);
+                            self::logdebug('refreshCameraInfos: sync_id='.$syncMod['id']);
+                            break;
                         }
-                        $this->setConfiguration('sync_id',$syncMod['id']);
-                        self::logdebug('refreshCameraInfos: sync_id='.$syncMod['id']);
-                        break;
                     }
                 }
                 self::logdebug('refreshCameraInfos: storage='.$this->getConfiguration('storage'));
