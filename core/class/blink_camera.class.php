@@ -629,8 +629,6 @@ class blink_camera extends eqLogic
             if ($pwd!="") {      
                 self::setConfigBlinkAccount($email,'pwd_prev',utils::encrypt($pwd)); 
             }
-            $_verifBlink=self::getConfigBlinkAccount($email,'verif');
-
             $notification_key=self::getConfigBlinkAccount($email,'notification_key');
             $unique_id=self::getConfigBlinkAccount($email,'uniqId');
             $_verifBlink=self::getConfigBlinkAccount($email,'verif');

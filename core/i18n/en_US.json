@@ -46,6 +46,7 @@
         "Mot de Passe": "Password",
         "Sauvegarder le mot de passe": "Save password",
         "Tester": "Test",
+        "Forcer le contrôle du code PIN": "Force PIN check",
         "Supprimer le compte": "Delete the account",
         "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".": "You will received a SMS from Blink with a pin code, you must fill it here and clic  \"Send\".",
         "Code PIN de vérification": "Verification PIN",

@@ -56,6 +56,7 @@ if (!isConnect()) {
                         </div>
                         <div class="col-sm-2">
                             <a id="bt_verify_pwd_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="checkConnexionBlink(<?=$cptAccount?>)">{{Tester}}</a>
+                            <a id="bt_force_pin_<?=$cptAccount?>" class="btn btn-success btn-xs" onclick="forcePinVerif(<?=$cptAccount?>)">{{Forcer le contrôle du code PIN}}</a>
                         </div>
                         <div class="col-sm-2">
                             <a id="bt_del_account_<?=$cptAccount?>" class="btn btn-danger btn-xs" onclick="removeConfigAccount(document.getElementById('email_<?=$cptAccount?>').value)">{{Supprimer le compte}}</a>
