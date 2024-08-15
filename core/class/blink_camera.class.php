@@ -97,34 +97,10 @@ class blink_camera extends eqLogic
         }
         return false;
     }
-    /* Every 10 minutes, check and download last event video (named last.mp4 in Jeedom) */
-    public static function cron10($_eqLogic_id = null)
+
+    private static function cronRefresh($cron_interval,$_eqLogic_id = null)
     {
-        if ($_eqLogic_id == null) {
-            $eqLogics = self::byType('blink_camera', true);
-        } else {
-            $eqLogics = array(self::byId($_eqLogic_id));
-        }
-        foreach ($eqLogics as $cam) {
-            $email=$cam->getConfiguration("email");
-            if (self::isConnected($email)) {
-                if ($cam->getIsEnable() == 1) {
-                    $cam->refreshCameraInfos("cron10");
-                }
-            }
-        }
-        /*$emailFound=array();
-        foreach ($eqLogics as $cam) {
-            $email=$cam->getConfiguration("email");
-            $emailFound=blink_camera::addIfNotAlreadyIn($emailFound,$email);
-        }
-        foreach($emailFound as $email) {
-            self::logdebug('cron10 refresh token for email: '.$email);
-            blink_camera::getToken($email);
-        }*/
-    }
-    public static function cron($_eqLogic_id = null)
-    {
+        self::logdebug('cronRefresh: '.$cron_interval);
         if ($_eqLogic_id == null) {
             $eqLogics = self::byType('blink_camera', true);
         } else {
@@ -140,8 +116,39 @@ class blink_camera extends eqLogic
             }
         }
     }
-
-
+    public static function cron($_eqLogic_id = null)
+    {
+        if (config::byKey('blink_scan_interval', 'blink_camera','')=='') {
+            config::save('blink_scan_interval','1m');
+        }
+        if (config::byKey('blink_scan_interval', 'blink_camera')=='1m') {
+            blink_camera::cronRefresh('1m',$_eqLogic_id);
+        }
+    }
+    public static function cron5($_eqLogic_id = null)
+    {
+        if (config::byKey('blink_scan_interval', 'blink_camera')=='5m') {
+            blink_camera::cronRefresh('5m',$_eqLogic_id);
+        }
+    }
+    public static function cron10($_eqLogic_id = null)
+    {
+        if (config::byKey('blink_scan_interval', 'blink_camera')=='10m') {
+            blink_camera::cronRefresh('10m',$_eqLogic_id);
+        }
+    }
+    public static function cron15($_eqLogic_id = null)
+    {
+        if (config::byKey('blink_scan_interval', 'blink_camera')=='15m') {
+            blink_camera::cronRefresh('15m',$_eqLogic_id);
+        }
+    }
+    public static function cron30($_eqLogic_id = null)
+    {
+        if (config::byKey('blink_scan_interval', 'blink_camera')=='30m') {
+            blink_camera::cronRefresh('30m',$_eqLogic_id);
+        }
+    }
     public static function cronHourly($_eqLogic_id = null)
     {
         if ($_eqLogic_id == null) {
@@ -155,6 +162,11 @@ class blink_camera extends eqLogic
             $emailFound=blink_camera::addIfNotAlreadyIn($emailFound,$email);
             if (self::isConnected($email)) {
                 if ($cam->getIsEnable() == 1) {
+                    if (config::byKey('blink_scan_interval', 'blink_camera')=='1h') {
+                        self::logdebug('cronRefresh: 1h');
+                        $cam->refreshCameraInfos();
+                        $cam->getLastEventDate();
+                    }
                     $cam->forceCleanup(true);
                }
             }
@@ -166,7 +178,9 @@ class blink_camera extends eqLogic
     }
     public static function cronDaily($_eqLogic_id = null)
     {
-        //
+        if (config::byKey('blink_scan_interval', 'blink_camera')=='1d') {
+            blink_camera::cronRefresh('1d',$_eqLogic_id);
+        }
     }
     
     private static function startwith(string $text,string $criteria) {

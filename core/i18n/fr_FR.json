@@ -160,6 +160,13 @@
         "Connexion à votre compte Blink OK mais un code de vérification est nécessaire": "Connexion à votre compte Blink OK mais un code de vérification est nécessaire",
         "Connexion à votre compte Blink OK - Email de vérification nécessaire": "Connexion à votre compte Blink OK - Email de vérification nécessaire",
         "limite connexion": "limite connexion",
-        "Erreur de connexion à votre compte Blink": "Erreur de connexion à votre compte Blink"
+        "Erreur de connexion à votre compte Blink": "Erreur de connexion à votre compte Blink",
+        "Recherche des nouveaux évenements sur les serveurs Blink":"Recherche des nouveaux évenements sur les serveurs Blink",
+        "Toutes les minutes":"Toutes les minutes",
+        "Toutes les 5 minutes":"Toutes les 5 minutes",
+        "Toutes les 30 minutes":"Toutes les 30 minutes",
+        "Toutes les heures":"Toutes les heures",
+        "Une fois par jour":"Une fois par jour",
+        "WARNING_INTERVAL":"ATTENTION : Si vous configurez une valeur trop courte, vous pouvez entrainer des erreurs avec les serveurs Blink, voir provoquer le verrouillage par Blink de votre compte !"
     }
 }

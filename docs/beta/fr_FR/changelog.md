@@ -1,3 +1,7 @@
+> 2024-08-15
+  + V3.0.1
+  + Ajout d'une config permettant de limiter la fréquence d'interrogation des serveurs Blink (toutes les minutes,toutes les 5 min., etc).
+  
 > 2024-04-07
   + V3.0.0
   + Version compatible Jeedom 4.4
