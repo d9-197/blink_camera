@@ -1,3 +1,8 @@
+> 2024-10-17
+  + Passage en stable de la v3.0
+  + **ATTENTION : CHANGEMENTS IMPORTANTS DANS CETTE VERSION NECESSITANTS UNE RECONFIGURATION DU PLUGIN ET DE VOS CAMERAS**
+  + Voir ci-dessous
+  
 > 2024-08-15
   + V3.0.1
   + Ajout d'une config permettant de limiter la fréquence d'interrogation des serveurs Blink (toutes les minutes,toutes les 5 min., etc).
@@ -5,7 +10,6 @@
 > 2024-04-07
   + V3.0.0
   + Version compatible Jeedom 4.4
-  + **ATTENTION : CHANGEMENTS IMPORTANTS DANS CETTE VERSION NECESSITANTS UNE RECONFIGURATION DU PLUGIN ET DE VOS CAMERAS**
   + Support de plusieurs comptes Blink
 
 > 2024-01-09
