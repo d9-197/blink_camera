@@ -561,6 +561,11 @@ function checkConnexionBlink(accountNumber) {
     }
   });
 };
+function forcePinVerif(accountNumber) {
+  updateConfigAccount(document.getElementById("email_" + accountNumber).value, 'verif', 'false');
+  checkConnexionBlink(accountNumber);
+};
+
 function verifyPin(accountNumber) {
   domUtils.ajax({
     type: 'POST',

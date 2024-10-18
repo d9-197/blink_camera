@@ -1,3 +1,28 @@
+> 2024-10-17
+  + Passage en stable de la v3.0
+  + **ATTENTION : CHANGEMENTS IMPORTANTS DANS CETTE VERSION NECESSITANTS UNE RECONFIGURATION DU PLUGIN ET DE VOS CAMERAS**
+  + Voir ci-dessous
+  
+> 2024-08-15
+  + V3.0.1
+  + Ajout d'une config permettant de limiter la fréquence d'interrogation des serveurs Blink (toutes les minutes,toutes les 5 min., etc).
+  
+> 2024-04-07
+  + V3.0.0
+  + Version compatible Jeedom 4.4
+  + Support de plusieurs comptes Blink
+
+> 2024-01-09
+  + V2.8.2
+  + Correction d'un problème de connexion avec des erreurs "406 Not Acceptable"
+
+> 2023-11-03
+  + V2.8.1
+  + Ajout des actions "Armer caméra" et "Désarmer caméra" sur les caméras de types "Mini" et "Doorbell"
+  + Pour l'info "dernier évenement" et les dates dans la vue "historique" : Les dates sont affichées au format français si Jeedom est configuré en français (sinon le format des dates Jeedom habituel est affiché)
+  + Vue historique : Ajout d'une option permettant de ne charger la vidéo que si on clique dessus.
+  + [**&rarr; Voir la documentation**](https://d9-197.github.io/blink_camera/beta/fr_FR/?theme=dark)
+
 > 2023-08-12
   + V2.8.0
   + Ajout de l'option "Largeur du widget" dans le choix de la taille de la vignette (config du plugin)

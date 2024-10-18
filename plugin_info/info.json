@@ -1,7 +1,7 @@
 {
 	"id" : "blink_camera",
 	"name" : "Blink Camera",
-	"version" : "3.0.0",
+	"version" : "3.0.1",
 	"description": {
         "fr_FR": "Permet d'interagir sur les caméras Blink et de récupérer les informations, vidéos et photos.",
         "en_US": "Allows you to interact on Blink cameras and retrieve information, videos and photos."

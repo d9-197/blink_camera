@@ -22,7 +22,7 @@ Les informations liées à la caméra sont également disponibles :
 * Etat des piles,
 * [Doorbell uniquement] Source du dernier évenement ("pir" pour la détection, "button_press" pour la sonette)
 
->**Dans le plugin, les caméras Blink Mini et les Doorbell n'ont pas les mêmes capacités que les autres caméras Blink XT, Outdoor, etc.<br> Par exemple, les vignettes de caméra ne sont pas implémentées pour les Mini, il n'est pas possible d'activer/désactiver la détection d'une Doorbell**
+>**Dans le plugin, les différents types de caméras n'ont pas tous les mêmes capacités. Certaines fonctions ou informations ne sont donc pas disponibles dans le plugin pour certaines caméras.**
 
 **Cas du stockage local**\
 Il existe 3 modes de stockage pour les vidéos/images des caméras
@@ -31,15 +31,12 @@ Il existe 3 modes de stockage pour les vidéos/images des caméras
 - "Pas de stockage" (ni Cloud, ni clé USB sur un module de synchronisation v2.
 
 Les modes "Cloud" et "Local" permettent de récupérer les évenements (toutes les minutes : ce n'est pas instantané).
-Le mode "pas de stockage" ne permet pas de récupérer le dernier évènement, ni les vidéos/images. Ce plugin n'a donc que peu d'interêt si vous en mode "pas de stockage"   
+Le mode "pas de stockage" ne permet pas de récupérer le dernier évènement, ni les vidéos/images. Ce plugin n'a donc que peu d'interêt si vous êtes en mode "pas de stockage"   
 
+# Comptes Blink
+Vous pouvez ajouter un ou plusieurs comptes Blink.
 
-# Configuration du plugin
-
-Dans l'écran de configuration du plugin les options suivantes sont disponibles :
-
-* Compte Blink
-  + Zone permettant de saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisie du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
+  + Saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisie du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
 
 >**Point important sur le code PIN envoyé par Blink :**\
 >Blink redemande régulièrement de resaisir le code PIN (la durée entre 2 demandes est variable - et indépendante du plugin). Quand cela se produit, vous recevez alors un code PIN de la part de Blink mais le plugin n'a pas l'information qu'un nouveau code doit être renseigné. Dans ce cas, il est probable que le champs du code PIN ne soit pas affiché dans le plugin.\
@@ -47,6 +44,10 @@ Dans l'écran de configuration du plugin les options suivantes sont disponibles 
 **Un nouveau code PIN vous est alors envoyé par Blink.**
 Le champs de saisi du code PIN apparaitra dans la config du plugin.\
 [**&rarr; Vidéo guide redemander un code pin**](https://youtu.be/mDud775DjYQ)
+
+# Configuration du plugin
+
+Dans l'écran de configuration du plugin les options suivantes sont disponibles :
 
 * Sécurité
   + _"Bloquer l'accès aux URLs des vidéos et images sans être authentifié dans Jeedom ?"_
@@ -66,13 +67,20 @@ Le champs de saisi du code PIN apparaitra dans la config du plugin.\
 
 
 * Vue historique
-  + Cette vue est accessible depuis le widget
-  + Elle affiche les dernières vidéos/vignettes disponibles
+  > Cette vue est accessible depuis le widget. Elle affiche les dernières vidéos/vignettes disponibles
   + Le nombre maximum de vidéos téléchargées permet de limiter la quantité de données à télécharger à l'ouverture de la vue historique
   + La taille des aperçus des vidéos peut également être confirgurée.
 
-    *Attention : Si vous configurez une taille importante et un nombre important de vidéos, cela peut entrainer des lenteurs dans la vue historique*
-
+    *Attention : Si vous configurez une taille importante et un nombre important de vidéos, cela peut entrainer des lenteurs dans la vue historique. Dans ce cas utilisez le "mode éco"*
+  + Mode éco : Ce mode permet de limiter la quantité de données échangée :
+    + entre Jeedom et votre navigateur : une vidéo est téléchargée sur votre navigateur que lorsque vous cliquez sur celle ci.
+    + entre les serveurs Blink et Jeedom : seules les données déjà présentes sur Jeedom sont affichées.
+  
+  
+* Sauvegarde
+  + Cette option vous permet d'inclure les vidéos et images dans les sauvegardes Jeedom. 
+  
+  **Attention DANGER : cette option va entrainer une forte augmentation de la taille de la sauvegarde Jeedom**
 
 >**N'oubliez pas de cliquer sur le bouton "Sauvegarder"**
 
@@ -145,4 +153,4 @@ Vous pouvez déclencher un scénario en mettant directement comme déclencheur l
 
 > Voir champ "Evénement" dans l'image ci-dessous
 
-![Utilisation dans des scénarios](..\assets\images\scenario.png "Utilisation dans des scénarios")
+![Utilisation dans des scénarios](..\assets\images\scenario2.png "Utilisation dans des scénarios")

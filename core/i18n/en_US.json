@@ -46,6 +46,7 @@
         "Mot de Passe": "Password",
         "Sauvegarder le mot de passe": "Save password",
         "Tester": "Test",
+        "Forcer le contrôle du code PIN": "Force PIN check",
         "Supprimer le compte": "Delete the account",
         "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".": "You will received a SMS from Blink with a pin code, you must fill it here and clic  \"Send\".",
         "Code PIN de vérification": "Verification PIN",
@@ -159,6 +160,13 @@
         "Connexion à votre compte Blink OK mais un code de vérification est nécessaire": "The connection to your Blink account is OK but a pin code is requiered",
         "Connexion à votre compte Blink OK - Email de vérification nécessaire": "The connection to your Blink account is OK but a pin code is requiered",
         "limite connexion": "Connection limit",
-        "Erreur de connexion à votre compte Blink": "Error during Blink account connection"
+        "Erreur de connexion à votre compte Blink": "Error during Blink account connection",
+        "Recherche des nouveaux évenements sur les serveurs Blink":"Search for new events on Blink servers",
+        "Toutes les minutes":"Every minutes",
+        "Toutes les 5 minutes":"Everyt 5 minutes",
+        "Toutes les 30 minutes":"Every 30 minutes",
+        "Toutes les heures":"Every hours",
+        "Une fois par jour":"Every days",
+        "WARNING_INTERVAL":"WARNING : If you configure a value that is too short, you can cause errors with Blink servers, or even cause Blink to lock your account!"
     }
 }

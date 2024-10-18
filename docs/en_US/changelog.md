@@ -1,3 +1,28 @@
+> 2024-10-17
+  + Version 3.0 become "stable"
+  + **WARNING : WITH THIS VERSION YOU HAVE TO MODIFY YOUR PLUGIN AND CAMERA CONFIGURATION**
+  + See below
+
+> 2024-08-15
+  + V3.0.1
+  + Add a configuration to limit the number of Blink's servers calls (Every minutes, every 5 min., etc).
+
+> 2024-04-07
+  + V3.0.0
+  + This version is compliant with Jeedom 4.4 (without JQuery)
+  + Support of several Blink accounts
+
+> 2024-01-09
+  + V2.8.2
+  + Fix of the connexion errors with message "406 Not Acceptable"
+
+> 2023-11-03
+  + V2.8.1
+  + Addition of actions "Arm camera" et "Disarm camera" for the "Mini" and "Doorbell"
+  + For the "last event" info and the dates in the "history" view: The dates are displayed in French format if Jeedom is configured in French (otherwise the usual Jeedom date format is displayed)
+  + History view: Added an option to only load the video if clicked.
+  + [**&rarr; See documentation**](https://d9-197.github.io/blink_camera/beta/fr_FR/?theme=dark)
+
 > 2023-08-12
   + V2.8.0
   + Addition of the option "Widget width" in thumbnails size (config du plugin)

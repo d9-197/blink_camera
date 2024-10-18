@@ -46,6 +46,7 @@
         "Mot de Passe": "Mot de Passe",
         "Sauvegarder le mot de passe": "Sauvegarder le mot de passe",
         "Tester": "Tester",
+        "Forcer le contrôle du code PIN": "Forcer le contrôle du code PIN",
         "Supprimer le compte": "Supprimer le compte",
         "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".": "Vous allez recevoir un SMS de Blink avec un code pin, vous devez le renseigner ici et cliquer sur le bouton \"Envoyer\".",
         "Code PIN de vérification": "Code PIN de vérification",
@@ -159,6 +160,13 @@
         "Connexion à votre compte Blink OK mais un code de vérification est nécessaire": "Connexion à votre compte Blink OK mais un code de vérification est nécessaire",
         "Connexion à votre compte Blink OK - Email de vérification nécessaire": "Connexion à votre compte Blink OK - Email de vérification nécessaire",
         "limite connexion": "limite connexion",
-        "Erreur de connexion à votre compte Blink": "Erreur de connexion à votre compte Blink"
+        "Erreur de connexion à votre compte Blink": "Erreur de connexion à votre compte Blink",
+        "Recherche des nouveaux évenements sur les serveurs Blink":"Recherche des nouveaux évenements sur les serveurs Blink",
+        "Toutes les minutes":"Toutes les minutes",
+        "Toutes les 5 minutes":"Toutes les 5 minutes",
+        "Toutes les 30 minutes":"Toutes les 30 minutes",
+        "Toutes les heures":"Toutes les heures",
+        "Une fois par jour":"Une fois par jour",
+        "WARNING_INTERVAL":"ATTENTION : Si vous configurez une valeur trop courte, vous pouvez entrainer des erreurs avec les serveurs Blink, voir provoquer le verrouillage par Blink de votre compte !"
     }
 }
