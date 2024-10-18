@@ -1,3 +1,13 @@
+> 2024-08-15
+  + V3.0.1
+  + Add a configuration to limit the number of Blink's servers calls (Every minutes, every 5 min., etc).
+
+> 2024-04-07
+  + V3.0.0
+  + This version is compliant with Jeedom 4.4 (without JQuery)
+  + **WARNING : WITH THIS VERSION YOU HAVE TO MODIFY YOUR PLUGIN AND CAMERA CONFIGURATION**
+  + Support of several Blink accounts
+
 > 2024-01-09
   + V2.8.2
   + Fix of the connexion errors with message "406 Not Acceptable"

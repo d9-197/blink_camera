@@ -1,14 +1,3 @@
-> 2024-01-09
-  + V2.8.2
-  + Fix of the connexion errors with message "406 Not Acceptable"
-
-> 2023-11-03
-  + V2.8.1
-  + Addition of actions "Arm camera" et "Disarm camera" for the "Mini" and "Doorbell"
-  + For the "last event" info and the dates in the "history" view: The dates are displayed in French format if Jeedom is configured in French (otherwise the usual Jeedom date format is displayed)
-  + History view: Added an option to only load the video if clicked.
-  + [**&rarr; See documentation**](https://d9-197.github.io/blink_camera/beta/fr_FR/?theme=dark)
-
 > 2023-08-12
   + V2.8.0
   + Addition of the option "Widget width" in thumbnails size (config du plugin)
