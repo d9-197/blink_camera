@@ -33,12 +33,10 @@ There are 3 storage configurations for camera videos/images.
 The "Cloud" and "Local" configurations allow the plugin to obtain the last event (every minutes : it is not instantaneous).
 The "No storage" configuration does not allow obtaining the last event and does not allow obtaining videos/images. In this case, this plugin is not very useful.   
 
-# Configuration of the plugin
+# Blink accounts
+You can add one or sevral Blink accounts.
 
-In the plugin configuration screen the following options are available:
-
-* Blink account
-  + Area to enter the email, password and pin code associated with your Blink account. (The pin code entry field is only displayed when the connection is not yet validated)
+  + Enter the email, password and pin code associated with your Blink account. (The pin code entry field is only displayed when the connection is not yet validated)
 
 >**Important point about the PIN code sent by Blink:**\
 >Blink regularly asks you to re-enter the PIN code (the duration between 2 requests is variable - and independent of the plugin). When this happens, you then receive a PIN code from Blink but the plugin does not have the information that a new code must be entered. In this case, it is likely that the PIN code field is not displayed in the plugin.\
@@ -46,6 +44,11 @@ In the plugin configuration screen the following options are available:
 **A new PIN code is then sent to you by Blink.**
 The PIN code entry field will appear in the plugin config.\
 [**&rarr; Video guide request a pin code**](https://youtu.be/mDud775DjYQ)
+
+
+# Configuration of the plugin
+
+In the plugin configuration screen the following options are available:
 
 * Security
   + _"Block access to video and image URLs without being authenticated in Jeedom?"_
