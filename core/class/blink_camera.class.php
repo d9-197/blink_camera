@@ -781,6 +781,18 @@ class blink_camera extends eqLogic
                     }
                 }
             }
+			foreach ($jsonin['hawks'] as $cams) {
+                if ($cams['network_id']==$currentnet) {
+                    if (!in_array($cams['id'], $cameras, true)) {
+                        if ($nbCam>0) {
+                            $jsonstr=$jsonstr.",";
+                        }
+                        $nbCam=$nbCam + 1;
+                        $cameras[]=$cams['id'];
+                        $jsonstr=$jsonstr."{\"device_id\":\"".$cams['id']."\",\"device_name\":\"".$cams['name']."\",\"device_type\":\"".$cams['type']."\"}";
+                    }
+                }
+            }
             foreach ($jsonin['doorbells'] as $cams) {
                 if ($cams['network_id']==$currentnet) {
                     if (!in_array($cams['id'], $cameras, true)) {
@@ -1496,6 +1508,10 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
     {
         return $this->requestNewMedia($type,"owl");
     }
+	public function requestNewMediaMini2($type="clip")
+    {
+        return $this->requestNewMedia($type,"hawk");
+    }
 	public function requestNewMedia($type="clip",$typeDevice="camera")
     {
         $email = $this->getConfiguration("email");
@@ -1505,6 +1521,9 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     if ($typeDevice==='owl') {
                         // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
                         $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/owls/'.$this->getConfiguration('camera_id').'/'.$type;
+                    } else if ($typeDevice==='hawk') {
+                        // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
+                        $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/hawks/'.$this->getConfiguration('camera_id').'/'.$type;
                     } else if ($typeDevice==='doorbells')  {
                         // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
                         $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/doorbells/'.$this->getConfiguration('camera_id').'/'.$type;
@@ -1811,7 +1830,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $this->getCameraThumbnail();
             //$this->emptyCacheWidget();
             
-            if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
+            if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="hawk" && $this->getBlinkDeviceType()!=="lotus") {
                 $datas=$this->getCameraInfo();
                 if (isset($datas['message']) ==false) {
                    /* // MAJ Température 
@@ -1900,6 +1919,25 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     foreach($datas['owls'] as $camera) {
                         if ($camera['id']==$this->getConfiguration('camera_id')) {
                             self::logdebug('refreshCameraInfos() OWL '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
+                            if ($camera['enabled']===true) {
+                                $this->checkAndUpdateCmd('arm_status_camera', 1);
+                                $this->setConfiguration('camera_status',true);
+                            } else 
+                            {
+                                $this->checkAndUpdateCmd('arm_status_camera', 0);
+                                $this->setConfiguration('camera_status',false);
+                            }
+                            $this->setConfiguration('camera_type',$camera['type']);
+                            $this->setConfiguration('camera_name',$camera['name']);
+                            //$this->setConfiguration('camera_battery_status',$camera['battery']);
+                            break;
+                        }
+                    }
+                }
+				if (isset($datas['hawks'])) {
+                    foreach($datas['hawks'] as $camera) {
+                        if ($camera['id']==$this->getConfiguration('camera_id')) {
+                            self::logdebug('refreshCameraInfos() HAWK '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
                             if ($camera['enabled']===true) {
                                 $this->checkAndUpdateCmd('arm_status_camera', 1);
                                 $this->setConfiguration('camera_status',true);
@@ -2057,6 +2095,8 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $datas = "{\"enabled\":true}";
             if ($this->getBlinkDeviceType()=='owl') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
+            } else if ($this->getBlinkDeviceType()=='hawk') {
+                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/hawks/".$camera_id."/config";
             } else if ($this->getBlinkDeviceType()=='lotus') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
             } else {
@@ -2094,6 +2134,8 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $datas = "{\"enabled\":false}";
             if ($this->getBlinkDeviceType()=='owl') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
+            } else if ($this->getBlinkDeviceType()=='hawk') {
+                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/hawks/".$camera_id."/config";
             } else if ($this->getBlinkDeviceType()=='lotus') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
             } else {
@@ -2548,7 +2590,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
 
 
         /* COMMANDES NON DISPONIBLES SUR owl et lotus  */
-        if ($typeDevice!="" and $typeDevice!="owl" and $typeDevice!="lotus") {
+        if ($typeDevice!="" and $typeDevice!="owl" and $typeDevice!="hawk" and $typeDevice!="lotus") {
 
             $temperature = $this->getCmd(null, 'temperature');
             if (!is_object($temperature)) {
@@ -2870,6 +2912,8 @@ class blink_cameraCmd extends cmd
 			case 'new_clip':
                 if ($eqlogic->getBlinkDeviceType()==="owl") {
                     $eqlogic->requestNewMediaMini("clip");
+                } else if ($eqlogic->getBlinkDeviceType()==="hawk") {
+                    $eqlogic->requestNewMediaMini2("clip");
                 } else if ($eqlogic->getBlinkDeviceType()==="lotus") {
                     $eqlogic->requestNewMediaDoorbell("clip");
                 } else {
@@ -2882,6 +2926,8 @@ class blink_cameraCmd extends cmd
             case 'new_thumbnail':
                 if ($eqlogic->getBlinkDeviceType()==="owl") {
                     $eqlogic->requestNewMediaMini("thumbnail");
+                } else if ($eqlogic->getBlinkDeviceType()==="hawk") {
+                    $eqlogic->requestNewMediaMini2("thumbnail");
                 } else if ($eqlogic->getBlinkDeviceType()==="lotus") {
                     $eqlogic->requestNewMediaDoorbell("thumbnail");
                 } else {

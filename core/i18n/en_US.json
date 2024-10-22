@@ -7,6 +7,7 @@
         "catalina":"Outdoor gen 3",
         "white" : "Indoor",
         "owl": "Mini",
+        "hawk": "Mini 2",		
         "lotus": "Doorbell",
         "type_name_missing":"Unknowned model"
     },

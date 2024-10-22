@@ -125,6 +125,7 @@
         "catalina":"UA->UE",
         "white" : "Indoor",
         "owl":"UA->UE",
+        "hawk": "UA->UE",
         "lotus":"UA->UE",
         "type_name_missing":"UA->UE"
     },
