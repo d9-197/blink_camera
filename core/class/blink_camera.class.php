@@ -1556,7 +1556,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $nbMax=-1;
         }
         $cptVideo=0;
-        $existingFilesOnJeedom = scandir($this->getMediaDir());
+        $existingFilesOnJeedom = scandir($this->getMediaDir(),SCANDIR_SORT_DESCENDING);
         $fileToDelete =array();
         $fileOnCloudAndOnJeedom =array();
         $fileToDownload =array();
@@ -1649,13 +1649,23 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $fileToKeep[]=str_replace(".mp4",".jpg",$filename);
                 $cptVideo++;
             }
-            
+
             // SUPPRESSION DES FICHIERS QUI NE SONT PLUS SUR CLOUD
+            $cptVideo=0;
             foreach ($existingFilesOnJeedom as $file) {
+                // On conserve les  "nbMax" derniers fichiers dans le cas du stockage local 
+                // existingFilesOnJeedom etant classé par ordre décroissant de nom (et donc date)
+                if ($storage=='local'){
+                    if ($nbMax>0 && $cptVideo>=$nbMax) {
+                        break;
+                    } 
+                    $fileToKeep[]=$file;
+                    $cptVideo++;
+                }
                 if (($key = array_search($file, $fileToKeep)) == false) {
                     if ($file!=="." && $file!=="..") {
                         // On ne supprime pas les thumbnail de camera
-                        if ($storage!=='local' && preg_match("#.*".self::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($file))==false){
+                        if (preg_match("#.*".self::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($file))==false){
                             $fileToDelete[]=$file;
                         }
                     }
