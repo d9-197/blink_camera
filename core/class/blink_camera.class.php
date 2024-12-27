@@ -1809,7 +1809,13 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $thumbUrlCmd=$this->getCmd(null, 'thumb_path');
                 $urlFile=$thumbUrlCmd->execCmd();
                 //On affiche la vignette de la derniere video
-            }                           
+            }
+                        self::logdebug('blink_camera->getLastEventDate() '.$this->getId().' urlFile '.print_r(dirname(__FILE__) . '/../..'.$urlFile,true) );
+            $fileExists=blink_camera::searchForFile(dirname(__FILE__) . '/../../../..'.$urlFile);
+            if ($fileExists==false)
+            {              
+                $urlFile="-";         
+            }
             if (($urlFile ==="-" || $urlFile ==="") && $config_thumb !== 1) {
                 $urlLine ='<img src="#urlFile#" '.$largeurVignette.' '. $hauteurVignette.' class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
                 if ((boolean) config::byKey('fallback_to_thumbnail', 'blink_camera')) {
