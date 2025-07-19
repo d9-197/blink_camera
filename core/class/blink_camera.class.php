@@ -798,7 +798,7 @@ class blink_camera extends eqLogic
         $jsonstr=$jsonstr."]}";
         return $jsonstr;
     }
-    public function getAccountConfigDatas($force_json_string=false,$forceReinitToken=false) {
+    public static function getAccountConfigDatas($force_json_string=false,$forceReinitToken=false) {
         $emails=self::getConfigBlinkAccountsList();
         self::logdebug('getAccountConfigDatas() emails: '.print_r($emails,true));
         $reto=array();
