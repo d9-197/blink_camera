@@ -9,6 +9,7 @@
         "owl": "Mini",
         "hawk": "Mini 2",
         "lotus": "Doorbell",
+		"sedona": "Outdoor gen 4",
         "type_name_missing":"Modèle de caméra inconnu"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {

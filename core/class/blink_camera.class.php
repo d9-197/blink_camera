@@ -889,7 +889,7 @@ class blink_camera extends eqLogic
     }
     public static function getDatetimeLocaleJeedom($valeur, $_format = self::FORMAT_DATETIME_OUT)
     {
-            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR'){
+            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR' && !empty($valeur)){
                 $dtim = date_create_from_format($_format, $valeur);
                 return date_format($dtim, self::FORMAT_DATETIME_OUT_FR);
             }
@@ -897,7 +897,7 @@ class blink_camera extends eqLogic
     }
     public static function getDateLocaleJeedom($valeur, $_format = self::FORMAT_DATE_OUT)
     {
-            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR'){
+            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR' && !empty($valeur)){
                 $dtim = date_create_from_format($_format, $valeur);
                 return date_format($dtim, self::FORMAT_DATE_OUT_FR);
             }
@@ -1377,7 +1377,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 //}
                 $lastManifest=$this->getConfiguration('manifest');
                 if (isset($lastManifest) && $lastManifest!=='') {
-    jeedomUtils.sleep(1);
+    //jeedomUtils.sleep(1);
     self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($lastManifest,true));
                     $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                     $url_manifest_req=$url_manifest.'/request';
@@ -1400,7 +1400,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                         }             
                         $url=$url_manifest_req.'/'.$lastManifest;
                         try {
-                            jeedomUtils.sleep(5);
+                            //jeedomUtils.sleep(5);
                             $jsonrep=self::queryGet($url,$email);
                         } catch (TransferException $e) {
                             self::logdebug('An error occured during RETRY OF GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -2052,7 +2052,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $url='/network/'.$this->getConfiguration('network_id').'/arm';
                 try {
                     self::queryPost($url,"{}",$email);
-                    jeedomUtils.sleep(1);
+                    //jeedomUtils.sleep(1);
                     $this->refreshCameraInfos("networkArm");
                     return true;
                 } catch (TransferException $e) {
@@ -2077,7 +2077,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $url='/network/'.$this->getConfiguration('network_id').'/disarm';
             try {
                 self::queryPost($url,"{}",$email);
-                jeedomUtils.sleep(1);
+                //jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("networkDisarm");
                 return true;
             } catch (TransferException $e) {
@@ -2118,7 +2118,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             }
             try {
                 self::queryPost($url,$datas,$email);
-                jeedomUtils.sleep(1);
+                //jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("cameraArm");
                 return true;
             } catch (TransferException $e) {
@@ -2157,7 +2157,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             }
             try {
                 self::queryPost($url,$datas,$email);
-                jeedomUtils.sleep(1);
+                //jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("cameraDisarm");
                 return true;
             } catch (TransferException $e) {
