@@ -125,6 +125,7 @@
         "catalina":"Outdoor generation 3",
         "white" : "Indoor",
         "owl": "Mini",
+		"hawk": "Mini 2",
         "lotus": "Doorbell",
         "type_name_missing":"Camera model unknowed"
     },

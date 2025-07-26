@@ -781,6 +781,18 @@ class blink_camera extends eqLogic
                     }
                 }
             }
+			/*foreach ($jsonin['hawks'] as $cams) {
+                if ($cams['network_id']==$currentnet) {
+                    if (!in_array($cams['id'], $cameras, true)) {
+                        if ($nbCam>0) {
+                            $jsonstr=$jsonstr.",";
+                        }
+                        $nbCam=$nbCam + 1;
+                        $cameras[]=$cams['id'];
+                        $jsonstr=$jsonstr."{\"device_id\":\"".$cams['id']."\",\"device_name\":\"".$cams['name']."\",\"device_type\":\"".$cams['type']."\"}";
+                    }
+                }
+            }*/
             foreach ($jsonin['doorbells'] as $cams) {
                 if ($cams['network_id']==$currentnet) {
                     if (!in_array($cams['id'], $cameras, true)) {
@@ -877,7 +889,7 @@ class blink_camera extends eqLogic
     }
     public static function getDatetimeLocaleJeedom($valeur, $_format = self::FORMAT_DATETIME_OUT)
     {
-            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR'){
+            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR' && !empty($valeur)){
                 $dtim = date_create_from_format($_format, $valeur);
                 return date_format($dtim, self::FORMAT_DATETIME_OUT_FR);
             }
@@ -885,7 +897,7 @@ class blink_camera extends eqLogic
     }
     public static function getDateLocaleJeedom($valeur, $_format = self::FORMAT_DATE_OUT)
     {
-            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR'){
+            if (config::byKey('language', 'core', 'fr_FR')==='fr_FR' && !empty($valeur)){
                 $dtim = date_create_from_format($_format, $valeur);
                 return date_format($dtim, self::FORMAT_DATE_OUT_FR);
             }
@@ -1365,7 +1377,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 //}
                 $lastManifest=$this->getConfiguration('manifest');
                 if (isset($lastManifest) && $lastManifest!=='') {
-    jeedomUtils.sleep(1);
+    //jeedomUtils.sleep(1);
     self::logdebug('getVideoListLocal '.$this->getName().' ('.$cameraApiName.') Phase 1 : '.print_r($lastManifest,true));
                     $url_manifest='/api/v1/accounts/'.$_accountBlink.'/networks/'.$network_id.'/sync_modules/'.$syncId.'/local_storage/manifest';
                     $url_manifest_req=$url_manifest.'/request';
@@ -1388,7 +1400,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                         }             
                         $url=$url_manifest_req.'/'.$lastManifest;
                         try {
-                            jeedomUtils.sleep(5);
+                            //jeedomUtils.sleep(5);
                             $jsonrep=self::queryGet($url,$email);
                         } catch (TransferException $e) {
                             self::logdebug('An error occured during RETRY OF GET MANIFEST (syncId: '.$syncId.'): '.$lastManifest. ' - ERROR:'.print_r($e->getMessage(), true));
@@ -1496,6 +1508,10 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
     {
         return $this->requestNewMedia($type,"owl");
     }
+	public function requestNewMediaMini2($type="clip")
+    {
+        return $this->requestNewMedia($type,"hawk");
+    }
 	public function requestNewMedia($type="clip",$typeDevice="camera")
     {
         $email = $this->getConfiguration("email");
@@ -1505,8 +1521,9 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     if ($typeDevice==='owl') {
                         // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
                         $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/owls/'.$this->getConfiguration('camera_id').'/'.$type;
+                    } else if ($typeDevice==='hawk') {
+                        $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/owls/'.$this->getConfiguration('camera_id').'/'.$type;
                     } else if ($typeDevice==='doorbells')  {
-                        // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
                         $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/doorbells/'.$this->getConfiguration('camera_id').'/'.$type;
                     } else  {
                         $url='/network/'.$this->getConfiguration('network_id').'/'.$typeDevice.'/'.$this->getConfiguration('camera_id').'/'.$type;
@@ -1539,7 +1556,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $nbMax=-1;
         }
         $cptVideo=0;
-        $existingFilesOnJeedom = scandir($this->getMediaDir());
+        $existingFilesOnJeedom = scandir($this->getMediaDir(),SCANDIR_SORT_DESCENDING);
         $fileToDelete =array();
         $fileOnCloudAndOnJeedom =array();
         $fileToDownload =array();
@@ -1632,13 +1649,23 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $fileToKeep[]=str_replace(".mp4",".jpg",$filename);
                 $cptVideo++;
             }
-            
+
             // SUPPRESSION DES FICHIERS QUI NE SONT PLUS SUR CLOUD
+            $cptVideo=0;
             foreach ($existingFilesOnJeedom as $file) {
+                // On conserve les  "nbMax" derniers fichiers dans le cas du stockage local 
+                // existingFilesOnJeedom etant classé par ordre décroissant de nom (et donc date)
+                if ($storage=='local'){
+                    if ($nbMax>0 && $cptVideo>=$nbMax) {
+                        break;
+                    } 
+                    $fileToKeep[]=$file;
+                    $cptVideo++;
+                }
                 if (($key = array_search($file, $fileToKeep)) == false) {
                     if ($file!=="." && $file!=="..") {
                         // On ne supprime pas les thumbnail de camera
-                        if ($storage!=='local' && preg_match("#.*".self::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($file))==false){
+                        if (preg_match("#.*".self::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($file))==false){
                             $fileToDelete[]=$file;
                         }
                     }
@@ -1782,7 +1809,12 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $thumbUrlCmd=$this->getCmd(null, 'thumb_path');
                 $urlFile=$thumbUrlCmd->execCmd();
                 //On affiche la vignette de la derniere video
-            }                           
+            }
+            $fileExists=blink_camera::searchForFile(dirname(__FILE__) . '/../../../..'.$urlFile);
+            if ($fileExists==false)
+            {              
+                $urlFile="-";         
+            }
             if (($urlFile ==="-" || $urlFile ==="") && $config_thumb !== 1) {
                 $urlLine ='<img src="#urlFile#" '.$largeurVignette.' '. $hauteurVignette.' class="vignette" style="display:block;padding:5px;" data-eqLogic_id="'.$this->getId().'"/>';
                 if ((boolean) config::byKey('fallback_to_thumbnail', 'blink_camera')) {
@@ -1811,7 +1843,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $this->getCameraThumbnail();
             //$this->emptyCacheWidget();
             
-            if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="lotus") {
+            if ($this->getBlinkDeviceType()!=="owl" && $this->getBlinkDeviceType()!=="hawk" && $this->getBlinkDeviceType()!=="lotus") {
                 $datas=$this->getCameraInfo();
                 if (isset($datas['message']) ==false) {
                    /* // MAJ Température 
@@ -1915,6 +1947,25 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                         }
                     }
                 }
+				/*if (isset($datas['hawks'])) {
+                    foreach($datas['hawks'] as $camera) {
+                        if ($camera['id']==$this->getConfiguration('camera_id')) {
+                            self::logdebug('refreshCameraInfos() HAWK '.$this->getConfiguration('camera_name').' '.$this->getConfiguration('camera_id').' - '.print_r($camera,true));
+                            if ($camera['enabled']===true) {
+                                $this->checkAndUpdateCmd('arm_status_camera', 1);
+                                $this->setConfiguration('camera_status',true);
+                            } else 
+                            {
+                                $this->checkAndUpdateCmd('arm_status_camera', 0);
+                                $this->setConfiguration('camera_status',false);
+                            }
+                            $this->setConfiguration('camera_type',$camera['type']);
+                            $this->setConfiguration('camera_name',$camera['name']);
+                            //$this->setConfiguration('camera_battery_status',$camera['battery']);
+                            break;
+                        }
+                    }
+                }*/
                 if (isset($datas['doorbells'])) {
                     foreach($datas['doorbells'] as $camera) {
                         if ($camera['id']==$this->getConfiguration('camera_id')) {
@@ -2001,7 +2052,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 $url='/network/'.$this->getConfiguration('network_id').'/arm';
                 try {
                     self::queryPost($url,"{}",$email);
-                    jeedomUtils.sleep(1);
+                    //jeedomUtils.sleep(1);
                     $this->refreshCameraInfos("networkArm");
                     return true;
                 } catch (TransferException $e) {
@@ -2026,7 +2077,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $url='/network/'.$this->getConfiguration('network_id').'/disarm';
             try {
                 self::queryPost($url,"{}",$email);
-                jeedomUtils.sleep(1);
+                //jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("networkDisarm");
                 return true;
             } catch (TransferException $e) {
@@ -2057,6 +2108,8 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $datas = "{\"enabled\":true}";
             if ($this->getBlinkDeviceType()=='owl') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
+            } else if ($this->getBlinkDeviceType()=='hawk') {
+                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
             } else if ($this->getBlinkDeviceType()=='lotus') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
             } else {
@@ -2065,7 +2118,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             }
             try {
                 self::queryPost($url,$datas,$email);
-                jeedomUtils.sleep(1);
+                //jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("cameraArm");
                 return true;
             } catch (TransferException $e) {
@@ -2094,6 +2147,8 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $datas = "{\"enabled\":false}";
             if ($this->getBlinkDeviceType()=='owl') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
+            } else if ($this->getBlinkDeviceType()=='hawk') {
+                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
             } else if ($this->getBlinkDeviceType()=='lotus') {
                 $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
             } else {
@@ -2102,7 +2157,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             }
             try {
                 self::queryPost($url,$datas,$email);
-                jeedomUtils.sleep(1);
+                //jeedomUtils.sleep(1);
                 $this->refreshCameraInfos("cameraDisarm");
                 return true;
             } catch (TransferException $e) {
@@ -2548,7 +2603,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
 
 
         /* COMMANDES NON DISPONIBLES SUR owl et lotus  */
-        if ($typeDevice!="" and $typeDevice!="owl" and $typeDevice!="lotus") {
+        if ($typeDevice!="" and $typeDevice!="owl" and $typeDevice!="hawk" and $typeDevice!="lotus") {
 
             $temperature = $this->getCmd(null, 'temperature');
             if (!is_object($temperature)) {
@@ -2870,6 +2925,8 @@ class blink_cameraCmd extends cmd
 			case 'new_clip':
                 if ($eqlogic->getBlinkDeviceType()==="owl") {
                     $eqlogic->requestNewMediaMini("clip");
+                } else if ($eqlogic->getBlinkDeviceType()==="hawk") {
+                    $eqlogic->requestNewMediaMini2("clip");
                 } else if ($eqlogic->getBlinkDeviceType()==="lotus") {
                     $eqlogic->requestNewMediaDoorbell("clip");
                 } else {
@@ -2882,6 +2939,8 @@ class blink_cameraCmd extends cmd
             case 'new_thumbnail':
                 if ($eqlogic->getBlinkDeviceType()==="owl") {
                     $eqlogic->requestNewMediaMini("thumbnail");
+                } else if ($eqlogic->getBlinkDeviceType()==="hawk") {
+                    $eqlogic->requestNewMediaMini2("thumbnail");
                 } else if ($eqlogic->getBlinkDeviceType()==="lotus") {
                     $eqlogic->requestNewMediaDoorbell("thumbnail");
                 } else {

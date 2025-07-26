@@ -1,3 +1,8 @@
+> 2024-10-17
+  + Version 3.0 become "stable"
+  + **WARNING : WITH THIS VERSION YOU HAVE TO MODIFY YOUR PLUGIN AND CAMERA CONFIGURATION**
+  + See below
+
 > 2024-08-15
   + V3.0.1
   + Add a configuration to limit the number of Blink's servers calls (Every minutes, every 5 min., etc).
@@ -5,7 +10,6 @@
 > 2024-04-07
   + V3.0.0
   + This version is compliant with Jeedom 4.4 (without JQuery)
-  + **WARNING : WITH THIS VERSION YOU HAVE TO MODIFY YOUR PLUGIN AND CAMERA CONFIGURATION**
   + Support of several Blink accounts
 
 > 2024-01-09

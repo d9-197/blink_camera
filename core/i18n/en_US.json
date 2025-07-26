@@ -7,7 +7,9 @@
         "catalina":"Outdoor gen 3",
         "white" : "Indoor",
         "owl": "Mini",
+        "hawk": "Mini 2",		
         "lotus": "Doorbell",
+        "sedona": "Outdoor gen 4",
         "type_name_missing":"Unknowned model"
     },
     "plugins\/blink_camera\/desktop\/js\/blink_camera.js": {
