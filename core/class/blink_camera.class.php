@@ -118,7 +118,7 @@ class blink_camera extends eqLogic
     }
     public static function cron($_eqLogic_id = null)
     {
-        if (config::byKey('blink_scan_interval', 'blink_camera','')=='') {
+        if (config::byKey('blink_scan_interval', 'blink_camera','')==='') {
             config::save('blink_scan_interval','1m');
         }
         if (config::byKey('blink_scan_interval', 'blink_camera')=='1m') {
@@ -510,7 +510,7 @@ class blink_camera extends eqLogic
     }*/
     public function getConfigHistory() {
         $cfgHisto=$this->getConfiguration('history_display_mode');
-        if (!isset($cfgHisto) || $cfgHisto=='') {
+        if (!isset($cfgHisto) || $cfgHisto==='') {
             $this->setConfigHistory();
             $cfgHisto=$this->getConfiguration('history_display_mode');
         }
@@ -1068,7 +1068,7 @@ class blink_camera extends eqLogic
         }
         if (!$syncId =="") {
 self::logdebug('getMediaLocal PHASE 1 - syncId=: '.$syncId);
-            if (!isset($lastManifest) || $lastManifest=='') {
+            if (!isset($lastManifest) || $lastManifest==='') {
                 $cam->requestNewManifest($_accountBlink,$netId,$syncId);
             }
             $lastManifest=$cam->getConfiguration('manifest');
@@ -2862,7 +2862,7 @@ class blink_cameraCmd extends cmd
             //blink_camera::logdebug('toHtml last_event avant custo : '.print_r($result,true));
             $valeurLastEvent=$this->execCmd();
             $params = array(
-                state => blink_camera::getDatetimeLocaleJeedom($valeurLastEvent)
+                'state' => blink_camera::getDatetimeLocaleJeedom($valeurLastEvent)
             );
             $this->setDisplay('parameters',$params);
 

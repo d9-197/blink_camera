@@ -8,11 +8,6 @@ try {
     if (!isConnect('admin')) {
         throw new Exception(__('401 - Accès non autorisé', __FILE__));
     }
-    if (!function_exists('str_starts_with')) {
-        function str_starts_with($str, $start) {
-          return (@substr_compare($str, $start, 0, strlen($start))==0);
-        }
-      }
     ajax::init();
 
     blink_camera::logdebug('AJAX : action='.init('action'));
@@ -31,7 +26,7 @@ try {
 
     if (init('action') == 'getConfig') {
         $config = blink_camera::getAccountConfigDatas(false,false);
-		if ($config==null) {
+		if ($config===null) {
 			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
         }
 
@@ -42,7 +37,7 @@ try {
     if (init('action') == 'getEmails') {
         $config = blink_camera::getConfigBlinkAccountsList();
         blink_camera::logdebug('blink_camera.ajax - getEmails: '.print_r($config,true));
-		if ($config==null) {
+		if ($config===null) {
 			throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
         }
         $return=json_encode($config);
@@ -51,14 +46,14 @@ try {
     if (init('action') == 'getNetworks') {
         $config = blink_camera::getAccountConfigDatas(false,false);
         blink_camera::logdebug('blink_camera.ajax - getNetworks: '.print_r($config,true));
-        if ($config==null) {
+        if ($config===null) {
             throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
         }
         foreach ($config as $emails) {
             foreach ($emails as $email) {
                 blink_camera::logdebug('blink_camera.ajax - getNetworks: '.print_r($email,true));
                 blink_camera::logdebug('blink_camera.ajax - getNetworks - email= '.$email['email'].' versus ' .init('email'));
-                if ($email['email']==init('email')) {
+                if ($email['email']===init('email')) {
                     blink_camera::logdebug('blink_camera.ajax - getNetworks - RESULTAT= '.print_r($email['networks'],true));
                     $return=json_encode($email['networks']);
                 }
@@ -69,14 +64,14 @@ try {
     if (init('action') == 'getCameras') {
         $config = blink_camera::getAccountConfigDatas(false,false);
         blink_camera::logdebug('blink_camera.ajax - getCameras: '.print_r($config,true));
-        if ($config==null) {
+        if ($config===null) {
             throw new Exception(__('Unable to load Blink Camera configuration.', __FILE__));
         }
         foreach ($config as $emails) {
             foreach ($emails as $email) {
                 foreach ($email['networks'] as $network) {
                     blink_camera::logdebug('blink_camera.ajax - getCameras - networkid= '.$network['network_id'].' versus ' .init('netid'));
-                    if ($network['network_id']==init('netid')) {
+                    if ($network['network_id']===init('netid')) {
                         blink_camera::logdebug('blink_camera.ajax - getCameras - RESULTAT= '.print_r($network['camera'],true));
                         $return=json_encode($network['camera']);
                     }
@@ -101,7 +96,7 @@ try {
         blink_camera::logdebug('blink_camera.ajax - setEmail: '.init('ideq'));
         $cam=blink_camera::byId(init('ideq'));
         $newEmail=init('email');
-        if ($newEmail!="") {
+        if ($newEmail!=="") {
             $config = $cam->setConfiguration('email',init('email'));
             $cam->save();
         }
