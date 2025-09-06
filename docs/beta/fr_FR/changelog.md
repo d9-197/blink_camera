@@ -1,3 +1,5 @@
+> 2025-09-06
+  + Intégration des corrections pour PHP 8.3 (Merci Romain-Grosos)
 > 2025-07-26
   + Passage en stable de la v3.0
   + **ATTENTION : CHANGEMENTS IMPORTANTS DANS CETTE VERSION NECESSITANTS UNE RECONFIGURATION DU PLUGIN ET DE VOS CAMERAS**
