@@ -27,7 +27,7 @@ try {
 	$targetName=urldecode(init('archive'));
 	blink_camera::logdebug($targetName);
 	$archivename='archive';
-	if (!$targetName=='') {
+	if ($targetName!=='') {
 		$archivename=$targetName;
 	}
     $pathfileOrig=$pathfile;		
