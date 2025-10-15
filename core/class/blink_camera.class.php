@@ -29,7 +29,9 @@ use GuzzleHttp\Psr7;
 class blink_camera extends eqLogic
 {
     const BLINK_URL_LOGIN="/api/v5/account/login";
-    const BLINK_DEFAULT_USER_AGENT="Mozilla/5.0 (Linux ; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.193 Mobile Safari/537.36";
+    #const BLINK_DEFAULT_USER_AGENT="Mozilla/5.0 (Linux ; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.193 Mobile Safari/537.36";
+    const BLINK_DEFAULT_USER_AGENT="Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.7390.71 Mobile Safari/537.36";	
+    const BLINK_APP_BUILD="ANDROID_44373244";
     const BLINK_CLIENT_NAME="Jeedom";
     const BLINK_DEVICE_IDENTIFIER="Jeedom";
     /*     * *************************Attributs****************************** */
@@ -311,6 +313,7 @@ class blink_camera extends eqLogic
                     //'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
                     'TOKEN_AUTH'=> ''.$_tokenBlink,
                     'User-Agent' =>  ''.self::BLINK_DEFAULT_USER_AGENT,
+					'APP-BUILD' => ''.self::BLINK_APP_BUILD,
                     'Accept' => '/'
                     ]
             ]);
@@ -338,6 +341,7 @@ class blink_camera extends eqLogic
                         'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
                         'TOKEN_AUTH'=> ''.$_tokenBlink,
                         'User-Agent' =>  ''.self::BLINK_DEFAULT_USER_AGENT,
+						'APP-BUILD' => ''.self::BLINK_APP_BUILD,
                         'Content-Type' => 'application/json',
                         'Accept' => '/'
                         ]
@@ -371,7 +375,8 @@ class blink_camera extends eqLogic
                     'Host'=> 'rest-prod.immedia-semi.com',
                     'Content-Type'=> 'application/json',
                     'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT,
-                    'Accept' => '/'
+   					'APP-BUILD' => ''.self::BLINK_APP_BUILD,
+					'Accept' => '/'
                 ],
                 'json' => json_decode($datas)
             ]);
@@ -418,7 +423,8 @@ class blink_camera extends eqLogic
                     ['timeout' => 1],
                     'headers' => [
                         'TOKEN_AUTH'=> ''.$_tokenBlink,
-                        'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT
+                        'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT,
+						'APP-BUILD' => ''.self::BLINK_APP_BUILD
                     ],
                     'json' => json_decode($datas)
                 ]);
@@ -459,7 +465,8 @@ class blink_camera extends eqLogic
                 ['timeout' => 1],
                 'headers' => [
                     'TOKEN_AUTH'=> ''.$_tokenBlink,
-                    'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT
+                    'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT,
+					'APP-BUILD' => ''.self::BLINK_APP_BUILD
                 ],
                 'json' => json_decode($datas)
             ]);
