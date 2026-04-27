@@ -38,6 +38,15 @@ Vous pouvez ajouter un ou plusieurs comptes Blink.
 
   + Saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisie du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
 
+>**Authentification OAuth 2.0 (depuis la v3.2.0) :**\
+>Suite au changement des API Blink fin 2025, le plugin utilise désormais le flow d'authentification **OAuth 2.0 avec PKCE** (les endpoints `api.oauth.blink.com`).\
+>Concrètement pour l'utilisateur, le parcours reste identique (email + mot de passe + code PIN à la première connexion), mais le plugin gère en interne :
+>- la génération d'un `code_verifier` / `code_challenge`,
+>- la conservation des cookies de session,
+>- le renouvellement automatique du jeton d'accès via un `refresh_token` (cron horaire).
+>
+>Vous n'aurez donc plus à ressaisir le code PIN aussi souvent qu'avant tant que le `refresh_token` reste valide côté Blink.
+
 >**Point important sur le code PIN envoyé par Blink :**\
 >Blink redemande régulièrement de resaisir le code PIN (la durée entre 2 demandes est variable - et indépendante du plugin). Quand cela se produit, vous recevez alors un code PIN de la part de Blink mais le plugin n'a pas l'information qu'un nouveau code doit être renseigné. Dans ce cas, il est probable que le champs du code PIN ne soit pas affiché dans le plugin.\
 **Il vous faut alors forcer une demande de code PIN depuis le plugin** (et donc le réaffichage du champ). Pour cela renseignez un __mauvais__ email ou mot de passe puis sauvegardez (à ce stade vous aurez une erreur : ce qui normal puisque l'email ou le mot de passe ne sont pas corrects), puis remettez le bon email et mot de passe et sauvegardez.\

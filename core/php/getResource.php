@@ -15,7 +15,7 @@ $file_root="/plugins/blink_camera/medias/";
 $file_root_plugin="/plugins/blink_camera/";
 if (substr($file,0,strlen($file_root_plugin))==$file_root_plugin) {
 	$file = dirname(__FILE__) . '/../../../../' . $file;
-} else if (substr($file,0,strlen($file_root))==$file_root && strpos($file, '..') == false) {
+} else if (substr($file,0,strlen($file_root))==$file_root && strpos($file, '..') === false) {
 	$file = dirname(__FILE__) . '/../../../../' . $file;
 } else if (substr($file,0,1)=='/' && strpos($file, $file_root_plugin) !== false)  {
 	$file=$file;
@@ -60,7 +60,7 @@ if (file_exists($file)) {
 	header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
 	header('Etag: ' . $etagFile);
 	header('Cache-Control: public');
-	if (@strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $lastModified || $etagHeader == $etagFile) {
+	if ((isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) === $lastModified) || $etagHeader === $etagFile) {
 		header('HTTP/1.1 304 Not Modified');
 		exit;
 	}
