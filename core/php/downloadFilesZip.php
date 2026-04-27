@@ -26,7 +26,7 @@ try {
 	$pathfile = calculPath(urldecode(init('pathfile')));
 	$targetName=urldecode(init('archive'));
 	$archivename='archive';
-	if (!$targetName=='') {
+	if ($targetName!=='') {
 		$archivename=blink_camera::cleanSpecialCharacters($targetName);
 	}
 	blink_camera::logdebug('downloadFilesZip - START');

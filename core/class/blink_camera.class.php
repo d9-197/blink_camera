@@ -25,13 +25,27 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
 //use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7;
- 
+use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
+
 class blink_camera extends eqLogic
 {
+    // Legacy constants (kept for reference)
     const BLINK_URL_LOGIN="/api/v5/account/login";
     const BLINK_DEFAULT_USER_AGENT="Mozilla/5.0 (Linux ; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.193 Mobile Safari/537.36";
     const BLINK_CLIENT_NAME="Jeedom";
     const BLINK_DEVICE_IDENTIFIER="Jeedom";
+    // OAuth 2.0 PKCE constants (Blink migrated to this flow in late 2025)
+    const OAUTH_AUTHORIZE_URL  = "https://api.oauth.blink.com/oauth/v2/authorize";
+    const OAUTH_SIGNIN_URL     = "https://api.oauth.blink.com/oauth/v2/signin";
+    const OAUTH_2FA_URL        = "https://api.oauth.blink.com/oauth/v2/2fa/verify";
+    const OAUTH_TOKEN_URL      = "https://api.oauth.blink.com/oauth/token";
+    const OAUTH_CLIENT_ID      = "ios";
+    const OAUTH_REDIRECT_URI   = "immedia-blink://applinks.blink.com/signin/callback";
+    const OAUTH_SCOPE          = "client";
+    const OAUTH_USER_AGENT     = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
+    const OAUTH_TOKEN_UA       = "Blink/2511191620 CFNetwork/3860.200.71 Darwin/25.1.0";
+    const TIER_ENDPOINT        = "https://rest-prod.immedia-semi.com/api/v1/users/tier_info";
     /*     * *************************Attributs****************************** */
     const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;
     const FORMAT_DATETIME_OUT="Y-m-d_His" ;
@@ -97,6 +111,359 @@ class blink_camera extends eqLogic
         }
         return false;
     }
+
+    // -------------------------------------------------------------------------
+    // OAuth 2.0 PKCE helpers
+    // -------------------------------------------------------------------------
+
+    private static function generatePKCE(): array {
+        $verifier  = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
+        return ['verifier' => $verifier, 'challenge' => $challenge];
+    }
+
+    private static function generateHardwareId(): string {
+        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+    }
+
+    private static function serializeCookieJar(CookieJar $jar): string {
+        $cookies = [];
+        foreach ($jar as $cookie) {
+            $cookies[] = $cookie->toArray();
+        }
+        return json_encode($cookies);
+    }
+
+    private static function deserializeCookieJar(string $serialized): CookieJar {
+        $jar     = new CookieJar();
+        $cookies = json_decode($serialized, true) ?? [];
+        foreach ($cookies as $data) {
+            $jar->setCookie(new SetCookie($data));
+        }
+        return $jar;
+    }
+
+    // -------------------------------------------------------------------------
+    // OAuth 2.0 flow steps
+    // -------------------------------------------------------------------------
+
+    private static function oauthDoAuthorize(CookieJar $jar, string $hardware_id, string $code_challenge): bool {
+        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => true]);
+        try {
+            $r = $client->request('GET', self::OAUTH_AUTHORIZE_URL, [
+                'headers' => [
+                    'User-Agent'      => self::OAUTH_USER_AGENT,
+                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.5',
+                ],
+                'query' => [
+                    'app_brand'          => 'blink',
+                    'app_version'        => '6.18.0',
+                    'client_id'          => self::OAUTH_CLIENT_ID,
+                    'code_challenge'     => $code_challenge,
+                    'code_challenge_method' => 'S256',
+                    'device_brand'       => 'Apple',
+                    'device_model'       => 'iPhone',
+                    'device_os_version'  => '18.7',
+                    'hardware_id'        => $hardware_id,
+                    'redirect_uri'       => self::OAUTH_REDIRECT_URI,
+                    'response_type'      => 'code',
+                    'scope'              => self::OAUTH_SCOPE,
+                ],
+            ]);
+            return $r->getStatusCode() === 200;
+        } catch (Exception $e) {
+            self::logdebug('oauthDoAuthorize ERROR: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private static function oauthGetCsrfToken(CookieJar $jar): ?string {
+        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => true]);
+        try {
+            $r    = $client->request('GET', self::OAUTH_SIGNIN_URL, [
+                'headers' => [
+                    'User-Agent'      => self::OAUTH_USER_AGENT,
+                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.5',
+                ],
+            ]);
+            $body = (string)$r->getBody();
+            // Blink's Next.js signin page embeds the CSRF token inside
+            // <script id="oauth-args" type="application/json">{..."csrf-token":"<value>"...}</script>
+            if (preg_match('/"csrf-token"\s*:\s*"([^"]+)"/', $body, $m)) {
+                return $m[1];
+            }
+            // Legacy HTML-form fallbacks.
+            if (preg_match('/name=["\']csrf-token["\'][^>]*value=["\']([^"\']+)["\']/', $body, $m) ||
+                preg_match('/value=["\']([^"\']+)["\'][^>]*name=["\']csrf-token["\']/', $body, $m)) {
+                return $m[1];
+            }
+            self::logdebug('oauthGetCsrfToken: CSRF token not found in page');
+            return null;
+        } catch (Exception $e) {
+            self::logdebug('oauthGetCsrfToken ERROR: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    private static function oauthSignin(CookieJar $jar, string $email, string $password, string $csrf_token): array {
+        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => false, 'http_errors' => false]);
+        try {
+            $r = $client->request('POST', self::OAUTH_SIGNIN_URL, [
+                'headers' => [
+                    'User-Agent'   => self::OAUTH_USER_AGENT,
+                    'Accept'       => 'application/json, text/plain, */*',
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                    'Origin'       => 'https://api.oauth.blink.com',
+                    'Referer'      => self::OAUTH_SIGNIN_URL,
+                ],
+                'form_params' => [
+                    'username'   => $email,
+                    'password'   => $password,
+                    'csrf-token' => $csrf_token,
+                ],
+            ]);
+            $code     = $r->getStatusCode();
+            $location = $r->getHeaderLine('Location');
+            $body     = (string)$r->getBody();
+            $json     = json_decode($body, true);
+
+            // Legacy redirect-based flow (kept for robustness).
+            if (in_array($code, [301, 302, 303, 307, 308])) {
+                return ['status' => 'SUCCESS', 'location' => $location];
+            }
+            if ($code === 412) {
+                return ['status' => '2FA_REQUIRED', 'location' => $location];
+            }
+            // Blink's Next.js signin endpoint now answers with JSON.
+            if ($code >= 200 && $code < 300 && is_array($json)) {
+                $status   = strtolower((string)($json['status'] ?? ''));
+                $redirect = $json['redirect_url'] ?? ($json['redirect_to'] ?? ($json['location'] ?? ($json['continue_to'] ?? ($json['next_action_url'] ?? ''))));
+                if (!$location && $redirect) { $location = (string)$redirect; }
+                self::logdebug('oauthSignin JSON status=' . $status . ' redirect=' . (string)$redirect . ' body=' . substr($body, 0, 400));
+                if ($status === 'auth-completed' || $status === 'authenticated' || $status === 'success') {
+                    return ['status' => 'SUCCESS', 'location' => $location];
+                }
+                if ($status !== '' || !empty($json['challenge']) || !empty($json['challenge_type']) || !empty($json['mfa_required']) || !empty($json['otp_required'])) {
+                    return ['status' => '2FA_REQUIRED', 'location' => $location];
+                }
+            }
+            // Anything else (401 invalid_user_credentials, 400, 5xx, …) → ERROR.
+            self::logdebug('oauthSignin unexpected response: HTTP ' . $code . ' body=' . substr($body, 0, 500));
+            return ['status' => 'ERROR', 'location' => ''];
+        } catch (Exception $e) {
+            self::logdebug('oauthSignin ERROR: ' . $e->getMessage());
+            return ['status' => 'ERROR', 'location' => ''];
+        }
+    }
+
+    private static function oauthVerify2FA(CookieJar $jar, string $twofa_code, string $csrf_token): array {
+        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => false, 'http_errors' => false]);
+        try {
+            $r = $client->request('POST', self::OAUTH_2FA_URL, [
+                'headers' => [
+                    'User-Agent'   => self::OAUTH_USER_AGENT,
+                    'Accept'       => 'application/json, text/plain, */*',
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                    'Origin'       => 'https://api.oauth.blink.com',
+                    'Referer'      => self::OAUTH_2FA_URL,
+                ],
+                'form_params' => [
+                    '2fa_code'    => $twofa_code,
+                    'csrf-token'  => $csrf_token,
+                    'remember_me' => 'on',
+                ],
+            ]);
+            $code     = $r->getStatusCode();
+            $location = $r->getHeaderLine('Location');
+            $body     = (string)$r->getBody();
+            $data     = json_decode($body, true);
+            $redirect = is_array($data) ? ($data['redirect_url'] ?? ($data['redirect_to'] ?? ($data['location'] ?? ($data['continue_to'] ?? ($data['next_action_url'] ?? ''))))) : '';
+            if (!$location && $redirect) { $location = (string)$redirect; }
+            self::logdebug('oauthVerify2FA HTTP ' . $code . ' location=' . $location . ' body=' . substr($body, 0, 400));
+
+            if (($code === 200 || $code === 201) && is_array($data) && (($data['status'] ?? '') === 'auth-completed')) {
+                return ['ok' => true, 'location' => $location];
+            }
+            return ['ok' => false, 'location' => $location];
+        } catch (Exception $e) {
+            self::logdebug('oauthVerify2FA ERROR: ' . $e->getMessage());
+            return ['ok' => false, 'location' => ''];
+        }
+    }
+
+    private static function oauthGetAuthCode(CookieJar $jar, string $hardware_id, string $code_challenge, ?string $startUrl = null): ?string {
+        // The continuation request after signin/2FA must hit the bare authorize URL — the session
+        // cookies carry the pending PKCE state. Re-sending the original PKCE params here would
+        // start a new flow and bounce us back to /signin (verified against blinkpy's reference
+        // implementation: oauth_get_authorization_code in fronzbot/blinkpy).
+        if ($startUrl !== null && $startUrl !== '') {
+            $url = $startUrl;
+            if (!preg_match('/^https?:\/\//i', $url)) {
+                $url = 'https://api.oauth.blink.com' . (substr($url, 0, 1) === '/' ? '' : '/') . $url;
+            }
+        } else {
+            $url = self::OAUTH_AUTHORIZE_URL;
+        }
+        // Dump cookies for diagnosis (names + short value prefix only).
+        $cookieDump = [];
+        foreach ($jar as $c) { $cookieDump[] = $c->getName() . '=' . substr((string)$c->getValue(), 0, 8) . '…'; }
+        self::logdebug('oauthGetAuthCode jar=[' . implode(', ', $cookieDump) . ']');
+        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => false, 'http_errors' => false]);
+        for ($i = 0; $i < 10; $i++) {
+            try {
+                $r = $client->request('GET', $url, [
+                    'headers' => [
+                        'User-Agent' => self::OAUTH_USER_AGENT,
+                        'Accept'     => '*/*',
+                        'Referer'    => self::OAUTH_SIGNIN_URL,
+                    ],
+                ]);
+                $status   = $r->getStatusCode();
+                $location = $r->getHeaderLine('Location');
+                self::logdebug('oauthGetAuthCode step '.$i.' HTTP '.$status.' url='.$url.' location='.$location);
+                if ($status >= 200 && $status < 300) {
+                    // Terminal 2xx — no redirect; the auth code cannot be extracted here.
+                    self::logdebug('oauthGetAuthCode: body='.substr((string)$r->getBody(), 0, 400));
+                    break;
+                }
+                if (!$location) {
+                    break;
+                }
+                if (stripos($location, 'immedia-blink://') === 0) {
+                    parse_str(parse_url($location, PHP_URL_QUERY), $params);
+                    return $params['code'] ?? null;
+                }
+                // Resolve relative redirect URL
+                if (!preg_match('/^https?:\/\//i', $location)) {
+                    $p        = parse_url($url);
+                    $location = $p['scheme'] . '://' . $p['host'] . '/' . ltrim($location, '/');
+                }
+                $url = $location;
+            } catch (Exception $e) {
+                self::logdebug('oauthGetAuthCode ERROR: ' . $e->getMessage());
+                break;
+            }
+        }
+        self::logdebug('oauthGetAuthCode: auth code not found');
+        return null;
+    }
+
+    private static function oauthExchangeCode(string $code, string $code_verifier, string $hardware_id): ?array {
+        $client = new GuzzleHttp\Client(['verify' => false]);
+        try {
+            $r = $client->request('POST', self::OAUTH_TOKEN_URL, [
+                'headers' => [
+                    'User-Agent'   => self::OAUTH_TOKEN_UA,
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                    'Accept'       => 'application/json',
+                ],
+                'form_params' => [
+                    'app_brand'    => 'blink',
+                    'client_id'    => self::OAUTH_CLIENT_ID,
+                    'code'         => $code,
+                    'code_verifier' => $code_verifier,
+                    'grant_type'   => 'authorization_code',
+                    'hardware_id'  => $hardware_id,
+                    'redirect_uri' => self::OAUTH_REDIRECT_URI,
+                    'scope'        => self::OAUTH_SCOPE,
+                ],
+            ]);
+            if ($r->getStatusCode() === 200) {
+                return json_decode((string)$r->getBody(), true);
+            }
+            self::logdebug('oauthExchangeCode unexpected status: ' . $r->getStatusCode());
+            return null;
+        } catch (Exception $e) {
+            self::logdebug('oauthExchangeCode ERROR: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    private static function oauthRefreshAccessToken(string $refresh_token, string $hardware_id): ?array {
+        $client = new GuzzleHttp\Client(['verify' => false]);
+        try {
+            $r = $client->request('POST', self::OAUTH_TOKEN_URL, [
+                'headers' => [
+                    'User-Agent'   => self::OAUTH_TOKEN_UA,
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                    'Accept'       => 'application/json',
+                ],
+                'form_params' => [
+                    'grant_type'    => 'refresh_token',
+                    'refresh_token' => $refresh_token,
+                    'client_id'     => self::OAUTH_CLIENT_ID,
+                    'scope'         => self::OAUTH_SCOPE,
+                    'hardware_id'   => $hardware_id,
+                ],
+            ]);
+            if ($r->getStatusCode() === 200) {
+                return json_decode((string)$r->getBody(), true);
+            }
+            self::logdebug('oauthRefreshAccessToken unexpected status: ' . $r->getStatusCode());
+            return null;
+        } catch (Exception $e) {
+            self::logdebug('oauthRefreshAccessToken ERROR: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    private static function getTierInfo(string $email): bool {
+        $access_token = self::getConfigBlinkAccount($email, 'token');
+        $client       = new GuzzleHttp\Client(['verify' => false]);
+        try {
+            $r    = $client->request('GET', self::TIER_ENDPOINT, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $access_token,
+                    'User-Agent'    => self::OAUTH_TOKEN_UA,
+                ],
+            ]);
+            $data = json_decode((string)$r->getBody(), true);
+            self::logdebug('getTierInfo: ' . print_r($data, true));
+            $region_id  = $data['tier']      ?? ($data['region_id'] ?? ($data['region'] ?? 'prod'));
+            $account_id = $data['account_id'] ?? ($data['id']      ?? '');
+            if ($region_id)  { self::setConfigBlinkAccount($email, 'region',    $region_id);  }
+            if ($account_id) { self::setConfigBlinkAccount($email, 'accountId', $account_id); }
+            return true;
+        } catch (Exception $e) {
+            self::logdebug('getTierInfo ERROR: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private static function finalizeOAuth(string $email, CookieJar $jar, string $verifier, string $challenge, string $hardware_id, ?string $startUrl): bool {
+        $code = self::oauthGetAuthCode($jar, $hardware_id, $challenge, $startUrl);
+        if (!$code) {
+            self::logerror('OAuth: authorization code not obtained');
+            return false;
+        }
+        $tokens = self::oauthExchangeCode($code, $verifier, $hardware_id);
+        if (!$tokens || empty($tokens['access_token'])) {
+            self::logerror('OAuth: token exchange failed');
+            return false;
+        }
+        self::setConfigBlinkAccount($email, 'token', $tokens['access_token']);
+        if (!empty($tokens['refresh_token'])) {
+            self::setConfigBlinkAccount($email, 'refresh_token', $tokens['refresh_token']);
+        }
+        self::setConfigBlinkAccount($email, 'oauth_hardware_id', $hardware_id);
+        self::setConfigBlinkAccount($email, 'oauth_cookies', self::serializeCookieJar($jar));
+        if (!self::getTierInfo($email)) {
+            self::logerror('OAuth: tier_info lookup failed');
+            return false;
+        }
+        self::setConfigBlinkAccount($email, 'verif', 'true');
+        return true;
+    }
+
+    // -------------------------------------------------------------------------
 
     private static function cronRefresh($cron_interval,$_eqLogic_id = null)
     {
@@ -309,7 +676,7 @@ class blink_camera extends eqLogic
                 //['http_errors' => false],
                 'headers' => [
                     //'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
-                    'TOKEN_AUTH'=> ''.$_tokenBlink,
+                    'Authorization' => 'Bearer ' . $_tokenBlink,
                     'User-Agent' =>  ''.self::BLINK_DEFAULT_USER_AGENT,
                     'Accept' => '/'
                     ]
@@ -336,7 +703,7 @@ class blink_camera extends eqLogic
                     //['http_errors' => false],
                     'headers' => [
                         'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
-                        'TOKEN_AUTH'=> ''.$_tokenBlink,
+                        'Authorization' => 'Bearer ' . $_tokenBlink,
                         'User-Agent' =>  ''.self::BLINK_DEFAULT_USER_AGENT,
                         'Content-Type' => 'application/json',
                         'Accept' => '/'
@@ -401,48 +768,40 @@ class blink_camera extends eqLogic
     }
     // 
     public static function queryPostPinVerify(string $pin, string $email) {
-        //self::logdebug('queryPostPinVerify(pin='.$pin.') START');
-        $client_id=self::getConfigBlinkAccount($email,'client');
-        $_tokenBlink=self::getConfigBlinkAccount($email,'token');
-        $account_id=self::getConfigBlinkAccount($email,'accountId');
-        $_regionBlink=self::getConfigBlinkAccount($email,'region');
-        if ($client_id!="" && $_tokenBlink!="" && $account_id!="" && $_regionBlink!="") {
-            $url='https://rest-'.$_regionBlink.'.immedia-semi.com/api/v4/account/'.$account_id.'/client/'.$client_id.'/pin/verify';
-            self::logDebugBlinkAPIRequest("CALL[queryPostPinVerify]: ".$url);
-            $lock=self::checkAndGetLock('queryPostPinVerify');  
-            $datas="{\"pin\":".$pin."}";
-            try {
-                $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $url]);
-                $r = $client->request('POST',$url,  [
-                    //['http_errors' => false],
-                    ['timeout' => 1],
-                    'headers' => [
-                        'TOKEN_AUTH'=> ''.$_tokenBlink,
-                        'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT
-                    ],
-                    'json' => json_decode($datas)
-                ]);
+        self::logdebug('queryPostPinVerify('.$email.') START');
+        $cookies        = self::getConfigBlinkAccount($email, 'oauth_cookies');
+        $verifier       = self::getConfigBlinkAccount($email, 'oauth_code_verifier');
+        $challenge      = self::getConfigBlinkAccount($email, 'oauth_code_challenge');
+        $hardwareId     = self::getConfigBlinkAccount($email, 'oauth_hardware_id');
+        $csrf           = self::getConfigBlinkAccount($email, 'oauth_csrf_token');
+        $signinLocation = self::getConfigBlinkAccount($email, 'oauth_signin_location');
+        if (!$cookies || !$verifier || !$challenge || !$hardwareId || !$csrf) {
+            self::logerror('queryPostPinVerify: OAuth state missing, please re-authenticate');
+            return 1;
+        }
+        $lock = self::checkAndGetLock('queryPostPinVerify');
+        try {
+            $jar    = self::deserializeCookieJar($cookies);
+            $verify = self::oauthVerify2FA($jar, $pin, $csrf);
+            if (!$verify['ok']) {
+                self::logerror('queryPostPinVerify: 2FA verification rejected');
+                self::setConfigBlinkAccount($email, 'verif', 'false');
                 self::releaseLock($lock);
-                $jsonrep= json_decode($r->getBody(), true);
-                self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
-
-                if ($jsonrep['valid']==1) {
-                    self::logdebug('queryPostPinVerify(pin='.$pin.') Vérification OK');
-                    self::setConfigBlinkAccount($email,'verif', 'true');
-                    return 0;
-                } else {
-                    self::setConfigBlinkAccount($email,'verif', 'false');
-                    //self::logdebug('queryPostPinVerify(pin='.$pin.') Vérification KO');
-                    return 1;
-                }
-            }  catch (Exception $e) {
-                self::releaseLock($lock);
-                self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
-                self::logdebug('ERROR:'.print_r($e->getMessage(), true));
                 return 1;
             }
+            $startUrl = !empty($verify['location']) ? $verify['location'] : ($signinLocation ?: null);
+            $ok = self::finalizeOAuth($email, $jar, $verifier, $challenge, $hardwareId, $startUrl);
+            self::releaseLock($lock);
+            if ($ok) {
+                self::logdebug('queryPostPinVerify: verification OK');
+                return 0;
+            }
+            return 1;
+        } catch (Exception $e) {
+            self::releaseLock($lock);
+            self::logdebug('queryPostPinVerify ERROR: ' . $e->getMessage());
+            return 1;
         }
-        return 1;
     }
     public static function queryPost(string $url, string $datas="{}", string $email) {
         //self::logdebug('queryPost(url='.$url.') START');
@@ -458,7 +817,7 @@ class blink_camera extends eqLogic
                 //['http_errors' => false],
                 ['timeout' => 1],
                 'headers' => [
-                    'TOKEN_AUTH'=> ''.$_tokenBlink,
+                    'Authorization' => 'Bearer ' . $_tokenBlink,
                     'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT
                 ],
                 'json' => json_decode($datas)
@@ -496,7 +855,7 @@ class blink_camera extends eqLogic
                 //['http_errors' => false],
                 ['timeout' => 1],
                 'headers' => [
-                    'TOKEN_AUTH'=> ''.$_tokenBlink,
+                    'Authorization' => 'Bearer ' . $_tokenBlink,
                     'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT
                 ],
                 'json' => json_decode($datas)
@@ -537,160 +896,121 @@ class blink_camera extends eqLogic
             //self::logdebug("isConnected($email) - FALSE");
         } ;
     }
-    public static function getToken(string $email,bool $forceReinit=false )
+    public static function getToken(string $email, bool $forceReinit = false)
     {
-        $argu='FALSE';
-        if ($forceReinit) {
-            $argu='TRUE';
-        }
-        $updFlag=$argu;
+        $argu = $forceReinit ? 'TRUE' : 'FALSE';
         self::logdebug('getToken('.$email.','.$argu.') START');
 
-        $date = date_create();
-        $tstamp1=date_timestamp_get($date);
-        $cryptedPwd=self::getConfigBlinkAccount($email,'pwd');
-        if (!$cryptedPwd || $cryptedPwd=="") {
-            self::logdebug('getToken('.$email.','.$argu.')  no password provided');
+        $cryptedPwd = self::getConfigBlinkAccount($email, 'pwd');
+        if (!$cryptedPwd || $cryptedPwd === '') {
+            self::logdebug('getToken('.$email.','.$argu.') no password provided');
             return false;
         }
-        $pwd=utils::decrypt($cryptedPwd);
-        $pwd_prev="".utils::decrypt(self::getConfigBlinkAccount($email,'pwd_prev'));
-        $email_prev="".self::getConfigBlinkAccount($email,'account_prev');
-         
+        $pwd        = utils::decrypt($cryptedPwd);
+        $pwd_prev   = '' . utils::decrypt(self::getConfigBlinkAccount($email, 'pwd_prev'));
+        $email_prev = '' . self::getConfigBlinkAccount($email, 'account_prev');
         if (!$forceReinit) {
-            $forceReinit=($email!==$email_prev || $pwd!==$pwd_prev);
-            if (!$forceReinit) {
-                $updFlag='FALSE';
-            }
-        }
-        self::logdebug('getToken('.$email.','.$argu.') '.$updFlag);
-        $notification_key=self::getConfigBlinkAccount($email,'notification_key');
-        $unique_id=self::getConfigBlinkAccount($email,'uniqId');;
-        if (!isset($notification_key) || $notification_key==="" || strlen($notification_key) <> 152) {
-            $notification_key=self::genererIdAleatoire(152);
-            self::setConfigBlinkAccount($email,'notification_key', $notification_key);
-        }
-        if (!isset($unique_id) || $unique_id==="" || strlen($unique_id) <> 16) {
-            $unique_id=self::genererIdAleatoire(16);
-            self::setConfigBlinkAccount($email,'uniqId', $unique_id);
+            $forceReinit = ($email !== $email_prev || $pwd !== $pwd_prev);
         }
 
-        /* Test de validité du token deja existant */
-        $need_new_token=false;
-        $_tokenBlink=self::getConfigBlinkAccount($email,'token');
-        $_regionBlink=self::getConfigBlinkAccount($email,'region');
-        $_accountBlink=self::getConfigBlinkAccount($email,'accountId');
+        $_tokenBlink   = self::getConfigBlinkAccount($email, 'token');
+        $_regionBlink  = self::getConfigBlinkAccount($email, 'region');
+        $_accountBlink = self::getConfigBlinkAccount($email, 'accountId');
 
-        if (!$forceReinit) {
-            // Check if a new token is required
-            //TODO : don't check if pin code verification is required
-            if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
-               /* $url='/api/v3/accounts/'.$_accountBlink.'/homescreen';
-                try {
-                    self::logDebugBlinkAPIRequest("CALL[queryToken] -->");
-                    $jsonrep=self::queryGet($url);
-                }
-                catch (TransferException $e) {
-                    self::logdebug('ERROR:'.print_r($e->getTraceAsString(), true));
-                    $need_new_token=true;
-                }*/
-                $reponseHomescreen=self::getHomescreenData("getToken",$email);
-                if (isset($reponseHomescreen['message'])==false) {
-                    self::logdebug('Homescreen KO : need a new token');
-                    self::setConfigBlinkAccount($email,'token','');
-                    self::setConfigBlinkAccount($email,'region','');
-                    self::setConfigBlinkAccount($email,'accountId','');
-        
-                    $_tokenBlink='';
-                    $_accountBlink='';
-                    $_regionBlink='';
-                    $need_new_token=true;
-                }
-            } else {
-                $need_new_token=true;
-            }
-            if (!$need_new_token) {
-                //self::logdebug('blink_camera->getToken() Reuse existing token');
-                $date = date_create();
-                $tstamp2=date_timestamp_get($date);
-                //self::logdebug('getToken()-1 END : '.($tstamp2-$tstamp1).' ms');
+        if ($_tokenBlink === 'BAD_TOKEN') {
+            self::logdebug('getToken('.$email.'): clearing BAD_TOKEN marker, will retry full OAuth');
+            self::setConfigBlinkAccount($email, 'token', '');
+            $_tokenBlink = '';
+        }
+
+        // 1) Reuse existing access token if still valid (homescreen probe).
+        if (!$forceReinit && $_tokenBlink && $_accountBlink && $_regionBlink) {
+            $reponseHomescreen = self::getHomescreenData('getToken', $email);
+            if (isset($reponseHomescreen['message'])) {
                 return true;
             }
-        } else {
-            self::setConfigBlinkAccount($email,'token','');
-            self::setConfigBlinkAccount($email,'region','');
-            self::setConfigBlinkAccount($email,'accountId','');
-
-            $_tokenBlink='';
-            $_accountBlink='';
-            $_regionBlink='';
+            self::logdebug('getToken: homescreen probe KO, need to refresh token');
         }
-        if ($_tokenBlink=="BAD_TOKEN") {
-            $date = date_create();
-            $tstamp2=date_timestamp_get($date);
-            //self::logdebug('getToken()-1bis END : '.($tstamp2-$tstamp1).' ms');
-            return false;
-        }
-        $_tokenBlink=self::getConfigBlinkAccount($email,'token');
-        $_regionBlink=self::getConfigBlinkAccount($email,'region');
-        $_accountBlink=self::getConfigBlinkAccount($email,'accountId');
-        if ($_tokenBlink=="" && $_accountBlink=="" && $_regionBlink=="") {
-            
-            self::logdebug('getToken('.$argu.') '.$updFlag. ' : Nouveau TOKEN');
-            $_regionBlink=self::getConfigBlinkAccount($email,'region');
-            $_accountBlink=self::getConfigBlinkAccount($email,'accountId');
-            self::setConfigBlinkAccount($email,'account_prev',$email);
-            if ($pwd!="") {      
-                self::setConfigBlinkAccount($email,'pwd_prev',utils::encrypt($pwd)); 
-            }
-            $notification_key=self::getConfigBlinkAccount($email,'notification_key');
-            $unique_id=self::getConfigBlinkAccount($email,'uniqId');
-            $_verifBlink=self::getConfigBlinkAccount($email,'verif');
-            if ($_verifBlink=="true") {
-                $reauthArg=",\"reauth\":\"true\"";
-            }
-            $idDeviceJeedom=self::BLINK_DEVICE_IDENTIFIER.'-'.self::cleanSpecialCharacters(config::byKey('name'));
-            $data = "{\"email\" : \"".$email."\",\"password\": \"".$pwd."\",\"notification_key\" : \"".$notification_key."\",\"unique_id\":\"".$unique_id."\",\"device_identifier\":\"".$idDeviceJeedom."\",\"client_name\":\"".self::BLINK_CLIENT_NAME."\"".$reauthArg."}";
-            try {
-                self::logdebug('getToken('.$email.') data: '.$data);
-                $jsonrep=self::queryPostLogin(self::BLINK_URL_LOGIN,$data,$email);
-            } catch (TransferException $e) {
-                if ($e->hasResponse()===true) {
-                    $response=$e->getResponse();
-                    $code=$response->getStatusCode();
-                    if ($code===401) {
-                        self::setConfigBlinkAccount($email,'token','BAD_TOKEN');
-                        self::setConfigBlinkAccount($email,'verif','false');
-            
-                        self::logdebug('Invalid credentials used for Blink Camera.');
-                        //self::logdebug(print_r($response,true));
 
-                        $date = date_create();
-                        $tstamp2=date_timestamp_get($date);
-                        //self::logdebug('getToken()-2 END : '.($tstamp2-$tstamp1).' ms');
-                        return false;
+        // 2) Try OAuth refresh_token before asking for credentials again.
+        if (!$forceReinit) {
+            $refreshToken = self::getConfigBlinkAccount($email, 'refresh_token');
+            $hardwareId   = self::getConfigBlinkAccount($email, 'oauth_hardware_id');
+            if ($refreshToken && $hardwareId) {
+                $tokens = self::oauthRefreshAccessToken($refreshToken, $hardwareId);
+                if ($tokens && !empty($tokens['access_token'])) {
+                    self::setConfigBlinkAccount($email, 'token', $tokens['access_token']);
+                    if (!empty($tokens['refresh_token'])) {
+                        self::setConfigBlinkAccount($email, 'refresh_token', $tokens['refresh_token']);
+                    }
+                    if (self::getTierInfo($email)) {
+                        self::setConfigBlinkAccount($email, 'verif', 'true');
+                        self::logdebug('getToken: refresh_token success');
+                        return true;
                     }
                 }
-                self::logdebug('An error occured during Blink Cloud call: /login - ERROR:'.print_r($e->getMessage(), true));
-                //$date = date_create();
-                //$tstamp2=date_timestamp_get($date);
-                //self::logdebug('getToken()-3 END : '.($tstamp2-$tstamp1).' ms');
-                return false;
+                self::logdebug('getToken: refresh_token failed, falling back to full OAuth');
             }
-            $_tokenBlink=$jsonrep['auth']['token'];
-            $_accountBlink=$jsonrep['account']['account_id'];
-            $_regionBlink=$jsonrep['account']['tier'];
-            $_clientIdBlink=$jsonrep['account']['client_id'];
-            if ($_verifBlink=="false") {
-                self::loginfo("Verification required with email code");
-            }
-            self::setConfigBlinkAccount($email,'token',$_tokenBlink);
-            self::setConfigBlinkAccount($email,'accountId',$_accountBlink);
-            self::setConfigBlinkAccount($email,'region',$_regionBlink);
-            self::setConfigBlinkAccount($email,'client',$_clientIdBlink);
-            //$date = date_create();
-            //$tstamp2=date_timestamp_get($date);
-            //self::logdebug('getToken()-4 END : '.($tstamp2-$tstamp1).' ms');
+        }
+
+        // 3) Full OAuth 2.0 PKCE flow.
+        self::logdebug('getToken('.$email.') : starting full OAuth flow');
+        self::setConfigBlinkAccount($email, 'account_prev', $email);
+        if ($pwd !== '') {
+            self::setConfigBlinkAccount($email, 'pwd_prev', utils::encrypt($pwd));
+        }
+        self::setConfigBlinkAccount($email, 'token', '');
+        self::setConfigBlinkAccount($email, 'accountId', '');
+        self::setConfigBlinkAccount($email, 'region', '');
+        self::setConfigBlinkAccount($email, 'refresh_token', '');
+
+        $pkce       = self::generatePKCE();
+        $hardwareId = self::generateHardwareId();
+        $jar        = new CookieJar();
+
+        if (!self::oauthDoAuthorize($jar, $hardwareId, $pkce['challenge'])) {
+            self::logerror('OAuth: authorize endpoint failed');
+            return false;
+        }
+        $csrf = self::oauthGetCsrfToken($jar);
+        if (!$csrf) {
+            self::logerror('OAuth: CSRF token not found on signin page');
+            return false;
+        }
+
+        try {
+            $signin = self::oauthSignin($jar, $email, $pwd, $csrf);
+        } catch (Exception $e) {
+            self::logerror('OAuth signin exception: ' . $e->getMessage());
+            return false;
+        }
+
+        if ($signin['status'] === 'ERROR') {
+            self::setConfigBlinkAccount($email, 'token', 'BAD_TOKEN');
+            self::setConfigBlinkAccount($email, 'verif', 'false');
+            self::logerror('OAuth signin rejected (invalid credentials?)');
+            return false;
+        }
+
+        // Persist OAuth state so a subsequent PIN verification (or retry) can resume.
+        self::setConfigBlinkAccount($email, 'oauth_cookies',          self::serializeCookieJar($jar));
+        self::setConfigBlinkAccount($email, 'oauth_code_verifier',    $pkce['verifier']);
+        self::setConfigBlinkAccount($email, 'oauth_code_challenge',   $pkce['challenge']);
+        self::setConfigBlinkAccount($email, 'oauth_hardware_id',      $hardwareId);
+        self::setConfigBlinkAccount($email, 'oauth_csrf_token',       $csrf);
+        self::setConfigBlinkAccount($email, 'oauth_signin_location',  $signin['location'] ?? '');
+
+        if ($signin['status'] === '2FA_REQUIRED') {
+            self::loginfo('Verification required with email code');
+            self::setConfigBlinkAccount($email, 'verif', 'false');
+            return true;
+        }
+
+        // 'SUCCESS' — follow the redirect chain to the auth code and exchange for tokens.
+        $ok = self::finalizeOAuth($email, $jar, $pkce['verifier'], $pkce['challenge'], $hardwareId, $signin['location'] ?? null);
+        if (!$ok) {
+            self::setConfigBlinkAccount($email, 'verif', 'false');
+            return false;
         }
         return true;
     }

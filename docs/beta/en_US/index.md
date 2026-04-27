@@ -38,6 +38,15 @@ You can add one or sevral Blink accounts.
 
   + Enter the email, password and pin code associated with your Blink account. (The pin code entry field is only displayed when the connection is not yet validated)
 
+>**OAuth 2.0 authentication (since v3.2.0):**\
+>Following the Blink API change in late 2025, the plugin now uses the **OAuth 2.0 with PKCE** authentication flow (the `api.oauth.blink.com` endpoints).\
+>From a user point of view the journey is the same (email + password + PIN code at first sign-in), but internally the plugin handles:
+>- the generation of a `code_verifier` / `code_challenge`,
+>- session cookie persistence,
+>- automatic access token renewal through a `refresh_token` (hourly cron).
+>
+>As a result, you no longer have to re-enter the PIN code as often as before, as long as the `refresh_token` is still valid on the Blink side.
+
 >**Important point about the PIN code sent by Blink:**\
 >Blink regularly asks you to re-enter the PIN code (the duration between 2 requests is variable - and independent of the plugin). When this happens, you then receive a PIN code from Blink but the plugin does not have the information that a new code must be entered. In this case, it is likely that the PIN code field is not displayed in the plugin.\
 **You must then force a PIN code request from the plugin** (and therefore the redisplay of the field). To do this, enter a __bad__ email or password then save (at this stage you will have an error: which is normal since the email or password are not correct), then enter the correct email and password and save .\
