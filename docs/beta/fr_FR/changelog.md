@@ -1,3 +1,13 @@
+> 2026-04-27
+  + V3.2.0
+  + **Migration vers le nouveau flow d'authentification OAuth 2.0 (PKCE)** suite au changement des API Blink fin 2025.
+  + La connexion s'appuie désormais sur les endpoints `api.oauth.blink.com` (authorize / signin / 2fa / token) avec génération d'un `code_verifier` / `code_challenge` côté plugin.
+  + Gestion d'un `refresh_token` : le plugin renouvelle automatiquement le jeton d'accès toutes les heures (cron horaire) sans redemander le code PIN.
+  + Le code PIN reste demandé lors de la première connexion ou lorsqu'un nouveau device n'est pas encore validé par Blink.
+  + Conservation des cookies de session (jar sérialisé) pour rester compatible avec le parcours web Next.js de Blink.
+  + Récupération automatique du `tier_info` (région) après authentification.
+  + **ATTENTION** : après mise à jour, il est conseillé de ressaisir mot de passe + code PIN pour chaque compte Blink afin de réinitialiser les jetons OAuth.
+
 > 2025-09-06
   + Intégration des corrections pour PHP 8.3 (Merci Romain-Grosos)
 > 2025-07-26
