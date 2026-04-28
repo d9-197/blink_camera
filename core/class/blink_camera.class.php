@@ -19,6 +19,7 @@
 /* * ***************************Includes********************************* */
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 require_once dirname(__FILE__) .'/../../vendor/autoload.php';
+require_once dirname(__FILE__) .'/BlinkOAuthTrait.php';
 //include dirname(__FILE__) .'/blink_const.php';
 
 use GuzzleHttp\Client;
@@ -30,6 +31,7 @@ use GuzzleHttp\Cookie\SetCookie;
 
 class blink_camera extends eqLogic
 {
+    use BlinkOAuthTrait;
     // Legacy constants (kept for reference)
     const BLINK_URL_LOGIN="/api/v5/account/login";
     const BLINK_DEFAULT_USER_AGENT="Mozilla/5.0 (Linux ; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.193 Mobile Safari/537.36";
@@ -113,356 +115,9 @@ class blink_camera extends eqLogic
     }
 
     // -------------------------------------------------------------------------
-    // OAuth 2.0 PKCE helpers
+    // OAuth 2.0 PKCE helpers and flow steps are provided by BlinkOAuthTrait.
+    // See core/class/BlinkOAuthTrait.php
     // -------------------------------------------------------------------------
-
-    private static function generatePKCE(): array {
-        $verifier  = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
-        $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
-        return ['verifier' => $verifier, 'challenge' => $challenge];
-    }
-
-    private static function generateHardwareId(): string {
-        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-        );
-    }
-
-    private static function serializeCookieJar(CookieJar $jar): string {
-        $cookies = [];
-        foreach ($jar as $cookie) {
-            $cookies[] = $cookie->toArray();
-        }
-        return json_encode($cookies);
-    }
-
-    private static function deserializeCookieJar(string $serialized): CookieJar {
-        $jar     = new CookieJar();
-        $cookies = json_decode($serialized, true) ?? [];
-        foreach ($cookies as $data) {
-            $jar->setCookie(new SetCookie($data));
-        }
-        return $jar;
-    }
-
-    // -------------------------------------------------------------------------
-    // OAuth 2.0 flow steps
-    // -------------------------------------------------------------------------
-
-    private static function oauthDoAuthorize(CookieJar $jar, string $hardware_id, string $code_challenge): bool {
-        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => true]);
-        try {
-            $r = $client->request('GET', self::OAUTH_AUTHORIZE_URL, [
-                'headers' => [
-                    'User-Agent'      => self::OAUTH_USER_AGENT,
-                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language' => 'en-US,en;q=0.5',
-                ],
-                'query' => [
-                    'app_brand'          => 'blink',
-                    'app_version'        => '6.18.0',
-                    'client_id'          => self::OAUTH_CLIENT_ID,
-                    'code_challenge'     => $code_challenge,
-                    'code_challenge_method' => 'S256',
-                    'device_brand'       => 'Apple',
-                    'device_model'       => 'iPhone',
-                    'device_os_version'  => '18.7',
-                    'hardware_id'        => $hardware_id,
-                    'redirect_uri'       => self::OAUTH_REDIRECT_URI,
-                    'response_type'      => 'code',
-                    'scope'              => self::OAUTH_SCOPE,
-                ],
-            ]);
-            return $r->getStatusCode() === 200;
-        } catch (Exception $e) {
-            self::logdebug('oauthDoAuthorize ERROR: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    private static function oauthGetCsrfToken(CookieJar $jar): ?string {
-        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => true]);
-        try {
-            $r    = $client->request('GET', self::OAUTH_SIGNIN_URL, [
-                'headers' => [
-                    'User-Agent'      => self::OAUTH_USER_AGENT,
-                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language' => 'en-US,en;q=0.5',
-                ],
-            ]);
-            $body = (string)$r->getBody();
-            // Blink's Next.js signin page embeds the CSRF token inside
-            // <script id="oauth-args" type="application/json">{..."csrf-token":"<value>"...}</script>
-            if (preg_match('/"csrf-token"\s*:\s*"([^"]+)"/', $body, $m)) {
-                return $m[1];
-            }
-            // Legacy HTML-form fallbacks.
-            if (preg_match('/name=["\']csrf-token["\'][^>]*value=["\']([^"\']+)["\']/', $body, $m) ||
-                preg_match('/value=["\']([^"\']+)["\'][^>]*name=["\']csrf-token["\']/', $body, $m)) {
-                return $m[1];
-            }
-            self::logdebug('oauthGetCsrfToken: CSRF token not found in page');
-            return null;
-        } catch (Exception $e) {
-            self::logdebug('oauthGetCsrfToken ERROR: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    private static function oauthSignin(CookieJar $jar, string $email, string $password, string $csrf_token): array {
-        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => false, 'http_errors' => false]);
-        try {
-            $r = $client->request('POST', self::OAUTH_SIGNIN_URL, [
-                'headers' => [
-                    'User-Agent'   => self::OAUTH_USER_AGENT,
-                    'Accept'       => 'application/json, text/plain, */*',
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                    'Origin'       => 'https://api.oauth.blink.com',
-                    'Referer'      => self::OAUTH_SIGNIN_URL,
-                ],
-                'form_params' => [
-                    'username'   => $email,
-                    'password'   => $password,
-                    'csrf-token' => $csrf_token,
-                ],
-            ]);
-            $code     = $r->getStatusCode();
-            $location = $r->getHeaderLine('Location');
-            $body     = (string)$r->getBody();
-            $json     = json_decode($body, true);
-
-            // Legacy redirect-based flow (kept for robustness).
-            if (in_array($code, [301, 302, 303, 307, 308])) {
-                return ['status' => 'SUCCESS', 'location' => $location];
-            }
-            if ($code === 412) {
-                return ['status' => '2FA_REQUIRED', 'location' => $location];
-            }
-            // Blink's Next.js signin endpoint now answers with JSON.
-            if ($code >= 200 && $code < 300 && is_array($json)) {
-                $status   = strtolower((string)($json['status'] ?? ''));
-                $redirect = $json['redirect_url'] ?? ($json['redirect_to'] ?? ($json['location'] ?? ($json['continue_to'] ?? ($json['next_action_url'] ?? ''))));
-                if (!$location && $redirect) { $location = (string)$redirect; }
-                self::logdebug('oauthSignin JSON status=' . $status . ' redirect=' . (string)$redirect . ' body=' . substr($body, 0, 400));
-                if ($status === 'auth-completed' || $status === 'authenticated' || $status === 'success') {
-                    return ['status' => 'SUCCESS', 'location' => $location];
-                }
-                if ($status !== '' || !empty($json['challenge']) || !empty($json['challenge_type']) || !empty($json['mfa_required']) || !empty($json['otp_required'])) {
-                    return ['status' => '2FA_REQUIRED', 'location' => $location];
-                }
-            }
-            // Anything else (401 invalid_user_credentials, 400, 5xx, …) → ERROR.
-            self::logdebug('oauthSignin unexpected response: HTTP ' . $code . ' body=' . substr($body, 0, 500));
-            return ['status' => 'ERROR', 'location' => ''];
-        } catch (Exception $e) {
-            self::logdebug('oauthSignin ERROR: ' . $e->getMessage());
-            return ['status' => 'ERROR', 'location' => ''];
-        }
-    }
-
-    private static function oauthVerify2FA(CookieJar $jar, string $twofa_code, string $csrf_token): array {
-        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => false, 'http_errors' => false]);
-        try {
-            $r = $client->request('POST', self::OAUTH_2FA_URL, [
-                'headers' => [
-                    'User-Agent'   => self::OAUTH_USER_AGENT,
-                    'Accept'       => 'application/json, text/plain, */*',
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                    'Origin'       => 'https://api.oauth.blink.com',
-                    'Referer'      => self::OAUTH_2FA_URL,
-                ],
-                'form_params' => [
-                    '2fa_code'    => $twofa_code,
-                    'csrf-token'  => $csrf_token,
-                    'remember_me' => 'on',
-                ],
-            ]);
-            $code     = $r->getStatusCode();
-            $location = $r->getHeaderLine('Location');
-            $body     = (string)$r->getBody();
-            $data     = json_decode($body, true);
-            $redirect = is_array($data) ? ($data['redirect_url'] ?? ($data['redirect_to'] ?? ($data['location'] ?? ($data['continue_to'] ?? ($data['next_action_url'] ?? ''))))) : '';
-            if (!$location && $redirect) { $location = (string)$redirect; }
-            self::logdebug('oauthVerify2FA HTTP ' . $code . ' location=' . $location . ' body=' . substr($body, 0, 400));
-
-            if (($code === 200 || $code === 201) && is_array($data) && (($data['status'] ?? '') === 'auth-completed')) {
-                return ['ok' => true, 'location' => $location];
-            }
-            return ['ok' => false, 'location' => $location];
-        } catch (Exception $e) {
-            self::logdebug('oauthVerify2FA ERROR: ' . $e->getMessage());
-            return ['ok' => false, 'location' => ''];
-        }
-    }
-
-    private static function oauthGetAuthCode(CookieJar $jar, string $hardware_id, string $code_challenge, ?string $startUrl = null): ?string {
-        // The continuation request after signin/2FA must hit the bare authorize URL — the session
-        // cookies carry the pending PKCE state. Re-sending the original PKCE params here would
-        // start a new flow and bounce us back to /signin (verified against blinkpy's reference
-        // implementation: oauth_get_authorization_code in fronzbot/blinkpy).
-        if ($startUrl !== null && $startUrl !== '') {
-            $url = $startUrl;
-            if (!preg_match('/^https?:\/\//i', $url)) {
-                $url = 'https://api.oauth.blink.com' . (substr($url, 0, 1) === '/' ? '' : '/') . $url;
-            }
-        } else {
-            $url = self::OAUTH_AUTHORIZE_URL;
-        }
-        // Dump cookies for diagnosis (names + short value prefix only).
-        $cookieDump = [];
-        foreach ($jar as $c) { $cookieDump[] = $c->getName() . '=' . substr((string)$c->getValue(), 0, 8) . '…'; }
-        self::logdebug('oauthGetAuthCode jar=[' . implode(', ', $cookieDump) . ']');
-        $client = new GuzzleHttp\Client(['verify' => false, 'cookies' => $jar, 'allow_redirects' => false, 'http_errors' => false]);
-        for ($i = 0; $i < 10; $i++) {
-            try {
-                $r = $client->request('GET', $url, [
-                    'headers' => [
-                        'User-Agent' => self::OAUTH_USER_AGENT,
-                        'Accept'     => '*/*',
-                        'Referer'    => self::OAUTH_SIGNIN_URL,
-                    ],
-                ]);
-                $status   = $r->getStatusCode();
-                $location = $r->getHeaderLine('Location');
-                self::logdebug('oauthGetAuthCode step '.$i.' HTTP '.$status.' url='.$url.' location='.$location);
-                if ($status >= 200 && $status < 300) {
-                    // Terminal 2xx — no redirect; the auth code cannot be extracted here.
-                    self::logdebug('oauthGetAuthCode: body='.substr((string)$r->getBody(), 0, 400));
-                    break;
-                }
-                if (!$location) {
-                    break;
-                }
-                if (stripos($location, 'immedia-blink://') === 0) {
-                    parse_str(parse_url($location, PHP_URL_QUERY), $params);
-                    return $params['code'] ?? null;
-                }
-                // Resolve relative redirect URL
-                if (!preg_match('/^https?:\/\//i', $location)) {
-                    $p        = parse_url($url);
-                    $location = $p['scheme'] . '://' . $p['host'] . '/' . ltrim($location, '/');
-                }
-                $url = $location;
-            } catch (Exception $e) {
-                self::logdebug('oauthGetAuthCode ERROR: ' . $e->getMessage());
-                break;
-            }
-        }
-        self::logdebug('oauthGetAuthCode: auth code not found');
-        return null;
-    }
-
-    private static function oauthExchangeCode(string $code, string $code_verifier, string $hardware_id): ?array {
-        $client = new GuzzleHttp\Client(['verify' => false]);
-        try {
-            $r = $client->request('POST', self::OAUTH_TOKEN_URL, [
-                'headers' => [
-                    'User-Agent'   => self::OAUTH_TOKEN_UA,
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                    'Accept'       => 'application/json',
-                ],
-                'form_params' => [
-                    'app_brand'    => 'blink',
-                    'client_id'    => self::OAUTH_CLIENT_ID,
-                    'code'         => $code,
-                    'code_verifier' => $code_verifier,
-                    'grant_type'   => 'authorization_code',
-                    'hardware_id'  => $hardware_id,
-                    'redirect_uri' => self::OAUTH_REDIRECT_URI,
-                    'scope'        => self::OAUTH_SCOPE,
-                ],
-            ]);
-            if ($r->getStatusCode() === 200) {
-                return json_decode((string)$r->getBody(), true);
-            }
-            self::logdebug('oauthExchangeCode unexpected status: ' . $r->getStatusCode());
-            return null;
-        } catch (Exception $e) {
-            self::logdebug('oauthExchangeCode ERROR: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    private static function oauthRefreshAccessToken(string $refresh_token, string $hardware_id): ?array {
-        $client = new GuzzleHttp\Client(['verify' => false]);
-        try {
-            $r = $client->request('POST', self::OAUTH_TOKEN_URL, [
-                'headers' => [
-                    'User-Agent'   => self::OAUTH_TOKEN_UA,
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                    'Accept'       => 'application/json',
-                ],
-                'form_params' => [
-                    'grant_type'    => 'refresh_token',
-                    'refresh_token' => $refresh_token,
-                    'client_id'     => self::OAUTH_CLIENT_ID,
-                    'scope'         => self::OAUTH_SCOPE,
-                    'hardware_id'   => $hardware_id,
-                ],
-            ]);
-            if ($r->getStatusCode() === 200) {
-                return json_decode((string)$r->getBody(), true);
-            }
-            self::logdebug('oauthRefreshAccessToken unexpected status: ' . $r->getStatusCode());
-            return null;
-        } catch (Exception $e) {
-            self::logdebug('oauthRefreshAccessToken ERROR: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    private static function getTierInfo(string $email): bool {
-        $access_token = self::getConfigBlinkAccount($email, 'token');
-        $client       = new GuzzleHttp\Client(['verify' => false]);
-        try {
-            $r    = $client->request('GET', self::TIER_ENDPOINT, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $access_token,
-                    'User-Agent'    => self::OAUTH_TOKEN_UA,
-                ],
-            ]);
-            $data = json_decode((string)$r->getBody(), true);
-            self::logdebug('getTierInfo: ' . print_r($data, true));
-            $region_id  = $data['tier']      ?? ($data['region_id'] ?? ($data['region'] ?? 'prod'));
-            $account_id = $data['account_id'] ?? ($data['id']      ?? '');
-            if ($region_id)  { self::setConfigBlinkAccount($email, 'region',    $region_id);  }
-            if ($account_id) { self::setConfigBlinkAccount($email, 'accountId', $account_id); }
-            return true;
-        } catch (Exception $e) {
-            self::logdebug('getTierInfo ERROR: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    private static function finalizeOAuth(string $email, CookieJar $jar, string $verifier, string $challenge, string $hardware_id, ?string $startUrl): bool {
-        $code = self::oauthGetAuthCode($jar, $hardware_id, $challenge, $startUrl);
-        if (!$code) {
-            self::logerror('OAuth: authorization code not obtained');
-            return false;
-        }
-        $tokens = self::oauthExchangeCode($code, $verifier, $hardware_id);
-        if (!$tokens || empty($tokens['access_token'])) {
-            self::logerror('OAuth: token exchange failed');
-            return false;
-        }
-        self::setConfigBlinkAccount($email, 'token', $tokens['access_token']);
-        if (!empty($tokens['refresh_token'])) {
-            self::setConfigBlinkAccount($email, 'refresh_token', $tokens['refresh_token']);
-        }
-        self::setConfigBlinkAccount($email, 'oauth_hardware_id', $hardware_id);
-        self::setConfigBlinkAccount($email, 'oauth_cookies', self::serializeCookieJar($jar));
-        if (!self::getTierInfo($email)) {
-            self::logerror('OAuth: tier_info lookup failed');
-            return false;
-        }
-        self::setConfigBlinkAccount($email, 'verif', 'true');
-        return true;
-    }
-
     // -------------------------------------------------------------------------
 
     private static function cronRefresh($cron_interval,$_eqLogic_id = null)
@@ -662,30 +317,168 @@ class blink_camera extends eqLogic
     public static function delAllConfigBlinkAccounts() {
         config::remove('configBlinkAccounts','blink_camera');
     }
+
+    // -------------------------------------------------------------------------
+    // Centralized authenticated REST API call wrapper.
+    //
+    // Handles:
+    //  - 401 -> automatic OAuth refresh_token + retry once
+    //  - 429 -> respect Retry-After (capped) + retry once
+    //  - 5xx -> linear backoff + retry once
+    //  - logging, locking, error swallowing consistent across callers
+    //
+    // $opts is a Guzzle request options array (headers, json, query, ...).
+    // Returns ['status'=>int, 'body'=>?array, 'raw'=>?string, 'error'=>?string].
+    // -------------------------------------------------------------------------
+    private static function tryRefreshToken(string $email): bool {
+        $refreshToken = self::getConfigBlinkAccount($email, 'refresh_token');
+        $hardwareId   = self::getConfigBlinkAccount($email, 'oauth_hardware_id');
+        if (!$refreshToken || !$hardwareId) {
+            self::logdebug('tryRefreshToken('.$email.'): missing refresh_token or hardware_id');
+            return false;
+        }
+        $tokens = self::oauthRefreshAccessToken($refreshToken, $hardwareId);
+        if (!$tokens || empty($tokens['access_token'])) {
+            self::logdebug('tryRefreshToken('.$email.'): refresh failed');
+            return false;
+        }
+        self::setConfigBlinkAccount($email, 'token', $tokens['access_token']);
+        if (!empty($tokens['refresh_token'])) {
+            self::setConfigBlinkAccount($email, 'refresh_token', $tokens['refresh_token']);
+        }
+        self::logdebug('tryRefreshToken('.$email.'): success');
+        return true;
+    }
+
+    public static function apiCall(string $email, string $method, string $url, array $opts = [], string $lockId = 'apiCall') {
+        $maxRetries = 1;
+        $attempt    = 0;
+        $lastResult = ['status' => 0, 'body' => null, 'raw' => null, 'error' => null];
+        $refreshed  = false;
+        while ($attempt <= $maxRetries) {
+            $attempt++;
+            $token  = self::getConfigBlinkAccount($email, 'token');
+            $region = self::getConfigBlinkAccount($email, 'region');
+            $accId  = self::getConfigBlinkAccount($email, 'accountId');
+            if ($token === '' || $region === '' || $accId === '') {
+                self::logdebug('apiCall('.$email.'): missing token/region/account, abort');
+                return ['status' => 0, 'body' => null, 'raw' => null, 'error' => 'unauthenticated'];
+            }
+            $baseuri = 'https://rest.'.$region.'.immedia-semi.com';
+            $fullUrl = $baseuri.'/'.ltrim($url, '/');
+            $reqOpts = array_replace_recursive([
+                'http_errors' => false,
+                'headers'     => [
+                    'Authorization' => 'Bearer '.$token,
+                    'User-Agent'    => self::BLINK_DEFAULT_USER_AGENT,
+                    'Accept'        => '*/*',
+                ],
+            ], $opts);
+            $lock = self::checkAndGetLock($lockId);
+            self::logDebugBlinkAPIRequest('CALL['.$lockId.' '.$method.' attempt='.$attempt.']: '.$fullUrl);
+            try {
+                $client = new GuzzleHttp\Client(['verify' => false, 'base_uri' => $baseuri]);
+                $r = $client->request($method, $fullUrl, $reqOpts);
+                self::releaseLock($lock);
+            } catch (Exception $e) {
+                self::releaseLock($lock);
+                self::logdebug('apiCall transport error: '.$e->getMessage());
+                $lastResult = ['status' => 0, 'body' => null, 'raw' => null, 'error' => $e->getMessage()];
+                if ($attempt <= $maxRetries) { usleep(500000); continue; }
+                return $lastResult;
+            }
+            $status = $r->getStatusCode();
+            $raw    = (string)$r->getBody();
+            $body   = json_decode($raw, true);
+            self::logDebugBlinkAPIResponse('STATUS='.$status.' '.substr($raw, 0, 500));
+            $lastResult = ['status' => $status, 'body' => $body, 'raw' => $raw, 'error' => null];
+
+            if ($status === 401 && !$refreshed) {
+                self::logdebug('apiCall: 401 received, attempting refresh_token');
+                $refreshed = true;
+                if (self::tryRefreshToken($email)) { continue; }
+                return $lastResult;
+            }
+            if ($status === 429 && $attempt <= $maxRetries) {
+                $retryAfter = (int)$r->getHeaderLine('Retry-After');
+                $wait       = max(1, min($retryAfter ?: 2, 10));
+                self::logdebug('apiCall: 429 received, sleeping '.$wait.'s');
+                sleep($wait);
+                continue;
+            }
+            if ($status >= 500 && $status < 600 && $attempt <= $maxRetries) {
+                self::logdebug('apiCall: '.$status.' received, backoff and retry');
+                usleep(1500000);
+                continue;
+            }
+            return $lastResult;
+        }
+        return $lastResult;
+    }
+
+    // -------------------------------------------------------------------------
+    // Detection notification webhook (POST endpoint protected by shared token).
+    // -------------------------------------------------------------------------
+    public static function getWebhookToken(): string {
+        $token = config::byKey('webhook_token', 'blink_camera', '');
+        if (!$token || strlen($token) < 32) {
+            $token = bin2hex(random_bytes(24));
+            config::save('webhook_token', $token, 'blink_camera');
+        }
+        return $token;
+    }
+
+    public static function regenerateWebhookToken(): string {
+        $token = bin2hex(random_bytes(24));
+        config::save('webhook_token', $token, 'blink_camera');
+        return $token;
+    }
+
+    public static function getWebhookUrl(): string {
+        $base  = trim(network::getNetworkAccess(config::byKey('blink_base_url', 'blink_camera') ?: 'internal', '', '', false), '/');
+        return $base . '/plugins/blink_camera/core/php/notification.php?token=' . self::getWebhookToken();
+    }
+
+    /**
+     * Handle a detection notification from an external bridge.
+     * Returns true if a matching camera was found and updated.
+     */
+    public static function handleDetectionNotification(array $payload): bool {
+        $networkId = isset($payload['network_id']) ? (string)$payload['network_id'] : '';
+        $cameraId  = isset($payload['camera_id'])  ? (string)$payload['camera_id']  : '';
+        $source    = isset($payload['source'])     ? (string)$payload['source']     : 'pir';
+        $timestamp = isset($payload['timestamp']) && $payload['timestamp'] !== ''
+            ? (string)$payload['timestamp']
+            : date(self::FORMAT_DATETIME_OUT);
+        if ($networkId === '' || $cameraId === '') {
+            self::logwarn('handleDetectionNotification: missing network_id or camera_id');
+            return false;
+        }
+        $matched = false;
+        foreach (self::byType('blink_camera', true) as $cam) {
+            if ((string)$cam->getConfiguration('network_id') === $networkId
+                && (string)$cam->getConfiguration('camera_id') === $cameraId) {
+                $cam->checkAndUpdateCmd('last_motion_event', $timestamp . '|' . $source);
+                self::loginfo('Detection notification for ' . $cam->getName() . ' (' . $source . ' @ ' . $timestamp . ')');
+                if ($cam->getIsEnable() == 1) {
+                    try { $cam->getLastEventDate(true); }
+                    catch (Exception $e) { self::logdebug('handleDetectionNotification refresh error: ' . $e->getMessage()); }
+                }
+                $matched = true;
+            }
+        }
+        if (!$matched) {
+            self::logwarn('handleDetectionNotification: no camera matches network=' . $networkId . ' camera=' . $cameraId);
+        }
+        return $matched;
+    }
+
     public static function queryGet(string $url, string $email) {
-        $_tokenBlink=self::getConfigBlinkAccount($email,'token');
-        $_accountBlink=self::getConfigBlinkAccount($email,'accountId');
-        $_regionBlink=self::getConfigBlinkAccount($email,'region');
-        $jsonrep=null;
-        self::logdebug("queryGet - email=".$email." - token / accountId / region : ".$_tokenBlink." / " .$_accountBlink." / ".$_regionBlink);
-        if (!$_tokenBlink=="" && !$_accountBlink=="" && !$_regionBlink=="") {
-            $lock=self::checkAndGetLock('getQuery');
-            self::logDebugBlinkAPIRequest("CALL[queryGet]: ".'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url);
-            $client = new GuzzleHttp\Client(['verify' => false,'base_uri' => 'https://rest.'.$_regionBlink.'.immedia-semi.com/'.$url]);
-            $r = $client->request('GET', $url, [
-                //['http_errors' => false],
-                'headers' => [
-                    //'Host'=> 'rest-'.$_regionBlink.'.immedia-semi.com',
-                    'Authorization' => 'Bearer ' . $_tokenBlink,
-                    'User-Agent' =>  ''.self::BLINK_DEFAULT_USER_AGENT,
-                    'Accept' => '/'
-                    ]
-            ]);
-            self::releaseLock($lock);
-            $jsonrep= json_decode($r->getBody(), true);
-            self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
-        }    
-        return $jsonrep;
+        $result = self::apiCall($email, 'GET', $url, [], 'queryGet');
+        if ($result['status'] >= 200 && $result['status'] < 300) {
+            return $result['body'];
+        }
+        return null;
     }
  
     public static function queryGetMedia(string $url, string $file_path, string $email) {
@@ -804,39 +597,12 @@ class blink_camera extends eqLogic
         }
     }
     public static function queryPost(string $url, string $datas="{}", string $email) {
-        //self::logdebug('queryPost(url='.$url.') START');
-        //self::logdebug('queryPost datas:'.$datas);
-        $_tokenBlink=self::getConfigBlinkAccount($email,'token');
-        $_regionBlink=self::getConfigBlinkAccount($email,'region');
-        self::logDebugBlinkAPIRequest("CALL[queryPost]: ".$url);
-        $lock=self::checkAndGetLock('queryPost'); 
-        try {
-            $baseuri='https://rest.'.$_regionBlink.'.immedia-semi.com';
-            $client = new GuzzleHttp\Client(['verify' => false,'base_uri' =>  $baseuri]);
-            $r = $client->request('POST',$baseuri.'/'.$url,  [
-                //['http_errors' => false],
-                ['timeout' => 1],
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $_tokenBlink,
-                    'User-Agent' =>  self::BLINK_DEFAULT_USER_AGENT
-                ],
-                'json' => json_decode($datas)
-            ]);
-            //self::releaseLock($lock);
-            $jsonrep= json_decode($r->getBody(), true);
-            self::logDebugBlinkAPIResponse(print_r($jsonrep,true));
-            return $jsonrep;
-
-        }  catch (Exception $e) {
-            self::releaseLock($lock);
-            throw $e;
-            /*$response = $e->getResponse();
-            $responseJson = json_decode($response->getBody()->getContents(),true);
-            if ($responseJson['code']=='307') {
-                self::logDebugBlinkResponse($responseJson['message']);
-            }*/
+        $payload = json_decode($datas);
+        $result  = self::apiCall($email, 'POST', $url, ['json' => $payload], 'queryPost');
+        if ($result['status'] >= 200 && $result['status'] < 300) {
+            return $result['body'];
         }
-        return "{}";
+        return null;
     }
    /* public  function queryPostLiveview() {
         $network_id=$this->getConfiguration("network_id");
@@ -1331,6 +1097,63 @@ class blink_camera extends eqLogic
         //}
     }
         
+    // -------------------------------------------------------------------------
+    // Centralized Blink device-type metadata.
+    //
+    // For every known camera/device type, declares:
+    //   - collection: the JSON key under which Blink's homescreen lists it
+    //                 ('cameras', 'owls', 'doorbells', ...).
+    //   - url_segment: the URL path fragment used for /api/v1 endpoints
+    //                  (config, clip, thumbnail, ...).
+    //   - has_temperature / has_wifi: whether the cam reports those values
+    //                                  (battery-powered outdoor cams do, mains
+    //                                  Mini/Doorbell don't).
+    //   - human: i18n key resolved to the human-readable model name.
+    //
+    // Adding a new model is a single-line operation here; downstream callers
+    // (requestNewMedia, cameraArm, cameraDisarm, postSave) then pick it up.
+    // -------------------------------------------------------------------------
+    public static function getDeviceTypeMap(): array {
+        // 'mains_arm' = arm/disarm goes via /api/v1/.../<segment>/<id>/config
+        // with {"enabled":true|false}. The legacy /network/.../camera/.../enable
+        // path is used for the older battery-powered outdoor cams (xt/xt2/catalina/sedona).
+        return [
+            // Battery outdoor cameras — legacy /network arm/disarm path.
+            'xt'       => ['collection' => 'cameras',   'url_segment' => 'cameras',   'has_temperature' => true,  'has_wifi' => true,  'mains_arm' => false, 'human' => 'xt'],
+            'xt2'      => ['collection' => 'cameras',   'url_segment' => 'cameras',   'has_temperature' => true,  'has_wifi' => true,  'mains_arm' => false, 'human' => 'xt2'],
+            'catalina' => ['collection' => 'cameras',   'url_segment' => 'cameras',   'has_temperature' => true,  'has_wifi' => true,  'mains_arm' => false, 'human' => 'catalina'],
+            'sedona'   => ['collection' => 'cameras',   'url_segment' => 'cameras',   'has_temperature' => true,  'has_wifi' => true,  'mains_arm' => false, 'human' => 'sedona'],
+            // Mains-powered Indoor (legacy "white").
+            'white'    => ['collection' => 'cameras',   'url_segment' => 'cameras',   'has_temperature' => true,  'has_wifi' => true,  'mains_arm' => false, 'human' => 'white'],
+            // Mini family — listed under 'owls' in the homescreen response, both for owl and hawk.
+            'owl'      => ['collection' => 'owls',      'url_segment' => 'owls',      'has_temperature' => false, 'has_wifi' => false, 'mains_arm' => true,  'human' => 'owl'],
+            'hawk'     => ['collection' => 'owls',      'url_segment' => 'owls',      'has_temperature' => false, 'has_wifi' => false, 'mains_arm' => true,  'human' => 'hawk'],
+            // Doorbell.
+            'lotus'    => ['collection' => 'doorbells', 'url_segment' => 'doorbells', 'has_temperature' => false, 'has_wifi' => false, 'mains_arm' => true,  'human' => 'lotus'],
+        ];
+    }
+
+    public static function getDeviceTypeInfo(string $type): array {
+        $map = self::getDeviceTypeMap();
+        if (isset($map[$type])) {
+            return $map[$type];
+        }
+        // Unknown type → fall back to legacy "camera" wiring; the user gets the
+        // basic feature set rather than nothing.
+        return ['collection' => 'cameras', 'url_segment' => 'cameras', 'has_temperature' => true, 'has_wifi' => true, 'mains_arm' => false, 'human' => 'type_name_missing'];
+    }
+
+    public static function getKnownDeviceCollections(): array {
+        $map = self::getDeviceTypeMap();
+        $cols = [];
+        foreach ($map as $info) {
+            if (!in_array($info['collection'], $cols, true)) {
+                $cols[] = $info['collection'];
+            }
+        }
+        return $cols;
+    }
+
     /*     * *********************Méthodes d'instance************************* */
     public function getBlinkDeviceType() {
         $valeur = $this->getConfiguration("camera_type");
@@ -1339,19 +1162,14 @@ class blink_camera extends eqLogic
         if ($valeur=="" && $this->isConfigured()&& self::isConnected($email)) {
             $datas=self::getHomescreenData("getBlinkDeviceType",$email);
             $camera_id = $this->getConfiguration("camera_id");
-            foreach ($datas['cameras'] as $device) {
-                if ("".$device['id']==="".$camera_id) {
-                    $valeur=$device['type'];
-                }
-            }
-            foreach ($datas['owls'] as $device) {
-                if ("".$device['id']==="".$camera_id) {
-                    $valeur=$device['type'];
-                }
-            }
-            foreach ($datas['doorbells'] as $device) {
-                if ("".$device['id']==="".$camera_id) {
-                    $valeur=$device['type'];
+            // Iterate through every known device collection so adding a new
+            // entry in getDeviceTypeMap() automatically extends the lookup.
+            foreach (self::getKnownDeviceCollections() as $col) {
+                if (!isset($datas[$col]) || !is_array($datas[$col])) { continue; }
+                foreach ($datas[$col] as $device) {
+                    if ("".$device['id']==="".$camera_id) {
+                        $valeur=$device['type'] ?? $valeur;
+                    }
                 }
             }
             self::logdebug('getBlinkDeviceType '.$this->getId().' NEW TYPE DEVICE='.$valeur);
@@ -1364,12 +1182,15 @@ class blink_camera extends eqLogic
     }
 
     public function getBlinkHumanDeviceType() {
-        $type=$this->getBlinkDeviceType();
-        if (__($type, __FILE__)==$type) {
+        return self::getBlinkHumanDeviceTypeStatic($this->getBlinkDeviceType());
+    }
+
+    public static function getBlinkHumanDeviceTypeStatic(string $type): string {
+        if ($type === '') { return ''; }
+        if (__($type, __FILE__) == $type) {
             return __('type_name_missing', __FILE__).' : '.$type;
-        } else {
-            return __($type, __FILE__);
         }
+        return __($type, __FILE__);
     }
     private static function getMediaLocal($clip_id_req="",$equipement_id=null) {
         $cam = self::byId($equipement_id);
@@ -1642,6 +1463,33 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         //file_put_contents($folderJson,$result);
         return json_decode($result,true);        
     }
+    // Number of items in the last raw "media/changed" page response (all cameras
+    // combined, before per-camera filtering). Used to detect the real end of
+    // pagination — distinct from "this camera has no event on this page", which
+    // would still leave more pages to scan.
+    public static $_lastCloudRawCount = -1;
+
+    /**
+     * Raw decoded "media/changed" API response for one page (all cameras combined).
+     * Used by forceCleanup to walk pagination in chronological-desc order and
+     * collect the most recent N events for the current camera, regardless of
+     * how dense (or sparse) other cameras' activity is between them.
+     */
+    public function getCloudMediaPageRaw(int $page) {
+        $email = $this->getConfiguration('email');
+        if (!self::isConnected($email) || !$this->isConfigured()) { return null; }
+        $accountId = self::getConfigBlinkAccount($email, 'accountId');
+        $url = '/api/v2/accounts/'.$accountId.'/media/changed?since=2021-04-19T00:00:00+0000&page='.$page;
+        try {
+            $jsonrep = self::queryGet($url, $email);
+        } catch (Exception $e) {
+            self::logdebug('getCloudMediaPageRaw error: ' . $e->getMessage());
+            return null;
+        }
+        if (!is_array($jsonrep)) { return null; }
+        return $jsonrep;
+    }
+
     public function getVideoListCloud(int $page=1)
     {
         $network_id = $this->getConfiguration("network_id");
@@ -1649,19 +1497,23 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         $camera_name = $this->getConfiguration("camera_name");
         $email = $this->getConfiguration("email");
         $jsonstr="erreur_cloud";
+        self::$_lastCloudRawCount = -1;
         if (self::isConnected($email) && $this->isConfigured()) {
             $_tokenBlink=self::getConfigBlinkAccount($email,'token');
 
             $_accountBlink=self::getConfigBlinkAccount($email,'accountId');
             $_regionBlink=self::getConfigBlinkAccount($email,'region');
             $url='/api/v2/accounts/'.$_accountBlink.'/media/changed?since=2021-04-19T00:00:00+0000&page='.$page;
-            
+
             try {
                 self::logDebugBlinkAPIRequest("CALL[getVideoListCloud] -->");
 //                self::checkAndGetLock('net-'.$network_id,2);
                 $jsonrep=self::queryGet($url,$email);
 
                 if (isset($jsonrep)) {
+                    self::$_lastCloudRawCount = isset($jsonrep['media']) && is_array($jsonrep['media'])
+                        ? count($jsonrep['media'])
+                        : 0;
                     $jsonstr =self::reformatVideoDatas($jsonrep);
 //                    $folderJson=__DIR__.'/../../medias/'.$this->getId().'/getlistvideocloud_result.json';
 //                    file_put_contents($folderJson,json_encode($jsonstr));
@@ -1838,15 +1690,16 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         $jsonrep=json_decode('["message":"erreur"]');
         if (($type==="clip" || $type ==="thumbnail" ) &&self::isConnected($email) && $this->isConfigured()) {
             $_accountBlink=self::getConfigBlinkAccount($email,'accountId');
-                    if ($typeDevice==='owl') {
-                        // https://rest.prde.immedia-semi.com/api/v1/accounts/{{accountid}}/networks/194881/owls/3287/clip
-                        $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/owls/'.$this->getConfiguration('camera_id').'/'.$type;
-                    } else if ($typeDevice==='hawk') {
-                        $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/owls/'.$this->getConfiguration('camera_id').'/'.$type;
-                    } else if ($typeDevice==='doorbells')  {
-                        $url='/api/v1/accounts/'.$_accountBlink.'/networks/'.$this->getConfiguration('network_id').'/doorbells/'.$this->getConfiguration('camera_id').'/'.$type;
-                    } else  {
-                        $url='/network/'.$this->getConfiguration('network_id').'/'.$typeDevice.'/'.$this->getConfiguration('camera_id').'/'.$type;
+                    // Resolve URL segment via the central device-type map. Legacy callers
+                    // pass "camera"/"owl"/"hawk"/"doorbells" — translate them all.
+                    $networkId = $this->getConfiguration('network_id');
+                    $cameraId  = $this->getConfiguration('camera_id');
+                    if ($typeDevice === 'owl' || $typeDevice === 'hawk') {
+                        $url = '/api/v1/accounts/'.$_accountBlink.'/networks/'.$networkId.'/owls/'.$cameraId.'/'.$type;
+                    } else if ($typeDevice === 'doorbells' || $typeDevice === 'lotus') {
+                        $url = '/api/v1/accounts/'.$_accountBlink.'/networks/'.$networkId.'/doorbells/'.$cameraId.'/'.$type;
+                    } else {
+                        $url = '/network/'.$networkId.'/camera/'.$cameraId.'/'.$type;
                     }
                     self::logDebugBlinkAPIRequest("CALL[requestNewMedia]: --> ");
                 try {
@@ -1886,75 +1739,97 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         $fileToKeep[]="last.mp4";
         $fileToKeep[]="thumbnail.jpg";
         if ($this->isConnected($email)) {
-            $pageVide=0;
-            $pageMax=100;
             $storage=$this->getConfiguration('storage');
+            $networkId=(string)$this->getConfiguration('network_id');
+            $cameraId=(string)$this->getConfiguration('camera_id');
+
             if ($storage=='local') {
-                $pageMax=1;
-            }
-            for ($page=1;$page<=$pageMax;$page++) {
-                $videosJson=$this->getVideoList($page);
-                if (isset($videosJson)) {
-                    self::logdebug( 'blink_camera->forceCleanup() list videos  : '. print_r($videosJson,true));            
-                }
-                $existVideoInPage=false;
-                // Si en cherchant des videos on a rencontré 10 pages vides, on arrete de rechercher (perfo)
-                if ($pageVide>=5) {
-                    break;
-                }
-                foreach ($videosJson as $videoApi) {
-                    $existVideoInPage=true;
-                    //self::logdebug( 'blink_camera->forceCleanup() video dans page : '. $page);
-                    break;
-                }
-                if ($existVideoInPage) {
-                    //self::logdebug( 'blink_camera->forceCleanup() process videos of page : '. $page);            
-                    $existVideoInPage=false;
-                    foreach ($existingFilesOnJeedom as $file) {
-                        if (($key = array_search($file, $fileOnCloudAndOnJeedom)) == false) {
-                            if ($file!=="." && $file!=="..") {
-                                $filename="";
-                                foreach ($videosJson as $videoApi) {
-//                                    self::logdebug( 'blink_camera->forceCleanup() videoApi : '. print_r($videoApi,true));            
-                                    if ($storage==='local' || !$videoApi['deleted']) {
-                                        $filename=$videoApi['id'].'-'.self::getDateJeedomTimezone($videoApi['created_at']).'.mp4';
-                                        if (($key = array_search($filename, $fileToDownload)) == false) {
-                                            $fileToDownload[$filename]=$videoApi['media'];
-                                            $cptVideo++;
-                                            if ($file === $filename && ($key = array_search($filename, $fileOnCloudAndOnJeedom)) == false) {
-                                                $fileOnCloudAndOnJeedom[]=$filename;
-  //self::logdebug( 'blink_camera->forceCleanup() fichier existant trouve sur le cloud : '. $filename);
-                                            }
-                                            $filename=$videoApi['id'].'-'.self::getDateJeedomTimezone($videoApi['created_at']).'.jpg';
-                                            $fileCloudThumb[$filename]=$videoApi['thumbnail'];
-                                            if ($file === $filename && ($key = array_search($filename, $fileOnCloudAndOnJeedom)) == false) {
-                                                $fileOnCloudAndOnJeedom[]=$filename;
-                    //self::logdebug( 'blink_camera->forceCleanup() fichier existant trouve sur le cloud : '. $filename);
-                                            }
-                                        }
-                                    }
-                                }
+                // Stockage USB : un seul "page=1" possible via getVideoList, on garde l'ancien chemin.
+                $videosJson=$this->getVideoList(1);
+                if (is_array($videosJson)) {
+                    foreach ($videosJson as $videoApi) {
+                        $filename=$videoApi['id'].'-'.self::getDateJeedomTimezone($videoApi['created_at']).'.mp4';
+                        if (!array_key_exists($filename, $fileToDownload)) {
+                            $fileToDownload[$filename]=$videoApi['media'];
+                            $thumbName=$videoApi['id'].'-'.self::getDateJeedomTimezone($videoApi['created_at']).'.jpg';
+                            $fileCloudThumb[$thumbName]=$videoApi['thumbnail'];
+                            if (in_array($filename, $existingFilesOnJeedom, true)) {
+                                $fileOnCloudAndOnJeedom[]=$filename;
+                            }
+                            if (in_array($thumbName, $existingFilesOnJeedom, true)) {
+                                $fileOnCloudAndOnJeedom[]=$thumbName;
                             }
                         }
                     }
-                } else {
-                    $pageVide++;
                 }
-            }  
-            //self::logdebug( 'blink_camera->forceCleanup() Videos listed on cloud : '. count($fileToDownload));     
+            } else {
+                // Cloud : parcours direct de /media/changed (ordre décroissant côté Blink)
+                // et arrêt dès qu'on a nbMax vidéos pour CETTE caméra. Les pages précédentes
+                // peuvent contenir 0 vidéo Porche (autres caméras très actives) sans nous
+                // arrêter — seule une page totalement vide signale la fin de pagination.
+                $pageMax=200; // garde-fou
+                $emptyApiPagesInARow=0;
+                $targetCount=$nbMax > 0 ? $nbMax : PHP_INT_MAX;
+                for ($page=1;$page<=$pageMax;$page++) {
+                    $rawPage=$this->getCloudMediaPageRaw($page);
+                    if ($rawPage === null) {
+                        self::logdebug('forceCleanup: API error on page '.$page.', stopping');
+                        break;
+                    }
+                    $rawCount=isset($rawPage['media']) && is_array($rawPage['media']) ? count($rawPage['media']) : 0;
+                    if ($rawCount === 0) {
+                        // Vraie fin de pagination Blink (toutes caméras confondues).
+                        $emptyApiPagesInARow++;
+                        if ($emptyApiPagesInARow >= 2) {
+                            self::logdebug('forceCleanup: end of Blink pagination at page '.$page);
+                            break;
+                        }
+                        continue;
+                    }
+                    $emptyApiPagesInARow=0;
+                    $addedThisPage=0;
+                    foreach ($rawPage['media'] as $videoApi) {
+                        if ((string)$videoApi['network_id'] !== $networkId) { continue; }
+                        if ((string)$videoApi['device_id']  !== $cameraId)  { continue; }
+                        if (!isset($videoApi['deleted']) || $videoApi['deleted']) { continue; }
+                        $filename=$videoApi['id'].'-'.self::getDateJeedomTimezone($videoApi['created_at']).'.mp4';
+                        if (array_key_exists($filename, $fileToDownload)) { continue; }
+                        $fileToDownload[$filename]=$videoApi['media'];
+                        $cptVideo++;
+                        $addedThisPage++;
+                        $thumbName=$videoApi['id'].'-'.self::getDateJeedomTimezone($videoApi['created_at']).'.jpg';
+                        $fileCloudThumb[$thumbName]=isset($videoApi['thumbnail']) ? $videoApi['thumbnail'] : '';
+                        if (in_array($filename, $existingFilesOnJeedom, true)) {
+                            $fileOnCloudAndOnJeedom[]=$filename;
+                        }
+                        if (in_array($thumbName, $existingFilesOnJeedom, true)) {
+                            $fileOnCloudAndOnJeedom[]=$thumbName;
+                        }
+                        if ($cptVideo >= $targetCount) { break; }
+                    }
+                    self::logdebug('forceCleanup page '.$page.' raw='.$rawCount.' addedForCamera='.$addedThisPage.' totalForCamera='.$cptVideo);
+                    if ($cptVideo >= $targetCount) {
+                        // On a déjà les N plus récentes pour cette caméra, on s'arrête.
+                        break;
+                    }
+                }
+            }
+            //self::logdebug( 'blink_camera->forceCleanup() Videos listed on cloud : '. count($fileToDownload));
                    
             $cptVideo=0;
 
             // TELECHARGEMENT DES FICHIERS MANQUANTS
+            // Trier par clé (filename = "<id>-<YYYY-MM-DD_HHMMSS>.mp4") décroissant
+            // pour que les N plus récentes vidéos soient en tête lorsque nb_max_video > 0.
             $fileToDownload=array_unique($fileToDownload);
-            arsort($fileToDownload);
+            krsort($fileToDownload);
             
             // Récupération des videos
             foreach ($fileToDownload as $filename => $urlMedia) {
                 if ($nbMax>0 && $cptVideo>=$nbMax) {
                     break;
                 } 
-                if (($key = array_search($filename, $fileOnCloudAndOnJeedom)) == false) {
+                if (array_search($filename, $fileOnCloudAndOnJeedom) === false) {
                     if ($download) { // Si demandé, on télécharge les vidéos disponibles
                         $path=$this->getMedia($urlMedia, $this->getId(), $filename);
                         //self::logdebug( 'blink_camera->forceCleanup() download file: '. $filename);
@@ -1982,10 +1857,10 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                     $fileToKeep[]=$file;
                     $cptVideo++;
                 }
-                if (($key = array_search($file, $fileToKeep)) == false) {
+                if (array_search($file, $fileToKeep) === false) {
                     if ($file!=="." && $file!=="..") {
                         // On ne supprime pas les thumbnail de camera
-                        if (preg_match("#.*".self::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($file))==false){
+                        if (preg_match("#.*".self::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($file))!==1){
                             $fileToDelete[]=$file;
                         }
                     }
@@ -2422,18 +2297,18 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
     {
         $email=$this->getConfiguration('email');
         if (self::isConnected($email) && $this->isConfigured()) {
-            $account_id=self::getConfigBlinkAccount($email,'token');
+            // BUG FIX: was 'token' instead of 'accountId' — the Mini/Mini2/Doorbell URL
+            // contained the bearer token where the numeric account_id was expected,
+            // making /config requests fail silently.
+            $account_id=self::getConfigBlinkAccount($email,'accountId');
             $network_id=$this->getConfiguration('network_id');
             $camera_id=$this->getConfiguration('camera_id');
-            $datas = "{\"enabled\":true}";
-            if ($this->getBlinkDeviceType()=='owl') {
-                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
-            } else if ($this->getBlinkDeviceType()=='hawk') {
-                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
-            } else if ($this->getBlinkDeviceType()=='lotus') {
-                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
+            $info = self::getDeviceTypeInfo($this->getBlinkDeviceType());
+            if ($info['mains_arm']) {
+                $url   = '/api/v1/accounts/'.$account_id.'/networks/'.$network_id.'/'.$info['url_segment'].'/'.$camera_id.'/config';
+                $datas = "{\"enabled\":true}";
             } else {
-                $url="/network/".$network_id."/camera/".$camera_id."/enable";
+                $url   = '/network/'.$network_id.'/camera/'.$camera_id.'/enable';
                 $datas = "{}";
             }
             try {
@@ -2464,15 +2339,12 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $account_id=self::getConfigBlinkAccount($email,'accountId');
             $network_id=$this->getConfiguration('network_id');
             $camera_id=$this->getConfiguration('camera_id');
-            $datas = "{\"enabled\":false}";
-            if ($this->getBlinkDeviceType()=='owl') {
-                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
-            } else if ($this->getBlinkDeviceType()=='hawk') {
-                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/owls/".$camera_id."/config";
-            } else if ($this->getBlinkDeviceType()=='lotus') {
-                $url="/api/v1/accounts/".$account_id."/networks/".$network_id."/doorbells/".$camera_id."/config";
+            $info = self::getDeviceTypeInfo($this->getBlinkDeviceType());
+            if ($info['mains_arm']) {
+                $url   = '/api/v1/accounts/'.$account_id.'/networks/'.$network_id.'/'.$info['url_segment'].'/'.$camera_id.'/config';
+                $datas = "{\"enabled\":false}";
             } else {
-                $url="/network/".$network_id."/camera/".$camera_id."/disable";
+                $url   = '/network/'.$network_id.'/camera/'.$camera_id.'/disable';
                 $datas = "{}";
             }
             try {
@@ -2647,6 +2519,40 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $info->setSubType('string');
             $info->setOrder(6);
             $info->save();
+        }
+        $info = $this->getCmd(null, 'last_motion_event');
+        if (!is_object($info)) {
+            self::loginfo('Create new information : last_motion_event');
+            $info = new blink_cameraCmd();
+            $info->setName(__('Dernière notification de détection', __FILE__));
+            $info->setLogicalId('last_motion_event');
+            $info->setEqLogic_id($this->getId());
+            $info->setType('info');
+            $info->setSubType('string');
+            $info->setIsVisible(0);
+            $info->setIsHistorized(0);
+            $info->setOrder(7);
+            $info->save();
+        }
+        $info = $this->getCmd(null, 'model');
+        if (!is_object($info)) {
+            self::loginfo('Create new information : model');
+            $info = new blink_cameraCmd();
+            $info->setName(__('Modèle', __FILE__));
+            $info->setLogicalId('model');
+            $info->setEqLogic_id($this->getId());
+            $info->setType('info');
+            $info->setSubType('string');
+            $info->setIsVisible(0);
+            $info->setIsHistorized(0);
+            $info->setOrder(8);
+            $info->save();
+        }
+        // Refresh "model" info every time the equipment is saved.
+        $type = $this->getBlinkDeviceType();
+        if ($type !== '' && $type !== null) {
+            $human = self::getBlinkHumanDeviceTypeStatic($type);
+            $this->checkAndUpdateCmd('model', $type . ' (' . $human . ')');
         }
 
         $info = $this->getCmd(null, 'thumbnail');

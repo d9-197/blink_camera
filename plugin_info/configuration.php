@@ -128,6 +128,20 @@ if (!isConnect()) {
             </div>
             <label class="col-lg-5">{{Mode eco desc}}</label>
         </div>
+        <h4 class="icon_blue"><i class="fa fa-bell"></i> {{Notifications de détection (webhook)}}</h4>
+        <div class="form-group">
+            <label class="col-lg-4 control-label">{{URL du webhook}}</label>
+            <div class="col-lg-7">
+                <input id="webhook_url" type="text" class="form-control" readonly value="" />
+            </div>
+            <div class="col-lg-1">
+                <a id="webhook_regen" class="btn btn-default" title="{{Régénérer le jeton}}"><i class="fa fa-refresh"></i></a>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-12">{{webhook_desc}}</label>
+        </div>
+
         <h4 class="icon_blue"><i class="fa fa-lock"></i> {{Sauvegarde}}</h4>
         <div class="form-group" id="medias_backup">
             <label class="col-lg-6 control-label">{{Inclure les vidéos/images des caméras dans la sauvegarde Jeedom ?}}</label>
@@ -160,6 +174,29 @@ if (!isConnect()) {
                 document.querySelector('#warning_interval').style.display = 'none';
                 document.querySelector('#scan_interval_select').removeClass("danger");
             }
-        })
+        });
+        function loadWebhookInfo(action) {
+            domUtils.ajax({
+                type: 'POST',
+                url: 'plugins/blink_camera/core/ajax/blink_camera.ajax.php',
+                data: { action: action },
+                dataType: 'json',
+                error: function(){},
+                success: function(data){
+                    if (data && data.state === 'ok') {
+                        try {
+                            var p = JSON.parse(data.result);
+                            document.querySelector('#webhook_url').value = p.url || '';
+                        } catch(e) {}
+                    }
+                }
+            });
+        }
+        loadWebhookInfo('getWebhookInfo');
+        document.querySelector('#webhook_regen').addEventListener('click', function(event) {
+            event.preventDefault();
+            if (!confirm('{{Régénérer le jeton invalidera l\'URL actuelle. Continuer ?}}')) return;
+            loadWebhookInfo('regenerateWebhookToken');
+        });
     </script>
 <?php include_file('desktop', 'blink_camera', 'js', 'blink_camera');?>
