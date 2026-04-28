@@ -1,3 +1,12 @@
+> 2026-04-28
+  + V4.0.0
+  + **Correctif majeur "Forcer le téléchargement"** : sur les comptes avec plusieurs caméras très actives, certaines caméras (ex. peu actives entre deux pics) ne récupéraient plus les vidéos les plus récentes — la pagination s'arrêtait après quelques pages "sans cette caméra" alors que d'autres pages plus loin contenaient les vidéos de la nuit/journée. Refonte de la boucle : parcours direct de l'API `/media/changed` Blink (ordre décroissant côté serveur), filtrage par caméra côté plugin, arrêt dès que `nb_max_video` vidéos sont collectées POUR la caméra. La fin réelle de pagination est détectée via la réponse brute (toutes caméras), plus via un compteur arbitraire de pages vides. Conséquence : les `N` vidéos les plus récentes sont toujours conservées, quel que soit le rythme des autres caméras.
+  + Correctifs annexes dans `forceCleanup` : tri du cache de téléchargement par date (clé `<id>-<YYYY-MM-DD_HHMMSS>.mp4`) au lieu de l'URL Blink, comparaisons `array_search() === false` strictes (l'index 0 ne déclenche plus de faux négatifs sur `last.mp4`).
+  + **Refonte interne** : extraction du flow OAuth dans un trait `BlinkOAuthTrait` (`core/class/BlinkOAuthTrait.php`) pour découper le fichier monolithique de la classe.
+  + **Wrapper `apiCall()` centralisé** pour les appels REST authentifiés Blink : gestion automatique des codes 401 (refresh `refresh_token` + retry), 429 (respect du `Retry-After`) et 5xx (backoff + retry). `queryGet` et `queryPost` passent désormais par ce wrapper.
+  + **Refresh `refresh_token` à la demande** (sur 401), en plus du cron horaire existant : plus aucun trou de service entre l'expiration du jeton et le prochain cron.
+  + **Réception de notifications de détection (webhook)** : nouveau endpoint `/plugins/blink_camera/core/php/notification.php` protégé par jeton. Un service externe peut POST un payload JSON (`network_id`, `camera_id`, `source`, `timestamp`) pour déclencher immédiatement le rafraîchissement de la caméra concernée. URL et jeton visibles dans la configuration du plugin (régénérables).
+  + Nouvelle commande info masquée par défaut `last_motion_event` mise à jour à chaque réception webhook (utilisable comme déclencheur de scénario sans attendre le polling).
 > 2026-04-27
   + V3.2.0
   + **Migration vers le nouveau flow d'authentification OAuth 2.0 (PKCE)** suite au changement des API Blink fin 2025.

@@ -224,7 +224,56 @@ try {
             blink_camera::logdebug("blink_camera.ajax - verifyPinCode : ".print_r(array('status' => $status),true));
             ajax::success(json_encode(array('status' => $status)));
     }
-    
+
+    if (init('action') == 'getEquipmentInfo') {
+        $cam = blink_camera::byId(init('ideq'));
+        if (!is_object($cam)) {
+            throw new Exception(__('Équipement introuvable', __FILE__));
+        }
+        $email = $cam->getConfiguration('email');
+        $info = array(
+            'name'           => $cam->getName(),
+            'eqlogic_id'     => $cam->getId(),
+            'camera_type'    => $cam->getConfiguration('camera_type'),
+            'camera_type_h'  => $cam->getBlinkHumanDeviceType(),
+            'storage'        => $cam->getConfiguration('storage'),
+            'sync_id'        => $cam->getConfiguration('sync_id'),
+            'network_id'     => $cam->getConfiguration('network_id'),
+            'network_name'   => $cam->getConfiguration('network_name'),
+            'camera_id'      => $cam->getConfiguration('camera_id'),
+            'camera_name'    => $cam->getConfiguration('camera_name'),
+            'email'          => $email,
+            'account_id'     => '',
+            'region'         => '',
+            'is_connected'   => false,
+        );
+        if ($email !== '' && $email !== null) {
+            $info['account_id']   = (string) blink_camera::getConfigBlinkAccount($email, 'accountId');
+            $info['region']       = (string) blink_camera::getConfigBlinkAccount($email, 'region');
+            $info['is_connected'] = (bool) blink_camera::isConnected($email);
+        }
+        // Snapshot of the main info commands (read-only diagnostic).
+        foreach (array('last_event','last_motion_event','battery','wifi_strength','temperature','arm_status_camera','arm_status','model','source_last_event') as $logical) {
+            $cmd = $cam->getCmd(null, $logical);
+            $info['cmd_' . $logical] = is_object($cmd) ? (string) $cmd->execCmd() : '';
+        }
+        ajax::success(json_encode($info));
+    }
+
+    if (init('action') == 'getWebhookInfo') {
+        ajax::success(json_encode(array(
+            'url'   => blink_camera::getWebhookUrl(),
+            'token' => blink_camera::getWebhookToken(),
+        )));
+    }
+    if (init('action') == 'regenerateWebhookToken') {
+        blink_camera::regenerateWebhookToken();
+        ajax::success(json_encode(array(
+            'url'   => blink_camera::getWebhookUrl(),
+            'token' => blink_camera::getWebhookToken(),
+        )));
+    }
+
 
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */

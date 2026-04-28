@@ -151,12 +151,64 @@ foreach ($eqLogics as $eqLogic) {
     </div>
     <div class="form-group blink_cfg">
         <label class="col-sm-3 control-label" >{{Caméra}}</label>
-        <div id="liste" class="col-sm-3">         
+        <div id="liste" class="col-sm-3">
         <!--select id="select_camera" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="camera_id"></select-->
         <select id="select_camera" class="form-control"></select>
         </div>
     </div>
 
+</fieldset>
+
+<fieldset class="blink_cfg" id="blink_info_panel">
+    <legend><i class="fa fa-info-circle"></i> {{Informations Blink}}
+        <button type="button" id="bt_refresh_blink_info" class="btn btn-default btn-xs" style="margin-left:10px;" title="{{Recharger}}"><i class="fas fa-sync"></i></button>
+    </legend>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Modèle}}</label>
+        <div class="col-sm-3"><input id="info_model" type="text" class="form-control" readonly /></div>
+        <label class="col-sm-2 control-label">{{Stockage}}</label>
+        <div class="col-sm-3"><input id="info_storage" type="text" class="form-control" readonly /></div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Système (network)}}</label>
+        <div class="col-sm-3"><input id="info_network" type="text" class="form-control" readonly /></div>
+        <label class="col-sm-2 control-label">{{Caméra (device)}}</label>
+        <div class="col-sm-3"><input id="info_camera" type="text" class="form-control" readonly /></div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Sync module}}</label>
+        <div class="col-sm-3"><input id="info_sync_id" type="text" class="form-control" readonly /></div>
+        <label class="col-sm-2 control-label">{{Compte / Région}}</label>
+        <div class="col-sm-3"><input id="info_account" type="text" class="form-control" readonly /></div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Email}}</label>
+        <div class="col-sm-3"><input id="info_email" type="text" class="form-control" readonly /></div>
+        <label class="col-sm-2 control-label">{{Connecté ?}}</label>
+        <div class="col-sm-3"><input id="info_connected" type="text" class="form-control" readonly /></div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Dernier événement}}</label>
+        <div class="col-sm-3"><input id="info_last_event" type="text" class="form-control" readonly /></div>
+        <label class="col-sm-2 control-label">{{Dernière notif. détection}}</label>
+        <div class="col-sm-3"><input id="info_last_motion_event" type="text" class="form-control" readonly /></div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Source dernier événement}}</label>
+        <div class="col-sm-3"><input id="info_source_last_event" type="text" class="form-control" readonly /></div>
+        <label class="col-sm-2 control-label">{{Caméra armée}}</label>
+        <div class="col-sm-3"><input id="info_armed" type="text" class="form-control" readonly /></div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Batterie}}</label>
+        <div class="col-sm-3"><input id="info_battery" type="text" class="form-control" readonly /></div>
+        <label class="col-sm-2 control-label">{{Wifi}}</label>
+        <div class="col-sm-3"><input id="info_wifi" type="text" class="form-control" readonly /></div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{Température}}</label>
+        <div class="col-sm-3"><input id="info_temp" type="text" class="form-control" readonly /></div>
+    </div>
 </fieldset>
 </form>
 </div>
@@ -206,6 +258,7 @@ foreach ($eqLogics as $eqLogic) {
 onVisible(document.querySelector("#select_camera"), () => {
   if ( document.getElementById('ideq').value!="") {
     initSelect();
+    loadEquipmentInfo();
   }
 });
 document.querySelector("#select_email").addEventListener("change", (event) => {
@@ -227,11 +280,54 @@ document.querySelector("#select_camera").addEventListener("change", (event) => {
 document.querySelector("#ideq").addEventListener("change", (event) => {
   if ( document.getElementById('ideq').value!="") {
     initSelect();
+    loadEquipmentInfo();
   }
 });
 
 document.querySelector("#bt_refresh_blink_cfg").addEventListener("click", function (e) {
   initSelect();
+  loadEquipmentInfo();
+});
+
+function loadEquipmentInfo() {
+  var ideq = document.getElementById('ideq').value;
+  if (!ideq) { return; }
+  domUtils.ajax({
+    type: "POST",
+    url: "plugins/blink_camera/core/ajax/blink_camera.ajax.php",
+    data: { action: "getEquipmentInfo", ideq: ideq },
+    dataType: 'json',
+    error: function (request, status, error) {},
+    success: function (data) {
+      if (!data || data.state !== 'ok') { return; }
+      var info;
+      try { info = JSON.parse(data.result); } catch (e) { return; }
+      var fmtBool = function (b) { return b ? '✓' : '✗'; };
+      var fmtSimple = function (v, suffix) {
+        if (v === '' || v === null || typeof v === 'undefined') { return '-'; }
+        return suffix ? v + suffix : v;
+      };
+      var armed = info.cmd_arm_status_camera !== '' ? info.cmd_arm_status_camera : info.cmd_arm_status;
+      document.querySelector('#info_model').value             = info.cmd_model || ((info.camera_type || '') + (info.camera_type_h ? ' (' + info.camera_type_h + ')' : '')) || '-';
+      document.querySelector('#info_storage').value           = fmtSimple(info.storage);
+      document.querySelector('#info_network').value           = (info.network_id || '-') + (info.network_name ? ' (' + info.network_name + ')' : '');
+      document.querySelector('#info_camera').value            = (info.camera_id || '-') + (info.camera_name ? ' (' + info.camera_name + ')' : '');
+      document.querySelector('#info_sync_id').value           = fmtSimple(info.sync_id);
+      document.querySelector('#info_account').value           = fmtSimple(info.account_id) + ' / ' + fmtSimple(info.region);
+      document.querySelector('#info_email').value             = fmtSimple(info.email);
+      document.querySelector('#info_connected').value         = fmtBool(info.is_connected === true || info.is_connected === 'true' || info.is_connected === 1);
+      document.querySelector('#info_last_event').value        = fmtSimple(info.cmd_last_event);
+      document.querySelector('#info_last_motion_event').value = fmtSimple(info.cmd_last_motion_event);
+      document.querySelector('#info_source_last_event').value = fmtSimple(info.cmd_source_last_event);
+      document.querySelector('#info_armed').value             = (armed === '1' || armed === 1) ? '✓' : ((armed === '0' || armed === 0) ? '✗' : '-');
+      document.querySelector('#info_battery').value           = fmtSimple(info.cmd_battery, '%');
+      document.querySelector('#info_wifi').value              = fmtSimple(info.cmd_wifi_strength, ' dB');
+      document.querySelector('#info_temp').value              = fmtSimple(info.cmd_temperature, '°');
+    }
+  });
+}
+document.querySelector("#bt_refresh_blink_info").addEventListener("click", function (e) {
+  loadEquipmentInfo();
 });
 document.querySelectorAll('.cmdAttr[data-l1key=id]').forEach(function (key, value) {key.unseen();})
 document.querySelectorAll('.cmdAttr[data-l1key=logicalId]').forEach(function (key, value) {key.disabled=true;})
