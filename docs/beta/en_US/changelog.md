@@ -1,3 +1,6 @@
+> 2026-06-24
+  + Security fix
+
 > 2026-04-28
   + V4.0.0
   + **Major "Force download" fix**: on accounts with several very active cameras, less active ones could miss their most recent videos — pagination stopped after a few pages "without this camera" even though further pages contained tonight/today's videos. Loop refactored: direct walk of the Blink `/media/changed` API (server-side descending order), per-camera filtering on the plugin side, stop as soon as `nb_max_video` videos are collected FOR the camera. True end of pagination is detected via the raw response (all cameras), not an arbitrary empty-page counter. As a result, the most recent `N` videos are always kept regardless of the other cameras' pace.

@@ -1,3 +1,7 @@
+> 2026-06-24
+  + Fix sécurité
+
+
 > 2026-04-28
   + V4.0.0
   + **Correctif majeur "Forcer le téléchargement"** : sur les comptes avec plusieurs caméras très actives, certaines caméras (ex. peu actives entre deux pics) ne récupéraient plus les vidéos les plus récentes — la pagination s'arrêtait après quelques pages "sans cette caméra" alors que d'autres pages plus loin contenaient les vidéos de la nuit/journée. Refonte de la boucle : parcours direct de l'API `/media/changed` Blink (ordre décroissant côté serveur), filtrage par caméra côté plugin, arrêt dès que `nb_max_video` vidéos sont collectées POUR la caméra. La fin réelle de pagination est détectée via la réponse brute (toutes caméras), plus via un compteur arbitraire de pages vides. Conséquence : les `N` vidéos les plus récentes sont toujours conservées, quel que soit le rythme des autres caméras.
