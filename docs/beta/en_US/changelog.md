@@ -1,3 +1,16 @@
+> 2026-06-24
+  + Security fix
+
+> 2026-04-28
+  + V4.0.0
+  + **Major "Force download" fix**: on accounts with several very active cameras, less active ones could miss their most recent videos — pagination stopped after a few pages "without this camera" even though further pages contained tonight/today's videos. Loop refactored: direct walk of the Blink `/media/changed` API (server-side descending order), per-camera filtering on the plugin side, stop as soon as `nb_max_video` videos are collected FOR the camera. True end of pagination is detected via the raw response (all cameras), not an arbitrary empty-page counter. As a result, the most recent `N` videos are always kept regardless of the other cameras' pace.
+  + Side fixes in `forceCleanup`: download cache sorted by date (key `<id>-<YYYY-MM-DD_HHMMSS>.mp4`) instead of Blink URL, strict `array_search() === false` comparisons (index 0 no longer triggers false negatives on `last.mp4`).
+  + **Internal refactor**: OAuth flow extracted to a `BlinkOAuthTrait` (`core/class/BlinkOAuthTrait.php`) to split the monolithic class file.
+  + **Centralized `apiCall()` wrapper** for authenticated Blink REST calls: automatic handling of 401 (`refresh_token` + retry), 429 (respect `Retry-After`) and 5xx (backoff + retry). `queryGet` and `queryPost` now go through this wrapper.
+  + **On-demand `refresh_token` refresh** (on 401), in addition to the existing hourly cron: no more service gap between token expiry and the next cron.
+  + **Detection notifications webhook**: new endpoint `/plugins/blink_camera/core/php/notification.php` protected by a shared token. An external service can POST a JSON payload (`network_id`, `camera_id`, `source`, `timestamp`) to immediately trigger a refresh of the matching camera. URL and token visible (and regeneratable) in the plugin configuration.
+  + New hidden info command `last_motion_event` updated on each webhook hit (usable as a scenario trigger without waiting for the polling cron).
+
 > 2026-04-27
   + V3.2.0
   + **Migration to the new OAuth 2.0 (PKCE) authentication flow** following the Blink API change in late 2025.

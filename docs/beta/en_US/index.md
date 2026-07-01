@@ -88,6 +88,16 @@ In the plugin configuration screen the following options are available:
     + between the Blink and Jeedom servers: only data already present on Jeedom is displayed.
 
 
+* Detection notifications (webhook) — _since v3.2.0_
+  + The plugin exposes a webhook URL (visible in the configuration) so that an external service can signal a detection in real-time, without waiting for the next polling cron.
+  + The third-party service must `POST` to this URL with a JSON payload:
+    ```json
+    { "network_id": "12345", "camera_id": "67890", "source": "pir", "timestamp": "2026-04-27_142530" }
+    ```
+  + The security token is part of the URL, or can be sent through the `X-Blink-Token` header. It can be regenerated from the configuration at any time (the previous token is then invalidated).
+  + The camera matching `network_id` + `camera_id` has its `last_motion_event` info command updated (format `YYYY-MM-DD_HHMMSS|source`) and an immediate refresh (`getLastEventDate`) is triggered.
+  + `last_motion_event` is hidden by default but can be used as a scenario trigger (`Event` field in the scenario configuration).
+
 * Backup
   + This option allows you to include videos and images in Jeedom backups.
   
