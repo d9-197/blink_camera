@@ -48,6 +48,11 @@ class blink_camera extends eqLogic
     const OAUTH_USER_AGENT     = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
     const OAUTH_TOKEN_UA       = "Blink/2511191620 CFNetwork/3860.200.71 Darwin/25.1.0";
     const TIER_ENDPOINT        = "https://rest-prod.immedia-semi.com/api/v1/users/tier_info";
+    // Minimum delay before re-issuing a brand-new signin (and thus a brand-new 2FA email) while
+    // a verification is already pending for this account. Blink emails a fresh code on every
+    // /oauth/v2/signin call, so retrying too fast invalidates the code the user is holding and
+    // eventually trips Blink's own "2fa_rate_limit_exceeded" 429 lockout (600s cooldown).
+    const OAUTH_PENDING_TTL    = 300;
     /*     * *************************Attributs****************************** */
     const FORMAT_DATETIME="Y-m-d\TH:i:sT" ;
     const FORMAT_DATETIME_OUT="Y-m-d_His" ;
@@ -719,7 +724,23 @@ class blink_camera extends eqLogic
             }
         }
 
-        // 3) Full OAuth 2.0 PKCE flow.
+        // 3) Resume a pending 2FA verification instead of re-issuing a brand-new signin.
+        // Without this guard, every retriggered test_blink/getToken call while the user is
+        // typing their PIN (e.g. the UI re-checks after a wrong code) restarts the whole
+        // signin, which emails a NEW code and silently invalidates the one the user has ­—
+        // a few of those within Blink's 10-minute window trips their 2fa_rate_limit_exceeded.
+        $pendingSince    = (int) self::getConfigBlinkAccount($email, 'oauth_pending_since');
+        $hasPendingState = self::getConfigBlinkAccount($email, 'oauth_code_verifier')
+            && self::getConfigBlinkAccount($email, 'oauth_cookies')
+            && self::getConfigBlinkAccount($email, 'oauth_csrf_token');
+        if (!$forceReinit && $hasPendingState
+            && self::getConfigBlinkAccount($email, 'verif') === 'false'
+            && $pendingSince && (time() - $pendingSince) < self::OAUTH_PENDING_TTL) {
+            self::logdebug('getToken('.$email.'): 2FA verification already pending ('.(time() - $pendingSince).'s ago), not re-sending signin');
+            return true;
+        }
+
+        // 4) Full OAuth 2.0 PKCE flow.
         self::logdebug('getToken('.$email.') : starting full OAuth flow');
         self::setConfigBlinkAccount($email, 'account_prev', $email);
         if ($pwd !== '') {
@@ -751,6 +772,13 @@ class blink_camera extends eqLogic
             return false;
         }
 
+        if ($signin['status'] === 'RATE_LIMITED') {
+            self::setConfigBlinkAccount($email, 'limitLogin', 'true');
+            self::logerror('OAuth signin rate-limited by Blink' . (!empty($signin['retry_after']) ? ' (retry in ' . $signin['retry_after'] . 's)' : ''));
+            return false;
+        }
+        self::setConfigBlinkAccount($email, 'limitLogin', 'false');
+
         if ($signin['status'] === 'ERROR') {
             self::setConfigBlinkAccount($email, 'token', 'BAD_TOKEN');
             self::setConfigBlinkAccount($email, 'verif', 'false');
@@ -767,8 +795,10 @@ class blink_camera extends eqLogic
         self::setConfigBlinkAccount($email, 'oauth_signin_location',  $signin['location'] ?? '');
 
         if ($signin['status'] === '2FA_REQUIRED') {
-            self::loginfo('Verification required with email code');
+            $via = !empty($signin['tsv_state']) ? strtoupper($signin['tsv_state']) : 'email';
+            self::loginfo('Verification required via ' . $via . (!empty($signin['phone']) ? ' (' . $signin['phone'] . ')' : ''));
             self::setConfigBlinkAccount($email, 'verif', 'false');
+            self::setConfigBlinkAccount($email, 'oauth_pending_since', (string) time());
             return true;
         }
 

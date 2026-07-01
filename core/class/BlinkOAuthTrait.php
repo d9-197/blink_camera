@@ -151,6 +151,10 @@ trait BlinkOAuthTrait
             $body     = (string)$r->getBody();
             $json     = json_decode($body, true);
 
+            if ($code === 429) {
+                self::logdebug('oauthSignin RATE LIMITED: HTTP 429 body=' . substr($body, 0, 300));
+                return ['status' => 'RATE_LIMITED', 'location' => '', 'retry_after' => is_array($json) ? ($json['next_time_in_secs'] ?? null) : null];
+            }
             // Legacy redirect-based flow (kept for robustness).
             if (in_array($code, [301, 302, 303, 307, 308])) {
                 return ['status' => 'SUCCESS', 'location' => $location];
@@ -163,13 +167,20 @@ trait BlinkOAuthTrait
                 $status   = strtolower((string)($json['status'] ?? ''));
                 $redirect = $json['redirect_url'] ?? ($json['redirect_to'] ?? ($json['location'] ?? ($json['continue_to'] ?? ($json['next_action_url'] ?? ''))));
                 if (!$location && $redirect) { $location = (string)$redirect; }
-                self::logdebug('oauthSignin JSON status=' . $status . ' redirect=' . (string)$redirect . ' body=' . substr($body, 0, 400));
+                self::logdebug('oauthSignin JSON HTTP ' . $code . ' status=' . $status . ' redirect=' . (string)$redirect . ' body=' . substr($body, 0, 400));
                 if ($status === 'auth-completed' || $status === 'authenticated' || $status === 'success') {
                     return ['status' => 'SUCCESS', 'location' => $location];
                 }
-                if ($status !== '' || !empty($json['challenge']) || !empty($json['challenge_type']) || !empty($json['mfa_required']) || !empty($json['otp_required'])) {
-                    return ['status' => '2FA_REQUIRED', 'location' => $location];
-                }
+                // Any other 2xx JSON reply — explicit challenge/otp/mfa markers, or Blink's
+                // SMS/WhatsApp/voice second-factor challenge (HTTP 202,
+                // {"tsv_state":"sms","tsv_methods":[...],"phone":"..."}, no "status" field at
+                // all) — means a further verification step is required, not an error.
+                return [
+                    'status'    => '2FA_REQUIRED',
+                    'location'  => $location,
+                    'tsv_state' => $json['tsv_state'] ?? null,
+                    'phone'     => $json['phone'] ?? null,
+                ];
             }
             // Anything else (401 invalid_user_credentials, 400, 5xx, …) → ERROR.
             self::logdebug('oauthSignin unexpected response: HTTP ' . $code . ' body=' . substr($body, 0, 500));
