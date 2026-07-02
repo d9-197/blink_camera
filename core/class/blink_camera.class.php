@@ -1063,10 +1063,15 @@ class blink_camera extends eqLogic
             if (($filename=="last" || !file_exists($folderBase.$filename) || $overwrite) && self::isConnected($email)) {
                 //self::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : $filename");
                 if (!empty($_tokenBlink) && !empty($_accountBlink) && !empty($_regionBlink)) {
-                    if (!file_exists($folderBase)) {
-                        mkdir($folderBase, 0775);
-                        chmod($folderBase, 0775);
+                    clearstatcache(true, $folderBase);
+                    if (!is_dir($folderBase) && !mkdir($folderBase, 0775, true)) {
+                        clearstatcache(true, $folderBase);
+                        if (!is_dir($folderBase)) {
+                            self::logerror("blink_camera->getMediaForce() unable to create media folder: $folderBase");
+                            return self::ERROR_IMG;
+                        }
                     }
+                    chmod($folderBase, 0775);
                     if (!file_exists($folderBase.$filename) || $overwrite) {
                         $file_path = fopen($folderBase.$filename, 'w');
                         if (file_exists($folderBase.$filename)) {
@@ -1759,7 +1764,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $nbMax=-1;
         }
         $cptVideo=0;
-        $existingFilesOnJeedom = scandir($this->getMediaDir(),SCANDIR_SORT_DESCENDING);
+        $existingFilesOnJeedom = is_dir($this->getMediaDir()) ? scandir($this->getMediaDir(),SCANDIR_SORT_DESCENDING) : array();
         $fileToDelete =array();
         $fileOnCloudAndOnJeedom =array();
         $fileToDownload =array();

@@ -40,7 +40,11 @@ if ($configMedia!='') {
     }
     $formatMedia='.'.$configMedia;
 }
-$dir= realpath(dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/');
+$dir= dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/';
+$dirReal = realpath($dir);
+if ($dirReal !== false) {
+    $dir = $dirReal;
+}
 ?>
 <script>
 
@@ -115,7 +119,7 @@ if ($thumbFilter=='') {
     }
     log::add('blink_camera','debug','History['.$blink_camera->getId().'] Avant scandir');
 
-    $scandir = scandir($dir);
+    $scandir = is_dir($dir) ? scandir($dir) : array();
     log::add('blink_camera','debug','History['.$blink_camera->getId().'] Après scandir');
     foreach($scandir as $fichier){
         if ($formatMedia==".mp4") {
@@ -144,7 +148,7 @@ if ($thumbFilter=='') {
 
 } else {
     //liste les thumbnail*.jpg dans jeedom
-    $scandir = scandir($dir);
+    $scandir = is_dir($dir) ? scandir($dir) : array();
     foreach($scandir as $fichier){
         if(preg_match("#".blink_camera::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($fichier))){
             $datetime = explode("_", $fichier);
