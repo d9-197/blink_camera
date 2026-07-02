@@ -1413,7 +1413,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         self::logdebug('blink_camera->getCameraThumbnail() '.$this->getId().' START ' );
         $email=$this->getConfiguration('email');
 		if ($this->getBlinkDeviceType()!=="owlZZ") {
-	      	$lastThumbnailTime = $this->getConfiguration("last_camera_thumb_time");
+	      	$lastThumbnailTime = (int) $this->getConfiguration("last_camera_thumb_time");
 	      	$newtime=time();
 	      	if ($forceDownload || ($newtime-$lastThumbnailTime)>5*6) {
 		        $datas=self::getHomescreenData("getCameraThumbnail",$email);
@@ -1572,7 +1572,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             if (!$syncId =="") {
                 self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId .' - lastManifest:'.$lastManifest);
                 //if (!isset($lastManifest) || $lastManifest=='') {
-                $lastRequestTime=$this->getConfiguration('manifest_timestamp');
+                $lastRequestTime=(int) $this->getConfiguration('manifest_timestamp');
                 if ((date_timestamp_get(date_create())-$lastRequestTime) > 10) {
                     $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                 }
