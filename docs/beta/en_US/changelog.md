@@ -1,3 +1,10 @@
+> 2026-07-03
+  + V4.0.1
+  + **Drastic reduction of log volume and Blink API calls**: the refresh cycle (`cronRefresh`) used to call `getHomescreenData()` once per camera (~10 API calls + 10 full payload dumps in the log every 5 minutes for a 10-camera account). Homescreen data is now fetched **once per account** and shared across `refreshCameraInfos()`, `getCameraThumbnail()`, `getBlinkDeviceType()` and `getLastEventDate()` for all cameras in the cycle.
+  + **No more raw `print_r()` payload dumps** in debug logs (accounts, cameras, networks, sync modules): replaced with readable summaries (`id`, `name`, `status`, `battery`, ...).
+  + **Fixed log levels**: real API call failures (camera/system arm-disarm, video list retrieval) now log as `error` instead of `debug`; a detected camera event and the cron cycle summary now log as `info`. `debug` level is now reserved for one-off diagnostics.
+  + Uniformized `isset($datas['message'])` check before reading any `getHomescreenData()` response, including in `getCameraThumbnail()` (avoids PHP warnings when the Blink API returns an error).
+
 > 2026-06-24
   + Security fix
 
