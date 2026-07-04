@@ -38,6 +38,15 @@ Vous pouvez ajouter un ou plusieurs comptes Blink.
 
   + Saisir l'email, le mot de passe et le code pin associés à votre compte Blink. (Le champs de saisie du code pin ne s'affiche que lorsque la connexion n'est pas encore validée)
 
+>**Authentification OAuth 2.0 (depuis la v3.2.0) :**\
+>Suite au changement des API Blink fin 2025, le plugin utilise désormais le flow d'authentification **OAuth 2.0 avec PKCE** (les endpoints `api.oauth.blink.com`).\
+>Concrètement pour l'utilisateur, le parcours reste identique (email + mot de passe + code PIN à la première connexion), mais le plugin gère en interne :
+>- la génération d'un `code_verifier` / `code_challenge`,
+>- la conservation des cookies de session,
+>- le renouvellement automatique du jeton d'accès via un `refresh_token` (cron horaire).
+>
+>Vous n'aurez donc plus à ressaisir le code PIN aussi souvent qu'avant tant que le `refresh_token` reste valide côté Blink.
+
 >**Point important sur le code PIN envoyé par Blink :**\
 >Blink redemande régulièrement de resaisir le code PIN (la durée entre 2 demandes est variable - et indépendante du plugin). Quand cela se produit, vous recevez alors un code PIN de la part de Blink mais le plugin n'a pas l'information qu'un nouveau code doit être renseigné. Dans ce cas, il est probable que le champs du code PIN ne soit pas affiché dans le plugin.\
 **Il vous faut alors forcer une demande de code PIN depuis le plugin** (et donc le réaffichage du champ). Pour cela renseignez un __mauvais__ email ou mot de passe puis sauvegardez (à ce stade vous aurez une erreur : ce qui normal puisque l'email ou le mot de passe ne sont pas corrects), puis remettez le bon email et mot de passe et sauvegardez.\
@@ -77,6 +86,16 @@ Dans l'écran de configuration du plugin les options suivantes sont disponibles 
     + entre les serveurs Blink et Jeedom : seules les données déjà présentes sur Jeedom sont affichées.
   
   
+* Notifications de détection (webhook) — _depuis la v3.2.0_
+  + Le plugin expose une URL de webhook (visible dans la configuration) permettant à un service externe de signaler une détection en temps réel, sans attendre le prochain cron de polling.
+  + Le service tiers doit faire un `POST` HTTP sur cette URL avec un payload JSON :
+    ```json
+    { "network_id": "12345", "camera_id": "67890", "source": "pir", "timestamp": "2026-04-27_142530" }
+    ```
+  + Le jeton de sécurité est inclus dans l'URL, ou peut être passé via l'entête `X-Blink-Token`. Il peut être régénéré à tout moment depuis la configuration (l'ancien jeton est alors invalidé).
+  + La caméra dont les `network_id` + `camera_id` correspondent voit sa commande info `last_motion_event` mise à jour (format `YYYY-MM-DD_HHMMSS|source`) et un rafraîchissement immédiat (`getLastEventDate`) est déclenché.
+  + La commande `last_motion_event` est masquée par défaut mais peut être utilisée comme déclencheur de scénario (`Evénement` dans la config du scénario).
+
 * Sauvegarde
   + Cette option vous permet d'inclure les vidéos et images dans les sauvegardes Jeedom. 
   

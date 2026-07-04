@@ -1,3 +1,13 @@
+> 2026-07-03
+  + V4.0.1
+  + **Drastic reduction of log volume and Blink API calls**: the refresh cycle (`cronRefresh`) used to call `getHomescreenData()` once per camera (~10 API calls + 10 full payload dumps in the log every 5 minutes for a 10-camera account). Homescreen data is now fetched **once per account** and shared across `refreshCameraInfos()`, `getCameraThumbnail()`, `getBlinkDeviceType()` and `getLastEventDate()` for all cameras in the cycle.
+  + **No more raw `print_r()` payload dumps** in debug logs (accounts, cameras, networks, sync modules): replaced with readable summaries (`id`, `name`, `status`, `battery`, ...).
+  + **Fixed log levels**: real API call failures (camera/system arm-disarm, video list retrieval) now log as `error` instead of `debug`; a detected camera event and the cron cycle summary now log as `info`. `debug` level is now reserved for one-off diagnostics.
+  + Uniformized `isset($datas['message'])` check before reading any `getHomescreenData()` response, including in `getCameraThumbnail()` (avoids PHP warnings when the Blink API returns an error).
+
+> 2026-06-24
+  + Security fix
+
 > 2026-04-28
   + V4.0.0
   + **Major "Force download" fix**: on accounts with several very active cameras, less active ones could miss their most recent videos — pagination stopped after a few pages "without this camera" even though further pages contained tonight/today's videos. Loop refactored: direct walk of the Blink `/media/changed` API (server-side descending order), per-camera filtering on the plugin side, stop as soon as `nb_max_video` videos are collected FOR the camera. True end of pagination is detected via the raw response (all cameras), not an arbitrary empty-page counter. As a result, the most recent `N` videos are always kept regardless of the other cameras' pace.
