@@ -1210,7 +1210,9 @@ class blink_camera extends eqLogic
             self::logdebug('getBlinkDeviceType '.$this->getId().' NEW TYPE DEVICE='.$valeur);
             if ($valeur!=="") {
                 $this->setConfiguration("camera_type",$valeur);
-                $this->save();
+                // save($_direct=true) : évite de redéclencher postSave() (qui peut lui-même
+                // appeler getBlinkDeviceType()/refreshCameraInfos() -> boucle infinie sinon).
+                $this->save(true);
             }
         }
 		return $valeur;
@@ -2263,7 +2265,9 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
                 self::logdebug('refreshCameraInfos: storage='.$this->getConfiguration('storage'));
                 $this->setConfiguration('account_storage',$datas['video_stats']['storage']);
                 $this->setConfiguration('account_auto_delete_days', $datas['video_stats']['auto_delete_days']);
-                $this->save();
+                // save($_direct=true) : postSave() peut appeler refreshCameraInfos() (voir plus bas) ;
+                // un save() normal ici redéclencherait postSave() -> boucle infinie.
+                $this->save(true);
             }
 		}
     }
@@ -2961,6 +2965,16 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             }
         }
 */
+        // Sans ceci, une caméra qu'on vient d'activer/configurer reste vide sur le
+        // dashboard (vignette, statut...) jusqu'au prochain passage du cron (1 à 5 min).
+        // On rafraîchit donc immédiatement, comme le fait l'action "Rafraichir".
+        if ($this->getIsEnable() == 1 && $this->isConfigured()) {
+            $email = $this->getConfiguration('email');
+            if (self::isConnected($email)) {
+                $this->getLastEventDate();
+                $this->refreshCameraInfos('postSave');
+            }
+        }
     }
 
     public function preUpdate()
