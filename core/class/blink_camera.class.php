@@ -1063,10 +1063,15 @@ class blink_camera extends eqLogic
             if (($filename=="last" || !file_exists($folderBase.$filename) || $overwrite) && self::isConnected($email)) {
                 //self::logdebug("blink_camera->getMediaForce() url : $urlMedia - path : $filename");
                 if (!empty($_tokenBlink) && !empty($_accountBlink) && !empty($_regionBlink)) {
-                    if (!file_exists($folderBase)) {
-                        mkdir($folderBase, 0775);
-                        chmod($folderBase, 0775);
+                    clearstatcache(true, $folderBase);
+                    if (!is_dir($folderBase) && !mkdir($folderBase, 0775, true)) {
+                        clearstatcache(true, $folderBase);
+                        if (!is_dir($folderBase)) {
+                            self::logerror("blink_camera->getMediaForce() unable to create media folder: $folderBase");
+                            return self::ERROR_IMG;
+                        }
                     }
+                    chmod($folderBase, 0775);
                     if (!file_exists($folderBase.$filename) || $overwrite) {
                         $file_path = fopen($folderBase.$filename, 'w');
                         if (file_exists($folderBase.$filename)) {
@@ -1413,7 +1418,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
         self::logdebug('blink_camera->getCameraThumbnail() '.$this->getId().' START ' );
         $email=$this->getConfiguration('email');
 		if ($this->getBlinkDeviceType()!=="owlZZ") {
-	      	$lastThumbnailTime = $this->getConfiguration("last_camera_thumb_time");
+	      	$lastThumbnailTime = (int) $this->getConfiguration("last_camera_thumb_time");
 	      	$newtime=time();
 	      	if ($forceDownload || ($newtime-$lastThumbnailTime)>5*6) {
 		        $datas=self::getHomescreenData("getCameraThumbnail",$email);
@@ -1572,7 +1577,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             if (!$syncId =="") {
                 self::logdebug('getVideoListLocal '.$this->getName().' syncId=: '.$syncId .' - lastManifest:'.$lastManifest);
                 //if (!isset($lastManifest) || $lastManifest=='') {
-                $lastRequestTime=$this->getConfiguration('manifest_timestamp');
+                $lastRequestTime=(int) $this->getConfiguration('manifest_timestamp');
                 if ((date_timestamp_get(date_create())-$lastRequestTime) > 10) {
                     $this->requestNewManifest($_accountBlink,$network_id,$syncId);
                 }
@@ -1759,7 +1764,7 @@ self::logdebug('getMediaLocal PHASE 2 syncId=: '.$syncId.' - result: '.print_r($
             $nbMax=-1;
         }
         $cptVideo=0;
-        $existingFilesOnJeedom = scandir($this->getMediaDir(),SCANDIR_SORT_DESCENDING);
+        $existingFilesOnJeedom = is_dir($this->getMediaDir()) ? scandir($this->getMediaDir(),SCANDIR_SORT_DESCENDING) : array();
         $fileToDelete =array();
         $fileOnCloudAndOnJeedom =array();
         $fileToDownload =array();
@@ -3118,7 +3123,7 @@ class blink_cameraCmd extends cmd
             //blink_camera::logdebug('toHtml last_event avant custo : '.print_r($result,true));
             $valeurLastEvent=$this->execCmd();
             $params = array(
-                state => blink_camera::getDatetimeLocaleJeedom($valeurLastEvent)
+                'state' => blink_camera::getDatetimeLocaleJeedom($valeurLastEvent)
             );
             $this->setDisplay('parameters',$params);
 

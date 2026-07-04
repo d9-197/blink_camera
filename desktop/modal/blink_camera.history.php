@@ -40,7 +40,11 @@ if ($configMedia!='') {
     }
     $formatMedia='.'.$configMedia;
 }
-$dir= realpath(dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/');
+$dir= dirname(__FILE__) ."/../../medias/" . $blink_camera->getId().'/';
+$dirReal = realpath($dir);
+if ($dirReal !== false) {
+    $dir = $dirReal;
+}
 ?>
 <script>
 
@@ -115,7 +119,7 @@ if ($thumbFilter=='') {
     }
     log::add('blink_camera','debug','History['.$blink_camera->getId().'] Avant scandir');
 
-    $scandir = scandir($dir);
+    $scandir = is_dir($dir) ? scandir($dir) : array();
     log::add('blink_camera','debug','History['.$blink_camera->getId().'] Après scandir');
     foreach($scandir as $fichier){
         if ($formatMedia==".mp4") {
@@ -144,7 +148,7 @@ if ($thumbFilter=='') {
 
 } else {
     //liste les thumbnail*.jpg dans jeedom
-    $scandir = scandir($dir);
+    $scandir = is_dir($dir) ? scandir($dir) : array();
     foreach($scandir as $fichier){
         if(preg_match("#".blink_camera::PREFIX_THUMBNAIL."-.*\.jpg$#",strtolower($fichier))){
             $datetime = explode("_", $fichier);
@@ -277,13 +281,13 @@ foreach ($videoFiltered as $date => $videoByDate) {
                 <?php
                     if (strpos($file, '.mp4')) {
                         $strVideo="";
+                        if (file_exists($dir . '/' . str_replace(".mp4",".jpg",$file))) {
+                            $overlay=$dir . '/' . str_replace(".mp4",".jpg",$file);
+                        } else {
+                            $overlay="/plugins/blink_camera/img/play.png";
+                        }
                         if (blink_camera::isModeEco()) {
                             $strVideo.="<div id=\"video-overlay-".$cptVideo."\">";
-                            if (file_exists($dir . '/' . str_replace(".mp4",".jpg",$file))) {
-                                $overlay=$dir . '/' . str_replace(".mp4",".jpg",$file);
-                            } else {
-                                $overlay="/plugins/blink_camera/img/play.png";
-                            }
                             $strVideo.="<img height=\"".$newHeight."\" src=\"". blink_camera::GET_RESOURCE . urlencode($overlay)."\"/>";
                             //$strVideo.="<span style=\" position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\"><i style=\"font-size:5em;\" class=\"icon font-awesome-play-circle icon_green\"></i></span>";
                             $strVideo.="</div>";
@@ -353,6 +357,18 @@ foreach ($videoFiltered as $date => $videoByDate) {
             pckry_<?=$cptDate?>.layout();
         }
         new ResizeObserver(relayout_<?=$cptDate?>).observe(document.querySelector('.blink_cameraThumbnailContainer_<?=$cptDate?>'));
+        // Packery lays out items using their size at call time; images/video posters are
+        // still loading on first open, so it sizes tiles wrong and they overlap. The capture
+        // listener catches each <img> as it finishes loading (load doesn't bubble, hence
+        // capture:true), and the timeouts are a fallback for <video> posters, which don't
+        // fire a load event of their own.
+        document.querySelector('.blink_cameraThumbnailContainer_<?=$cptDate?>').addEventListener('load', function(e) {
+            if (e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO') {
+                relayout_<?=$cptDate?>();
+            }
+        }, true);
+        setTimeout(relayout_<?=$cptDate?>, 300);
+        setTimeout(relayout_<?=$cptDate?>, 1000);
         document.querySelector('.toggleList_<?=$cptDate?>').addEventListener('click', function(event) {
             event.preventDefault();
             container=document.querySelector(".blink_cameraThumbnailContainer_<?=$cptDate?>")
